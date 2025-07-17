@@ -40,7 +40,7 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
 
       const symbol = new vscode.DocumentSymbol(
         sectionName,
-        'Code Section',
+        '',
         vscode.SymbolKind.Module,
         fullRange,
         selectionRange
