@@ -1,6 +1,6 @@
 {
   "name": "python-outline-code-sections",
-  "displayName": "python-outline-code-sections",
+  "displayName": "Python - Outline",
   "description": "\"Provides code section navigation for Python files using comment patterns. Create foldable sections with comments ending in 4+ dashes, equals, or hashes (e.g., # Section One ----). Navigate sections via VS Code's outline view.\"",
   "version": "0.0.1",
   "engines": {
