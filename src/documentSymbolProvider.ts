@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 /**
- * Simplified Document Symbol Provider for Python files
+ * Document Symbol Provider for friendly code outlines
  * Detects comment sections with pattern: # Section Name ----
  */
 export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
@@ -57,7 +57,8 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
   /**
    * Find all section matches in text
    * Pattern: # Section Name ----
-   */
+  **/
+  
   private findSections(text: string): Array<{ name: string, index: number, fullText: string }> {
     const matches: Array<{ name: string, index: number, fullText: string }> = [];
 

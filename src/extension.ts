@@ -15,7 +15,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// Register the document symbol provider for Python files
 	context.subscriptions.push(
 		vscode.languages.registerDocumentSymbolProvider(
-			{ language: 'python' },
+			// { language: 'python' },
+			'*', // All langauges
 			new PythonDocumentSymbolProvider()
 		)
 	);
