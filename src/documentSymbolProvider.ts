@@ -40,7 +40,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
       // Child logic
       const children = all_matches.filter(item => item.parentName == match.name)
       if (children.length > 0) {
-        console.log("FOUND CHIDLRENNNNNNn")
         for (let j = 0; j < children.length; j++) {
           const child = children[j];
           const range = new vscode.Range(
@@ -61,7 +60,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
             vscode.SymbolKind.Function, range, range
           );
 
-          console.log("+++ ++++ Added Child Symbol: ", configs)
+          console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", configs)
           symbol.children.push(childSymbol);
         }
       }
