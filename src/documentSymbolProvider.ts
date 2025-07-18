@@ -1,4 +1,6 @@
+
 import * as vscode from 'vscode';
+import { findSections, SectionMatch } from './utils/findSections';
 
 /**
  * Document Symbol Provider for friendly code outlines
@@ -21,8 +23,9 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     const text = document.getText();
 
     // Find all section matches
-    const all_matches = this.findSections(text);
-    const matches = all_matches.filter(item => item.depth === 1);
+    const all_matches: SectionMatch[] = findSections(text);
+    const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
+    const child = all_matches.filter((item: SectionMatch) => item.depth === 2);
     console.log('Found', all_matches.length, 'total matches:', all_matches);
 
 
@@ -32,14 +35,17 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
       const match = matches[i];
       const sectionName = match.name;
 
-      // Calculate positions
-      const ranges = this.calculateSymbolRanges(document, match, matches, i, text.length);
+      // Calculate positions - simple single line range
+      const startPos = document.positionAt(match.index);
+      const endPos = document.positionAt(match.index + match.fullText.length);
+      const range = new vscode.Range(startPos, endPos);
+
       const configs = {
         name: sectionName,
         detail: '',
         kind: vscode.SymbolKind.Module,
-        range: ranges.fullRange,
-        selectionRange: ranges.selectionRange,
+        range: range,
+        selectionRange: range,
         children: [],
         tags: null
       }
@@ -50,7 +56,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
         configs.range,
         configs.selectionRange
       );
-      console.log("Added parent: ", configs)
+      console.log("+++ Added parent: ", configs)
 
       // Child logic
       if (match.name == '1. Setup') {
@@ -58,8 +64,8 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           name: 'text-child',
           detail: 'This is a dummy child',
           kind: vscode.SymbolKind.Function,
-          range: ranges.fullRange,
-          selectionRange: ranges.selectionRange,
+          range: range,
+          selectionRange: range,
           children: [],
           tags: null
         }
@@ -71,7 +77,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           configs.selectionRange
         );
         
-        console.log("--- Added Child Symbol: ", configs)
+        console.log("+++ ++++ Added Child Symbol: ", configs)
         symbol.children.push(childSymbol);
       }
 
@@ -83,72 +89,4 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     return symbols;
   }
 
-  /**
-   * Find all section matches in text
-   * Pattern: # Section Name ----  
-   **/
-
-  private findSections(text: string): Array<{ name: string, index: number, fullText: string, depth: number, parentIndex?: number }> {
-    const matches: Array<{ name: string, index: number, fullText: string, depth: number, parentIndex?: number }> = [];
-
-    // Updated regex: capture 1-4 # symbols, followed by text, then space, then 4+ dashes
-    const pattern = /^(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm;
-
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(text)) !== null) {
-      const hashSymbols = match[1];  // The # symbols (e.g., "#", "##", "###")
-      const sectionName = match[2].trim();  // The section name text
-      const depth = Math.min(hashSymbols.length, 4);  // Depth 1-4, capped at 4
-
-      // Skip if section name is empty or just dashes/whitespace
-      if (sectionName && !sectionName.match(/^[-\s]*$/)) {
-        
-        // Find parent: look backwards for a section with smaller depth
-        let parentIndex: number | undefined = undefined;
-        for (let i = matches.length - 1; i >= 0; i--) {
-          if (matches[i].depth < depth) {
-            parentIndex = i;
-            break;
-          }
-        }
-
-        matches.push({
-          name: sectionName,
-          index: match.index,
-          fullText: match[0],
-          depth: depth,
-          parentIndex: parentIndex
-        });
-        
-        const parentName = parentIndex !== undefined ? matches[parentIndex].name : 'root';
-      }
-    }
-
-    return matches;
-  }
-
-  /**
-   * Calculate the full range and selection range for a symbol
-   */
-  private calculateSymbolRanges(
-    document: vscode.TextDocument,
-    match: { name: string, index: number, fullText: string, depth: number, parentIndex?: number },
-    allMatches: Array<{ name: string, index: number, fullText: string, depth: number, parentIndex?: number }>,
-    currentIndex: number,
-    textLength: number
-  ): { fullRange: vscode.Range, selectionRange: vscode.Range } {
-    
-    const startPos = document.positionAt(match.index);
-    const nextMatch = allMatches[currentIndex + 1];
-    const endIndex = nextMatch ? nextMatch.index : textLength;
-    const endPos = document.positionAt(endIndex);
-    
-    const fullRange = new vscode.Range(startPos, endPos);
-    const selectionRange = new vscode.Range(startPos, document.positionAt(match.index + match.fullText.length));
-    
-    return {
-      fullRange,
-      selectionRange
-    };
-  }
 }
