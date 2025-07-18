@@ -45,7 +45,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           const range = new vscode.Range(
             document.positionAt(child.index),
             document.positionAt(child.index + child.fullText.length));
-          console.log("Childddd: ", child)
           const configs = {
             name: child.name,
             detail: '',
