@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "publisher": "ran-codes",
   "license": "MIT",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.102.0"
   },
