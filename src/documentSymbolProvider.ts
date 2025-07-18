@@ -59,14 +59,11 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
       // ADD THE CHILD TO THE PARENT
       symbol.children.push(childSymbol);
-
       symbols.push(symbol);
-      console.log('--- Created symbol:', sectionName, 'at line', startPos.line + 1);
-      console.log('--- Added child "text-child" to symbol:', sectionName);
-      console.log(symbol);
     }
 
     console.log('Returning', symbols.length, 'symbols');
+    console.log(symbols)
     return symbols;
   }
 
@@ -75,8 +72,8 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
    * Pattern: # Section Name ----  
    **/
 
-  private findSections(text: string): Array<{ name: string, index: number, fullText: string, depth: number }> {
-    const matches: Array<{ name: string, index: number, fullText: string, depth: number }> = [];
+  private findSections(text: string): Array<{ name: string, index: number, fullText: string, depth: number, parentIndex?: number }> {
+    const matches: Array<{ name: string, index: number, fullText: string, depth: number, parentIndex?: number }> = [];
 
     // Updated regex: capture 1-4 # symbols, followed by text, then space, then 4+ dashes
     const pattern = /^(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm;
@@ -89,13 +86,26 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
       // Skip if section name is empty or just dashes/whitespace
       if (sectionName && !sectionName.match(/^[-\s]*$/)) {
+        
+        // Find parent: look backwards for a section with smaller depth
+        let parentIndex: number | undefined = undefined;
+        for (let i = matches.length - 1; i >= 0; i--) {
+          if (matches[i].depth < depth) {
+            parentIndex = i;
+            break;
+          }
+        }
+
         matches.push({
           name: sectionName,
           index: match.index,
           fullText: match[0],
-          depth: depth
+          depth: depth,
+          parentIndex: parentIndex
         });
-        console.log(`Found section: "${sectionName}" at position ${match.index}, depth ${depth}`);
+        
+        const parentName = parentIndex !== undefined ? matches[parentIndex].name : 'root';
+        console.log(`Found section: "${sectionName}" at position ${match.index}, depth ${depth}, parent: ${parentName}`);
       }
     }
 
