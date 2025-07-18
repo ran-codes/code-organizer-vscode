@@ -25,7 +25,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     // Find all section matches
     const all_matches: SectionMatch[] = findSections(text);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
-    const child = all_matches.filter((item: SectionMatch) => item.depth === 2);
+ 
     console.log('Found', all_matches.length, 'total matches:', all_matches);
 
 
@@ -34,12 +34,9 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
       const sectionName = match.name;
-
-      // Calculate positions - simple single line range
-      const startPos = document.positionAt(match.index);
-      const endPos = document.positionAt(match.index + match.fullText.length);
-      const range = new vscode.Range(startPos, endPos);
-
+      const range = new vscode.Range(
+        document.positionAt(match.index),
+        document.positionAt(match.index + match.fullText.length));
       const configs = {
         name: sectionName,
         detail: '',
@@ -60,9 +57,14 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
       // Child logic
       if (match.name == '1. Setup') {
+        const child = all_matches.filter((item: SectionMatch) => item.depth === 2)[0];
+        const range = new vscode.Range(
+          document.positionAt(child.index),
+          document.positionAt(child.index + child.fullText.length));
+        console.log("Childddd: ", child)
         const configs = {
-          name: 'text-child',
-          detail: 'This is a dummy child',
+          name: child.name,
+          detail: '',
           kind: vscode.SymbolKind.Function,
           range: range,
           selectionRange: range,
