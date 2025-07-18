@@ -20,13 +20,11 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
   ): void {
     // Prevent infinite recursion by tracking processed parent names
     if (processedNames.has(parentMatch.name)) {
-      console.log(`Skipping already processed parent: ${parentMatch.name}`);
       return;
     }
     processedNames.add(parentMatch.name);
 
     const children = allMatches.filter(item => item.parentName === parentMatch.name);
-    console.log(`Looking for children of "${parentMatch.name}", found ${children.length} children`);
 
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
@@ -34,7 +32,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
         // Additional safety check to prevent infinite loops
         if (child.name === parentMatch.name) {
-          console.log(`Skipping self-reference: ${child.name}`);
           continue;
         }
 
@@ -68,8 +65,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     const text = document.getText();
     const all_matches: SectionMatch[] = findSections(text);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + `FriendlyOutlineDocumentSymbolProvider: provideDocumentSymbols called for: "${document.fileName.split('\\').pop() || document.fileName.split('/').pop() || 'unknown'}" (${document.languageId})`);
-    console.log('Found', all_matches.length, 'total matches:', all_matches);
 
     // Generate symbols
     const symbols: vscode.DocumentSymbol[] = [];
@@ -83,7 +78,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
         sectionName, '',
         vscode.SymbolKind.File, range, range
       );
-      console.log("+++ Added Level 1: ", symbol);
 
       // Child Level Logic
       this.addChildSymbols(symbol, match, all_matches, document);
@@ -92,7 +86,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
       symbols.push(symbol);
     }
 
-    console.log('Returning', symbols.length, 'first level symbols:', symbols);
     return symbols;
   }
 

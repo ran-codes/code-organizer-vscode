@@ -9,9 +9,6 @@ export function activate(context: vscode.ExtensionContext) {
 	// Show message when extension loads
 	vscode.window.showInformationMessage('Friend code outliner loaded');
 
-
-	console.log('Congratulations, your extension "friendly-code-outlines-vscode" is now active!');
-
 	// Register the document symbol provider for Python files
 	context.subscriptions.push(
 		vscode.languages.registerDocumentSymbolProvider(
