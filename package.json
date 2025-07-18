@@ -1,15 +1,36 @@
 {
   "name": "friendly-code-outlines-vscode",
   "displayName": "Friendly Outline",
-  "description": "\"Provides code section navigation for  files using comment patterns. Create foldable sections with comments ending in 4+ dashes, equals, or hashes (e.g., # Section One ----). Navigate sections via VS Code's outline view.\"",
+  "description": "Provides code section navigation for files using comment patterns. Create foldable sections with comments ending in 4+ dashes, equals, or hashes (e.g., # Section One ----). Navigate sections via VS Code's outline view.",
   "version": "0.0.1",
+  "publisher": "ran-codes",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.102.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "keywords": [
+    "outline",
+    "navigation",
+    "sections",
+    "comments",
+    "code organization",
+    "folding",
+    "structure"
+  ],
+  "activationEvents": [
+    "onLanguage:*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ran-codes/friendly-code-outlines-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ran-codes/friendly-code-outlines-vscode/issues"
+  },
+  "homepage": "https://github.com/ran-codes/friendly-code-outlines-vscode#readme",
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
