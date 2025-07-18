@@ -4,6 +4,7 @@ export interface SectionMatch {
   fullText: string;
   depth: number;
   parentName?: string;
+  uniqueId: string; // New property: name + index for unique identification
 }
 
 /**
@@ -25,18 +26,25 @@ export function findSections(text: string): SectionMatch[] {
     if (sectionName && !sectionName.match(/^[-\s]*$/)) {
       // Find parent: look backwards for a section with smaller depth
       let parentName: string | undefined = undefined;
+      let parentUniqueId: string | undefined = undefined;
       for (let i = matches.length - 1; i >= 0; i--) {
         if (matches[i].depth < depth) {
           parentName = matches[i].name;
+          parentUniqueId = matches[i].uniqueId;
           break;
         }
       }
+      
+      // Create unique ID by combining name and index
+      const uniqueId = `${sectionName}_${match.index}`;
+      
       matches.push({
         name: sectionName,
         index: match.index,
         fullText: match[0],
         depth: depth,
-        parentName: parentName
+        parentName: parentUniqueId, // Use parent's uniqueId instead of just name
+        uniqueId: uniqueId
       });
     }
   }

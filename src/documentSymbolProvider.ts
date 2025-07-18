@@ -16,15 +16,16 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     parentMatch: SectionMatch,
     allMatches: SectionMatch[],
     document: vscode.TextDocument,
-    processedNames: Set<string> = new Set()
+    processedIds: Set<string> = new Set()
   ): void {
-    // Prevent infinite recursion by tracking processed parent names
-    if (processedNames.has(parentMatch.name)) {
+    // Prevent infinite recursion by tracking processed parent unique IDs
+    if (processedIds.has(parentMatch.uniqueId)) {
       return;
     }
-    processedNames.add(parentMatch.name);
+    processedIds.add(parentMatch.uniqueId);
 
-    const children = allMatches.filter(item => item.parentName === parentMatch.name);
+    const children = allMatches.filter(item => item.parentName === parentMatch.uniqueId);
+    console.log(`Looking for children of "${parentMatch.uniqueId}", found ${children.length} children`);
 
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
@@ -45,7 +46,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
 
         // Recursively add children to this child symbol with updated processed set
-        this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedNames));
+        this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedIds));
 
         parentSymbol.children.push(childSymbol);
       }
