@@ -9,18 +9,35 @@ import { findSections, SectionMatch } from './utils/findSections';
 export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
-   * Helper method to add child symbols to a parent symbol
+   * Helper method to add child symbols to a parent symbol (recursive)
    */
   private addChildSymbols(
     parentSymbol: vscode.DocumentSymbol,
     parentMatch: SectionMatch,
     allMatches: SectionMatch[],
-    document: vscode.TextDocument
+    document: vscode.TextDocument,
+    processedNames: Set<string> = new Set()
   ): void {
+    // Prevent infinite recursion by tracking processed parent names
+    if (processedNames.has(parentMatch.name)) {
+      console.log(`Skipping already processed parent: ${parentMatch.name}`);
+      return;
+    }
+    processedNames.add(parentMatch.name);
+
     const children = allMatches.filter(item => item.parentName == parentMatch.name);
+    console.log(`Looking for children of "${parentMatch.name}", found ${children.length} children`);
+    
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
         const child = children[j];
+        
+        // Additional safety check to prevent infinite loops
+        if (child.name === parentMatch.name) {
+          console.log(`Skipping self-reference: ${child.name}`);
+          continue;
+        }
+        
         const range = new vscode.Range(
           document.positionAt(child.index),
           document.positionAt(child.index + child.fullText.length));
@@ -38,7 +55,11 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           vscode.SymbolKind.Function, range, range
         );
 
-        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", configs)
+        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", child.name)
+        
+        // Recursively add children to this child symbol with updated processed set
+        this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedNames));
+        
         parentSymbol.children.push(childSymbol);
       }
     }
