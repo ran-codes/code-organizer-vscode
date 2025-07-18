@@ -1,71 +1,148 @@
-# python-outline-code-sections README
+# Friendly Code Outlines
 
-This is the README for your extension "python-outline-code-sections". After writing up a brief description, we recommend including the following sections.
+A VS Code extension that creates navigable code sections using comment patterns. Organize your code with simple comment-based section headers that appear in VS Code's outline view.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Simple Syntax**: Create sections with hash comments ending in 4+ dashes
+- **Nested Sections**: Support for up to 4 levels of nesting using multiple # symbols
+- **Multi-Language**: Works with any programming language that supports # comments
+- **VS Code Integration**: Sections appear in the built-in Outline view
+- **No Code Changes**: Uses only comments, doesn't affect your actual code
 
-For example if there is an image subfolder under your extension project workspace:
+## Usage
 
-\!\[feature X\]\(images/feature-x.png\)
+### Basic Sections
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Add hash comments with 4 or more dashes:
+
+```python
+# Main Configuration ----
+database_url = "localhost"
+api_key = "secret"
+
+# Helper Functions ----
+def process_data():
+    pass
+
+# Constants ----
+MAX_RETRIES = 3
+TIMEOUT = 30
+```
+
+### Nested Sections
+
+Use multiple # symbols for nested organization:
+
+```python
+# Database Layer ----
+
+## Connection Management ----
+def connect():
+    pass
+
+## Query Helpers ----
+def execute_query():
+    pass
+
+### SQL Builders ----
+def build_select():
+    pass
+
+# API Layer ----
+
+## Authentication ----
+def login():
+    pass
+```
+
+### Multi-Language Support
+
+Works with any language that supports hash (#) comments:
+
+```javascript
+// Note: Only # comments are supported, not // comments
+// Use # instead:
+
+# Frontend Components ----
+const Button = () => <button />;
+
+# State Management ----
+const store = createStore();
+```
+
+```python
+# Database Schema ----
+def create_tables():
+    pass
+
+# Data Processing ----
+def process_data():
+    pass
+```
+
+## Configuration
+
+Open VS Code settings and search for "Friendly Code Outlines":
+
+- **Enable/Disable**: Turn the extension on or off
+- **Supported Languages**: Choose which languages to support (default: all)
+
+## Supported Patterns
+
+The extension recognizes this comment pattern:
+
+| Pattern | Example | Description |
+|---------|---------|-------------|
+| `# Text ----` | `# Main Section ----` | Hash comments with 4+ dashes |
+| `## Text ----` | `## Sub Section ----` | Double hash for level 2 nesting |
+| `### Text ----` | `### Sub-Sub Section ----` | Triple hash for level 3 nesting |
+| `#### Text ----` | `#### Deep Section ----` | Quad hash for level 4 nesting |
+
+**Note**: Only hash (#) comments with dashes (----) are supported. Other comment styles like //, --, or /* */ are not recognized.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- VS Code 1.102.0 or higher
+- No additional dependencies
 
-## Extension Settings
+## Installation
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search for "Friendly Code Outlines"
+4. Click Install
 
-For example:
+## Viewing Sections
 
-This extension contributes the following settings:
+After installation, your comment sections will appear in:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+1. **Outline View**: Click the outline icon in the Explorer sidebar
+2. **Breadcrumbs**: Enable breadcrumbs in View menu
+3. **Go to Symbol**: Use Ctrl+Shift+O to navigate between sections
 
-## Known Issues
+## Tips
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Use consistent spacing: `# Section Name ----`
+- Keep section names concise for better readability
+- Use 4 or more dashes (----, -----, etc.)
+- Nest sections logically with ##, ###, ####
+- Only hash (#) comments are supported
+
+## Contributing
+
+Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/your-username/friendly-code-outlines).
+
+## License
+
+This project is licensed under the MIT License.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.1.0
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- Initial release
+- Support for hash, slash, and block comment patterns
+- Nested section support up to 4 levels
+- Multi-language compatibility
+- Configuration options
