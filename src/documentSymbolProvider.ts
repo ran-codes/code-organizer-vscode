@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
  * Document Symbol Provider for friendly code outlines
  * Detects comment sections with pattern: # Section Name ----
  */
-export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
    * Main method called by VS Code when it needs symbols for a Python file
@@ -14,7 +14,7 @@ export class PythonDocumentSymbolProvider implements vscode.DocumentSymbolProvid
     token: vscode.CancellationToken
   ): vscode.DocumentSymbol[] {
 
-    console.log('PythonDocumentSymbolProvider: provideDocumentSymbols called');
+    console.log('FriendlyOutlineDocumentSymbolProvider: provideDocumentSymbols called');
 
     const text = document.getText();
     console.log('Document has', document.lineCount, 'lines');
