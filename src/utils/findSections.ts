@@ -3,7 +3,7 @@ export interface SectionMatch {
   index: number;
   fullText: string;
   depth: number;
-  parentIndex?: number;
+  parentName?: string;
 }
 
 /**
@@ -24,10 +24,10 @@ export function findSections(text: string): SectionMatch[] {
     // Skip if section name is empty or just dashes/whitespace
     if (sectionName && !sectionName.match(/^[-\s]*$/)) {
       // Find parent: look backwards for a section with smaller depth
-      let parentIndex: number | undefined = undefined;
+      let parentName: string | undefined = undefined;
       for (let i = matches.length - 1; i >= 0; i--) {
         if (matches[i].depth < depth) {
-          parentIndex = i;
+          parentName = matches[i].name;
           break;
         }
       }
@@ -36,7 +36,7 @@ export function findSections(text: string): SectionMatch[] {
         index: match.index,
         fullText: match[0],
         depth: depth,
-        parentIndex: parentIndex
+        parentName: parentName
       });
     }
   }
