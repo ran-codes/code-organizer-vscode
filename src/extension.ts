@@ -1,34 +1,56 @@
-
 import * as vscode from 'vscode';
 import { FriendlyOutlineDocumentSymbolProvider } from './documentSymbolProvider';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	// Get configuration
+	const config = vscode.workspace.getConfiguration('friendlyCodeOutlines');
+	const isEnabled = config.get<boolean>('enable', true);
+	const supportedLanguages = config.get<string[]>('supportedLanguages', ['*']);
 
-	// Show message when extension loads
-	vscode.window.showInformationMessage('Friend code outliner loaded');
+	if (!isEnabled) {
+		return;
+	}
 
-	// Register the document symbol provider for Python files
+	// Register document symbol provider
+	const provider = new FriendlyOutlineDocumentSymbolProvider();
+
+	if (supportedLanguages.includes('*')) {
+		// Register for all languages
+		context.subscriptions.push(
+			vscode.languages.registerDocumentSymbolProvider(
+				'*',
+				provider
+			)
+		);
+	} else {
+		// Register for specific languages
+		supportedLanguages.forEach(language => {
+			context.subscriptions.push(
+				vscode.languages.registerDocumentSymbolProvider(
+					{ language: language },
+					provider
+				)
+			);
+		});
+	}
+
+	// Listen for configuration changes
 	context.subscriptions.push(
-		vscode.languages.registerDocumentSymbolProvider(
-			// { language: 'python' },
-			'*', // All langauges
-			new FriendlyOutlineDocumentSymbolProvider()
-		)
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration('friendlyCodeOutlines')) {
+				vscode.window.showInformationMessage(
+					'Friendly Code Outlines configuration changed. Please reload VS Code for changes to take effect.',
+					'Reload'
+				).then(selection => {
+					if (selection === 'Reload') {
+						vscode.commands.executeCommand('workbench.action.reloadWindow');
+					}
+				});
+			}
+		})
 	);
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('friendly-code-outlines-vscode.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello from your friendly code outliner(12:32)');
-	});
-
-	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	// Cleanup if needed
+}
