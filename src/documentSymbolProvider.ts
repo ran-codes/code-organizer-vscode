@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
  * Document Symbol Provider for friendly code outlines
  * Detects comment sections with pattern: # Section Name ----
  */
-
 export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
@@ -49,8 +48,22 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
         selectionRange
       );
 
+      // CREATE A DUMMY CHILD SYMBOL
+      const childSymbol = new vscode.DocumentSymbol(
+        'text-child',                    // Child name
+        'This is a dummy child',         // Child detail
+        vscode.SymbolKind.Function,      // Different icon for child
+        fullRange,                       // Same range as parent (you could make it smaller)
+        selectionRange                   // Same selection range (you could make it smaller)
+      );
+
+      // ADD THE CHILD TO THE PARENT
+      symbol.children.push(childSymbol);
+
       symbols.push(symbol);
-      console.log('Created symbol:', sectionName, 'at line', startPos.line + 1);
+      console.log('--- Created symbol:', sectionName, 'at line', startPos.line + 1);
+      console.log('--- Added child "text-child" to symbol:', sectionName);
+      console.log(symbol);
     }
 
     console.log('Returning', symbols.length, 'symbols');
@@ -59,9 +72,9 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
   /**
    * Find all section matches in text
-   * Pattern: # Section Name ----
-  **/
-  
+   * Pattern: # Section Name ----  
+   **/
+
   private findSections(text: string): Array<{ name: string, index: number, fullText: string, depth: number }> {
     const matches: Array<{ name: string, index: number, fullText: string, depth: number }> = [];
 
@@ -88,5 +101,4 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
     return matches;
   }
-
 }
