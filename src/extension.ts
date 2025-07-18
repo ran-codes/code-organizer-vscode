@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const disposable = vscode.commands.registerCommand('friendly-code-outlines-vscode.helloWorld', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello from your friendly code outliner( 12:09)');
+		vscode.window.showInformationMessage('Hello from your friendly code outliner(12:32)');
 	});
 
 	context.subscriptions.push(disposable);

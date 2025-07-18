@@ -9,6 +9,42 @@ import { findSections, SectionMatch } from './utils/findSections';
 export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
+   * Helper method to add child symbols to a parent symbol
+   */
+  private addChildSymbols(
+    parentSymbol: vscode.DocumentSymbol,
+    parentMatch: SectionMatch,
+    allMatches: SectionMatch[],
+    document: vscode.TextDocument
+  ): void {
+    const children = allMatches.filter(item => item.parentName == parentMatch.name);
+    if (children.length > 0) {
+      for (let j = 0; j < children.length; j++) {
+        const child = children[j];
+        const range = new vscode.Range(
+          document.positionAt(child.index),
+          document.positionAt(child.index + child.fullText.length));
+        const configs = {
+          name: child.name,
+          detail: '',
+          kind: vscode.SymbolKind.Function,
+          range: range,
+          selectionRange: range,
+          children: [],
+          tags: null
+        }
+        const childSymbol = new vscode.DocumentSymbol(
+          child.name, "",
+          vscode.SymbolKind.Function, range, range
+        );
+
+        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", configs)
+        parentSymbol.children.push(childSymbol);
+      }
+    }
+  }
+
+  /**
    * Main method called by VS Code when it needs symbols for a Python file
    */
   public provideDocumentSymbols(
@@ -37,32 +73,8 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
       );
       console.log("+++ Added Level 1: ", symbol)
 
-      // Child logic
-      const children = all_matches.filter(item => item.parentName == match.name)
-      if (children.length > 0) {
-        for (let j = 0; j < children.length; j++) {
-          const child = children[j];
-          const range = new vscode.Range(
-            document.positionAt(child.index),
-            document.positionAt(child.index + child.fullText.length));
-          const configs = {
-            name: child.name,
-            detail: '',
-            kind: vscode.SymbolKind.Function,
-            range: range,
-            selectionRange: range,
-            children: [],
-            tags: null
-          }
-          const childSymbol = new vscode.DocumentSymbol(
-            child.name, "",
-            vscode.SymbolKind.Function, range, range
-          );
-
-          console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", configs)
-          symbol.children.push(childSymbol);
-        }
-      }
+      // Child Level Logic
+      this.addChildSymbols(symbol, match, all_matches, document);
 
       // Return
       symbols.push(symbol);
