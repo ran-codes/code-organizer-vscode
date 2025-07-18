@@ -27,39 +27,30 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
 
     const children = allMatches.filter(item => item.parentName == parentMatch.name);
     console.log(`Looking for children of "${parentMatch.name}", found ${children.length} children`);
-    
+
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
         const child = children[j];
-        
+
         // Additional safety check to prevent infinite loops
         if (child.name === parentMatch.name) {
           console.log(`Skipping self-reference: ${child.name}`);
           continue;
         }
-        
+
         const range = new vscode.Range(
           document.positionAt(child.index),
           document.positionAt(child.index + child.fullText.length));
-        const configs = {
-          name: child.name,
-          detail: '',
-          kind: vscode.SymbolKind.Function,
-          range: range,
-          selectionRange: range,
-          children: [],
-          tags: null
-        }
         const childSymbol = new vscode.DocumentSymbol(
           child.name, "",
-          vscode.SymbolKind.Function, range, range
+          vscode.SymbolKind.Module, range, range
         );
 
-        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth," Symbol: ", child.name)
-        
+        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth, " Symbol: ", child.name)
+
         // Recursively add children to this child symbol with updated processed set
         this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedNames));
-        
+
         parentSymbol.children.push(childSymbol);
       }
     }
@@ -90,7 +81,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
         document.positionAt(match.index + match.fullText.length));
       const symbol = new vscode.DocumentSymbol(
         sectionName, '',
-        vscode.SymbolKind.Module,  range,  range
+        vscode.SymbolKind.File, range, range
       );
       console.log("+++ Added Level 1: ", symbol)
 
