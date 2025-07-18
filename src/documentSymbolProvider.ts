@@ -43,7 +43,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           vscode.SymbolKind.Module, range, range
         );
 
-        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth, " Symbol: ", child.name);
 
         // Recursively add children to this child symbol with updated processed set
         this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedNames));
