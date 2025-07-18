@@ -25,7 +25,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     }
     processedNames.add(parentMatch.name);
 
-    const children = allMatches.filter(item => item.parentName == parentMatch.name);
+    const children = allMatches.filter(item => item.parentName === parentMatch.name);
     console.log(`Looking for children of "${parentMatch.name}", found ${children.length} children`);
 
     if (children.length > 0) {
@@ -46,7 +46,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
           vscode.SymbolKind.Module, range, range
         );
 
-        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth, " Symbol: ", child.name)
+        console.log('++++ '.repeat(child.depth), "Added Level ", child.depth, " Symbol: ", child.name);
 
         // Recursively add children to this child symbol with updated processed set
         this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedNames));
@@ -83,7 +83,7 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
         sectionName, '',
         vscode.SymbolKind.File, range, range
       );
-      console.log("+++ Added Level 1: ", symbol)
+      console.log("+++ Added Level 1: ", symbol);
 
       // Child Level Logic
       this.addChildSymbols(symbol, match, all_matches, document);
