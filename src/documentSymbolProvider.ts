@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
  * Document Symbol Provider for friendly code outlines
  * Detects comment sections with pattern: # Section Name ----
  */
+
 export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
@@ -14,10 +15,12 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
     token: vscode.CancellationToken
   ): vscode.DocumentSymbol[] {
 
-    console.log('FriendlyOutlineDocumentSymbolProvider: provideDocumentSymbols called');
+    const fileName = document.fileName.split('\\').pop() || document.fileName.split('/').pop() || 'unknown';
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    console.log(`FriendlyOutlineDocumentSymbolProvider: provideDocumentSymbols called for: "${fileName}" (${document.languageId})`);
 
     const text = document.getText();
-    console.log('Document has', document.lineCount, 'lines');
+    console.log(`Document has ${document.lineCount} lines`);
 
     // Find all section matches
     const matches = this.findSections(text);
@@ -59,27 +62,31 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
    * Pattern: # Section Name ----
   **/
   
-  private findSections(text: string): Array<{ name: string, index: number, fullText: string }> {
-    const matches: Array<{ name: string, index: number, fullText: string }> = [];
+  private findSections(text: string): Array<{ name: string, index: number, fullText: string, depth: number }> {
+    const matches: Array<{ name: string, index: number, fullText: string, depth: number }> = [];
 
-    // Simple regex: # followed by text, then space, then 4+ dashes
-    const pattern = /^#\s*(.+?)\s+[-]{4,}\s*$/gm;
+    // Updated regex: capture 1-4 # symbols, followed by text, then space, then 4+ dashes
+    const pattern = /^(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm;
 
     let match: RegExpExecArray | null;
     while ((match = pattern.exec(text)) !== null) {
-      const sectionName = match[1].trim();
+      const hashSymbols = match[1];  // The # symbols (e.g., "#", "##", "###")
+      const sectionName = match[2].trim();  // The section name text
+      const depth = Math.min(hashSymbols.length, 4);  // Depth 1-4, capped at 4
 
-      // Skip if section name is empty or just dashes
+      // Skip if section name is empty or just dashes/whitespace
       if (sectionName && !sectionName.match(/^[-\s]*$/)) {
         matches.push({
           name: sectionName,
           index: match.index,
-          fullText: match[0]
+          fullText: match[0],
+          depth: depth
         });
-        console.log('Found section:', sectionName, 'at position', match.index);
+        console.log(`Found section: "${sectionName}" at position ${match.index}, depth ${depth}`);
       }
     }
 
     return matches;
   }
+
 }
