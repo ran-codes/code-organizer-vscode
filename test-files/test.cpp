@@ -22,12 +22,11 @@ std::cout << "filler" << std::endl;
 std::cout << "filler" << std::endl;
 std::cout << "filler" << std::endl;
 
+//// 1.1 Constructor ----
 class Calculator {
 private:
     std::string name;
-    
 public:
-    // 1.1 Constructor ----
     Calculator(const std::string& name) : name(name) {}
     std::cout << "filler" << std::endl;
     std::cout << "filler" << std::endl;
@@ -50,7 +49,7 @@ public:
     std::cout << "filler" << std::endl;
     std::cout << "filler" << std::endl;
     
-    // 1.2 Operations ----
+    //// 1.2 Operations ----
     int add(int a, int b) {
         return a + b;
     }
@@ -106,11 +105,11 @@ std::cout << "filler" << std::endl;
 std::cout << "filler" << std::endl;
 std::cout << "filler" << std::endl;
 
-// 2.1 Main Function ----
+//// 2.1 Main Function ----
 int main() {
     Calculator calc("MyCalculator");
     
-    // 2.2 Usage Examples ----
+    //// 2.2 Usage Examples ----
     int sum = calc.add(5, 3);
     int diff = calc.subtract(10, 4);
     

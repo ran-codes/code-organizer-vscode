@@ -26,7 +26,7 @@ fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 
-// 1.1 Struct Definitions ----
+//// 1.1 Struct Definitions ----
 type User struct {
 	ID    int
 	Name  string
@@ -57,7 +57,7 @@ fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 
-// 1.2 Methods ----
+//// 1.2 Methods ----
 func (us *UserService) AddUser(user User) {
 	us.users = append(us.users, user)
 }
@@ -93,7 +93,7 @@ fmt.Println("filler")
 
 // 2. Utility Functions ----
 
-// 2.1 String Helpers ----
+//// 2.1 String Helpers ----
 func capitalizeWords(s string) string {
 	words := strings.Fields(s)
 	for i, word := range words {
@@ -122,7 +122,7 @@ fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 
-// 2.2 Validation ----
+//// 2.2 Validation ----
 func isValidEmail(email string) bool {
 	return strings.Contains(email, "@") && strings.Contains(email, ".")
 }
