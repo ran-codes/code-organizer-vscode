@@ -21,7 +21,7 @@ print("filler")
 print("filler")
 print("filler")
 
-// 1.1 Protocol Definitions ----
+//// 1.1 Protocol Definitions ----
 protocol UserServiceProtocol {
     func addUser(_ user: User)
     func getUserById(_ id: Int) -> User?
@@ -47,7 +47,7 @@ print("filler")
 print("filler")
 print("filler")
 
-// 1.2 Data Models ----
+//// 1.2 Data Models ----
 struct User {
     let id: Int
     let name: String
@@ -57,7 +57,7 @@ struct User {
 class UserService: UserServiceProtocol {
     private var users: [User] = []
     
-    // 1.3 Service Methods ----
+    //// 1.3 Service Methods ----
     func addUser(_ user: User) {
         users.append(user)
     }
@@ -93,7 +93,7 @@ print("filler")
 
 // 2. Utility Extensions ----
 
-// 2.1 String Extensions ----
+//// 2.1 String Extensions ----
 extension String {
     func capitalizeFirst() -> String {
         return prefix(1).uppercased() + dropFirst()
@@ -126,7 +126,7 @@ print("filler")
 print("filler")
 print("filler")
 
-// 2.2 Array Extensions ----
+//// 2.2 Array Extensions ----
 extension Array where Element == User {
     func findByEmail(_ email: String) -> User? {
         return first { $0.email == email }

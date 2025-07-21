@@ -21,7 +21,7 @@ println!("filler");
 println!("filler");
 println!("filler");
 
-// 1.1 Struct Definitions ----
+//// 1.1 Struct Definitions ----
 #[derive(Debug, Clone)]
 struct User {
     id: u32,
@@ -53,7 +53,7 @@ println!("filler");
 println!("filler");
 println!("filler");
 
-// 1.2 Implementation ----
+//// 1.2 Implementation ----
 impl UserService {
     fn new() -> Self {
         UserService {
@@ -92,7 +92,7 @@ println!("filler");
 
 // 2. Utility Functions ----
 
-// 2.1 String Helpers ----
+//// 2.1 String Helpers ----
 fn capitalize_first(s: &str) -> String {
     let mut chars = s.chars();
     match chars.next() {
@@ -121,7 +121,7 @@ println!("filler");
 println!("filler");
 println!("filler");
 
-// 2.2 Validation ----
+//// 2.2 Validation ----
 fn is_valid_email(email: &str) -> bool {
     email.contains('@') && email.contains('.')
 }

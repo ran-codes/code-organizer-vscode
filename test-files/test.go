@@ -136,11 +136,13 @@ fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
+////// 2.2.1 validation phase A ----
 fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")
+////// 2.2.2 validation phase B ----
 fmt.Println("filler")
 fmt.Println("filler")
 fmt.Println("filler")

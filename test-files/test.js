@@ -24,7 +24,7 @@ print('hi')
 print('hi')
 print('hi')
 
-// 1.1 Helper Functions ----
+//// 1.1 Helper Functions ----
 function getData() {
     return fetch(config.apiUrl);
 }
@@ -84,7 +84,7 @@ print('hi')
 print('hi')
 print('hi')
 
-// 2.1 Event Handlers ----
+//// 2.1 Event Handlers ----
 document.addEventListener('click', handleClick);
 
 function handleClick(event) {

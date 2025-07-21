@@ -21,7 +21,7 @@ echo "filler";
 echo "filler";
 echo "filler";
 
-// 1.1 Configuration ----
+//// 1.1 Configuration ----
 $config = [
     'database' => 'mysql',
     'host' => 'localhost',
@@ -48,7 +48,7 @@ echo "filler";
 echo "filler";
 echo "filler";
 
-// 1.2 Database Class ----
+//// 1.2 Database Class ----
 class Database {
     private $connection;
     
@@ -83,7 +83,7 @@ echo "filler";
 
 // 2. Utility Functions ----
 
-// 2.1 String Helpers ----
+//// 2.1 String Helpers ----
 function sanitize_input($input) {
     return htmlspecialchars(trim($input));
 }
@@ -112,7 +112,7 @@ echo "filler";
 echo "filler";
 echo "filler";
 
-// 2.2 Array Helpers ----
+//// 2.2 Array Helpers ----
 function array_get($array, $key, $default = null) {
     return isset($array[$key]) ? $array[$key] : $default;
 }
