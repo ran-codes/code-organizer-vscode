@@ -1,6 +1,26 @@
 # 1. Notes and Ideas ----
 
 This is a simple text file for testing the extension.
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 ## 1.1 Task List ----
 
@@ -8,24 +28,124 @@ This is a simple text file for testing the extension.
 - Test JavaScript files
 - Test Markdown files
 - Test plain text files
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 ### 1.1.1 Priority Tasks ----
 
 1. Verify outline view works
 2. Check nesting levels
 3. Test with duplicate section names
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 ## 1.2 Configuration Notes ----
 
 The extension should work with any file type.
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 ## 1.3 Testing Results ----
 
 Document your testing results here.
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 ### 1.3.1 Bug Reports ----
 
 Report any issues found during testing.
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
+filler text
 
 # 2. Final Notes ----
 

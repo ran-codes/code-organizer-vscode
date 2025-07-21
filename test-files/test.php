@@ -1,5 +1,25 @@
 <?php
 // 1. PHP Application ----
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
 
 // 1.1 Configuration ----
 $config = [
@@ -7,6 +27,26 @@ $config = [
     'host' => 'localhost',
     'port' => 3306
 ];
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
 
 // 1.2 Database Class ----
 class Database {
@@ -20,6 +60,26 @@ class Database {
         echo "Connecting to database...";
     }
 }
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
 
 // 2. Utility Functions ----
 
@@ -31,11 +91,51 @@ function sanitize_input($input) {
 function format_currency($amount) {
     return '$' . number_format($amount, 2);
 }
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
 
 // 2.2 Array Helpers ----
 function array_get($array, $key, $default = null) {
     return isset($array[$key]) ? $array[$key] : $default;
 }
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
+echo "filler";
 
 // 3. Main Application ----
 $db = new Database($config);

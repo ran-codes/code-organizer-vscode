@@ -4,6 +4,27 @@ using System.Collections.Generic;
 // 1. C# Application ----
 namespace TestApp
 {
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    
     // 1.1 Main Class ----
     public class Program
     {
@@ -15,6 +36,26 @@ namespace TestApp
             Console.WriteLine($"Result: {result}");
         }
     }
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
+    Console.WriteLine("filler");
     
     // 2. Business Logic ----
     public class Calculator
@@ -29,6 +70,26 @@ namespace TestApp
         {
             return a * b;
         }
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
+        Console.WriteLine("filler");
         
         // 2.2 Advanced Operations ----
         public double Average(List<int> numbers)

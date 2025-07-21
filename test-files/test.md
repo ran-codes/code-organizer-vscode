@@ -16,10 +16,20 @@ code
 code
 code
 code
+code
+code
+code
+code
+code
 
 ## 1.1 Installation ----
 
 Install the extension from VS Code marketplace.
+code
+code
+code
+code
+code
 code
 code
 code
@@ -40,10 +50,35 @@ code
 
 - VS Code 1.102.0 or higher
 - No additional dependencies
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 
 ## 1.2 Usage ----
 
 Create sections using hash comments followed by 4+ dashes.
+code
+code
+code
+code
+code
 code
 code
 code
@@ -80,6 +115,11 @@ code
 code
 code
 code
+code
+code
+code
+code
+code
 
 ### 1.2.2 Nested Sections ----
 
@@ -90,6 +130,18 @@ Use multiple hash symbols for nesting:
 ## Sub Section ----
 ### Sub-Sub Section ----
 ```
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 code
 code
 code

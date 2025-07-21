@@ -5,6 +5,26 @@ import (
 	"fmt"
 	"strings"
 )
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
 
 // 1.1 Struct Definitions ----
 type User struct {
@@ -16,6 +36,26 @@ type User struct {
 type UserService struct {
 	users []User
 }
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
 
 // 1.2 Methods ----
 func (us *UserService) AddUser(user User) {
@@ -30,6 +70,26 @@ func (us *UserService) GetUserByID(id int) *User {
 	}
 	return nil
 }
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
 
 // 2. Utility Functions ----
 
@@ -41,11 +101,51 @@ func capitalizeWords(s string) string {
 	}
 	return strings.Join(words, " ")
 }
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
 
 // 2.2 Validation ----
 func isValidEmail(email string) bool {
 	return strings.Contains(email, "@") && strings.Contains(email, ".")
 }
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
+fmt.Println("filler")
 
 // 3. Main Function ----
 func main() {

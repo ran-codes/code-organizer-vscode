@@ -1,5 +1,25 @@
 // 1. Rust Application ----
 use std::collections::HashMap;
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
 
 // 1.1 Struct Definitions ----
 #[derive(Debug, Clone)]
@@ -12,6 +32,26 @@ struct User {
 struct UserService {
     users: HashMap<u32, User>,
 }
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
 
 // 1.2 Implementation ----
 impl UserService {
@@ -29,6 +69,26 @@ impl UserService {
         self.users.get(&id)
     }
 }
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
 
 // 2. Utility Functions ----
 
@@ -40,11 +100,51 @@ fn capitalize_first(s: &str) -> String {
         Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
     }
 }
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
 
 // 2.2 Validation ----
 fn is_valid_email(email: &str) -> bool {
     email.contains('@') && email.contains('.')
 }
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
+println!("filler");
 
 // 3. Main Function ----
 fn main() {

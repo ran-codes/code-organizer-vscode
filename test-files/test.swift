@@ -1,11 +1,51 @@
 // 1. Swift Application ----
 import Foundation
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
 
 // 1.1 Protocol Definitions ----
 protocol UserServiceProtocol {
     func addUser(_ user: User)
     func getUserById(_ id: Int) -> User?
 }
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
 
 // 1.2 Data Models ----
 struct User {
@@ -30,6 +70,26 @@ class UserService: UserServiceProtocol {
         return users
     }
 }
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
 
 // 2. Utility Extensions ----
 
@@ -45,6 +105,26 @@ extension String {
         return predicate.evaluate(with: self)
     }
 }
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
 
 // 2.2 Array Extensions ----
 extension Array where Element == User {
@@ -52,6 +132,26 @@ extension Array where Element == User {
         return first { $0.email == email }
     }
 }
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
+print("filler")
 
 // 3. Main Application ----
 let userService = UserService()

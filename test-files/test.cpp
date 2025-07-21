@@ -1,6 +1,26 @@
 // 1. C++ Class Definition ----
 #include <iostream>
 #include <string>
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
 
 class Calculator {
 private:
@@ -9,6 +29,26 @@ private:
 public:
     // 1.1 Constructor ----
     Calculator(const std::string& name) : name(name) {}
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
+    std::cout << "filler" << std::endl;
     
     // 1.2 Operations ----
     int add(int a, int b) {
@@ -19,12 +59,52 @@ public:
         return a - b;
     }
 };
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
 
 // 2. Template Functions ----
 template<typename T>
 T maximum(T a, T b) {
     return (a > b) ? a : b;
 }
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
+std::cout << "filler" << std::endl;
 
 // 2.1 Main Function ----
 int main() {
