@@ -90,16 +90,36 @@ Open VS Code settings and search for "Friendly Code Outlines":
 
 ## Supported Patterns
 
-The extension recognizes this comment pattern:
+The extension recognizes comment patterns in multiple programming languages:
 
-| Pattern | Example | Description |
-|---------|---------|-------------|
-| `# Text ----` | `# Main Section ----` | Hash comments with 4+ dashes |
-| `## Text ----` | `## Sub Section ----` | Double hash for level 2 nesting |
-| `### Text ----` | `### Sub-Sub Section ----` | Triple hash for level 3 nesting |
-| `#### Text ----` | `#### Deep Section ----` | Quad hash for level 4 nesting |
+| Language | Extension | Comment Style | Example |
+|----------|-----------|---------------|---------|
+| Python | `.py` | `# Text ----` | `# Main Section ----` |
+| R | `.R` | `# Text ----` | `# Data Analysis ----` |
+| JavaScript | `.js` | `// Text ----` | `// App Configuration ----` |
+| TypeScript | `.ts` | `// Text ----` | `// Type Definitions ----` |
+| C | `.c` | `// Text ----` | `// Helper Functions ----` |
+| C++ | `.cpp` | `// Text ----` | `// Class Definition ----` |
+| C# | `.cs` | `// Text ----` | `// Business Logic ----` |
+| Java | `.java` | `// Text ----` | `// Main Class ----` |
+| Go | `.go` | `// Text ----` | `// Package Functions ----` |
+| Rust | `.rs` | `// Text ----` | `// Implementation ----` |
+| Swift | `.swift` | `// Text ----` | `// Protocol Definition ----` |
+| PHP | `.php` | `// Text ----` | `// Application Logic ----` |
+| SQL | `.sql` | `-- Text ----` | `-- Database Setup ----` |
 
-**Note**: Only hash (#) comments with dashes (----) are supported. Other comment styles like //, --, or /* */ are not recognized.
+### Nesting Support
+
+All comment styles support up to 4 levels of nesting:
+
+| Level | Python/R | JavaScript/Java/etc | SQL |
+|-------|----------|---------------------|-----|
+| 1 | `# Section ----` | `// Section ----` | `-- Section ----` |
+| 2 | `## Subsection ----` | `//// Subsection ----` | `---- Subsection ----` |
+| 3 | `### Sub-sub ----` | `////// Sub-sub ----` | `------ Sub-sub ----` |
+| 4 | `#### Deep ----` | `//////// Deep ----` | `-------- Deep ----` |
+
+**Note**: All patterns require exactly 4 or more dashes (`----`) after the section name.
 
 ## Requirements
 
