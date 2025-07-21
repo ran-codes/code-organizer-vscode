@@ -17,13 +17,13 @@ export function findSections(text: string): SectionMatch[] {
   // Define patterns for different comment styles
   const patterns = [
     // Hash comments: # Section Name ---- (Python, R, shell, etc.)
-    { regex: /^(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '#' },
+    { regex: /^[ \t]*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '#' },
     
     // Double slash comments: // Section Name ---- (JS, TS, C, C++, C#, Java, Go, Rust, Swift)
-    { regex: /^(\/\/+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '//' },
+    { regex: /^[ \t]*(\/\/+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '//' },
     
     // SQL comments: -- Section Name ---- (SQL)
-    { regex: /^(--+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '--' }
+    { regex: /^[ \t]*(--+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '--' }
   ];
 
   for (const pattern of patterns) {
