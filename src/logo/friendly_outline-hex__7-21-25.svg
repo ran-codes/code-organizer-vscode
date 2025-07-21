@@ -1,0 +1,55 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hex sticker background -->
+  <defs>
+    <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5A9FD4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7DB8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Hexagon shape (square proportions to fill canvas) -->
+  <polygon points="64,6 110,38 110,90 64,122 18,90 18,38" 
+           fill="url(#hexGradient)" 
+           stroke="#1E5A8C" 
+           stroke-width="2"/>
+  
+  <!-- Inner hex border for that authentic sticker look -->
+  <polygon points="64,10 106,40 106,88 64,118 22,88 22,40" 
+           fill="none" 
+           stroke="rgba(255,255,255,0.2)" 
+           stroke-width="1"/>
+  
+  <!-- Comment hash symbols with better positioning -->
+  <g fill="white" font-family="Consolas, 'Courier New', monospace" font-size="14" font-weight="bold">
+    <text x="30" y="44">#</text>
+    <text x="37" y="56">##</text>
+    <text x="43" y="66">###</text>
+    <text x="30" y="76">#</text>
+    <text x="37" y="86">##</text>
+  </g>
+  
+  <!-- Outline/list lines with clear separation from hash symbols -->
+  <g fill="white" stroke="white" stroke-width="0.5">
+    <!-- Main section line (# with dashes) -->
+    <rect x="45" y="38" width="25" height="3" rx="1"/>
+    <rect x="72" y="38" width="16" height="3" rx="1"/>
+    
+    <!-- Sub-section lines (## with dashes) - shorter dashes -->
+    <rect x="55" y="50" width="17" height="2.5" rx="1"/>
+    <rect x="74" y="50" width="14" height="2.5" rx="1"/>
+    
+    <!-- Third level (### with dashes) - much shorter dashes with more space -->
+    <rect x="68" y="60" width="8" height="2" rx="1"/>
+    <rect x="78" y="60" width="8" height="2" rx="1"/>
+    
+    <!-- Another main section (# with dashes) -->
+    <rect x="45" y="70" width="22" height="3" rx="1"/>
+    <rect x="69" y="70" width="19" height="3" rx="1"/>
+    
+    <!-- Sub-section (## with dashes) - shorter dashes -->
+    <rect x="55" y="80" width="15" height="2.5" rx="1"/>
+    <rect x="72" y="80" width="16" height="2.5" rx="1"/>
+  </g>
+  
+
+</svg>
