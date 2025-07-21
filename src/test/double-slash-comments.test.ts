@@ -173,7 +173,7 @@ function another() {}
 		const sections = findSections(text);
 		assert.strictEqual(sections.length, 5);
 
-		const mainFunc = sections.find(s => s.name === 'Main Function')!
+		const mainFunc = sections.find(s => s.name === 'Main Function')!;
 		const helper1 = sections.find(s => s.name === 'Helper 1')!;
 		const deepHelper = sections.find(s => s.name === 'Deep Helper')!;
 		const helper2 = sections.find(s => s.name === 'Helper 2')!;
@@ -185,5 +185,104 @@ function another() {}
 		assert.strictEqual(deepHelper.parentName, helper1.uniqueId);
 		assert.strictEqual(helper2.parentName, mainFunc.uniqueId);
 		assert.strictEqual(anotherMain.parentName, undefined);
+	});
+
+	test('Should handle indented double slash comments with spaces', () => {
+		const text = `
+// 1. Outer Section ----
+class Calculator {
+    //// 1.1 Constructor ----
+    constructor(name) {
+        this.name = name;
+    }
+    
+        ////// 1.1.1 Initialization ----
+        init() {
+            console.log('Initialized');
+        }
+    
+    //// 1.2 Operations ----
+    add(a, b) {
+        return a + b;
+    }
+}
+
+// 2. Utility Functions ----
+function helper() {
+    console.log('helper');
+}
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 5);
+
+		const outer = sections.find(s => s.name === '1. Outer Section')!;
+		const constructor = sections.find(s => s.name === '1.1 Constructor')!;
+		const initialization = sections.find(s => s.name === '1.1.1 Initialization')!;
+		const operations = sections.find(s => s.name === '1.2 Operations')!;
+		const utility = sections.find(s => s.name === '2. Utility Functions')!;
+
+		// Test depths
+		assert.strictEqual(outer.depth, 1);
+		assert.strictEqual(constructor.depth, 2);
+		assert.strictEqual(initialization.depth, 3);
+		assert.strictEqual(operations.depth, 2);
+		assert.strictEqual(utility.depth, 1);
+
+		// Test parent relationships
+		assert.strictEqual(outer.parentName, undefined);
+		assert.strictEqual(constructor.parentName, outer.uniqueId);
+		assert.strictEqual(initialization.parentName, constructor.uniqueId);
+		assert.strictEqual(operations.parentName, outer.uniqueId);
+		assert.strictEqual(utility.parentName, undefined);
+	});
+
+	test('Should handle indented double slash comments with tabs', () => {
+		const text = `
+// Main Function ----
+int main() {
+	//// Inside Main ----
+	int x = 5;
+	
+	if (x > 0) {
+		////// Deep Inside ----
+		printf("positive");
+	}
+	
+	return 0;
+}
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 3);
+
+		assert.strictEqual(sections[0].name, 'Main Function');
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[1].name, 'Inside Main');
+		assert.strictEqual(sections[1].depth, 2);
+		assert.strictEqual(sections[2].name, 'Deep Inside');
+		assert.strictEqual(sections[2].depth, 3);
+	});
+
+	test('Should handle mixed indentation (spaces and tabs)', () => {
+		const text = `
+// Root ----
+function root() {
+    //// Spaces Indent ----
+    console.log('spaces');
+    
+	////// Tab Indent ----
+	console.log('tabs');
+}
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 3);
+
+		assert.strictEqual(sections[0].name, 'Root');
+		assert.strictEqual(sections[1].name, 'Spaces Indent');
+		assert.strictEqual(sections[2].name, 'Tab Indent');
+		
+		// All should be found regardless of indentation type
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[1].depth, 2);
+		assert.strictEqual(sections[2].depth, 3);
 	});
 });

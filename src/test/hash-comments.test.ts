@@ -126,4 +126,111 @@ def helper():
 		assert.strictEqual(apiSettings.parentName, config.uniqueId);
 		assert.strictEqual(utils.parentName, undefined);
 	});
+
+	test('Should handle indented hash comments with spaces', () => {
+		const text = `
+# 1. Main Module ----
+import sys
+
+    ## 1.1 Helper Functions ----
+    def helper():
+        pass
+    
+        ### 1.1.1 Deep Helper ----
+        def deep_helper():
+            return True
+    
+    ## 1.2 Configuration ----
+    CONFIG = {
+        'debug': True
+    }
+
+# 2. Entry Point ----
+if __name__ == '__main__':
+    main()
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 5);
+
+		const mainModule = sections.find(s => s.name === '1. Main Module')!;
+		const helpers = sections.find(s => s.name === '1.1 Helper Functions')!;
+		const deepHelper = sections.find(s => s.name === '1.1.1 Deep Helper')!;
+		const config = sections.find(s => s.name === '1.2 Configuration')!;
+		const entryPoint = sections.find(s => s.name === '2. Entry Point')!;
+
+		// Test depths
+		assert.strictEqual(mainModule.depth, 1);
+		assert.strictEqual(helpers.depth, 2);
+		assert.strictEqual(deepHelper.depth, 3);
+		assert.strictEqual(config.depth, 2);
+		assert.strictEqual(entryPoint.depth, 1);
+
+		// Test parent relationships
+		assert.strictEqual(mainModule.parentName, undefined);
+		assert.strictEqual(helpers.parentName, mainModule.uniqueId);
+		assert.strictEqual(deepHelper.parentName, helpers.uniqueId);
+		assert.strictEqual(config.parentName, mainModule.uniqueId);
+		assert.strictEqual(entryPoint.parentName, undefined);
+	});
+
+	test('Should handle indented hash comments with tabs', () => {
+		const text = `
+# Data Analysis ----
+import pandas as pd
+
+	## Data Loading ----
+	data = pd.read_csv('file.csv')
+	
+		### Data Cleaning ----
+		data = data.dropna()
+		
+	## Plotting ----
+	import matplotlib.pyplot as plt
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 4);
+
+		assert.strictEqual(sections[0].name, 'Data Analysis');
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[1].name, 'Data Loading');
+		assert.strictEqual(sections[1].depth, 2);
+		assert.strictEqual(sections[2].name, 'Data Cleaning');
+		assert.strictEqual(sections[2].depth, 3);
+		assert.strictEqual(sections[3].name, 'Plotting');
+		assert.strictEqual(sections[3].depth, 2);
+	});
+
+	test('Should handle R-style indented comments', () => {
+		const text = `
+# 1. Data Analysis ----
+library(ggplot2)
+
+    ## 1.1 Data Loading ----
+    data <- read.csv("data.csv")
+    
+        ### 1.1.1 Data Validation ----
+        summary(data)
+    
+    ## 1.2 Plotting ----
+    plot <- ggplot(data, aes(x, y)) + geom_point()
+
+# 2. Statistics ----
+mean_value <- mean(data$value)
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 5);
+
+		const dataAnalysis = sections.find(s => s.name === '1. Data Analysis')!;
+		const dataLoading = sections.find(s => s.name === '1.1 Data Loading')!;
+		const validation = sections.find(s => s.name === '1.1.1 Data Validation')!;
+		const plotting = sections.find(s => s.name === '1.2 Plotting')!;
+		const stats = sections.find(s => s.name === '2. Statistics')!;
+
+		// Verify indented comments work correctly
+		assert.strictEqual(dataAnalysis.parentName, undefined);
+		assert.strictEqual(dataLoading.parentName, dataAnalysis.uniqueId);
+		assert.strictEqual(validation.parentName, dataLoading.uniqueId);
+		assert.strictEqual(plotting.parentName, dataAnalysis.uniqueId);
+		assert.strictEqual(stats.parentName, undefined);
+	});
 });

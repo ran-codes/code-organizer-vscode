@@ -176,4 +176,115 @@ DELIMITER ;
 		assert.strictEqual(orderProcs.parentName, procedures.uniqueId);
 		assert.strictEqual(functions.parentName, undefined);
 	});
+
+	test('Should handle indented SQL comments with spaces', () => {
+		const text = `
+-- 1. Database Schema ----
+CREATE DATABASE ecommerce;
+USE ecommerce;
+
+    ---- 1.1 User Tables ----
+    CREATE TABLE users (
+        id INT PRIMARY KEY,
+        name VARCHAR(100),
+        email VARCHAR(255)
+    );
+    
+        ------ 1.1.1 User Indexes ----
+        CREATE INDEX idx_user_email ON users(email);
+    
+    ---- 1.2 Order Tables ----
+    CREATE TABLE orders (
+        id INT PRIMARY KEY,
+        user_id INT,
+        total DECIMAL(10,2)
+    );
+
+-- 2. Queries ----
+SELECT COUNT(*) FROM users;
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 5);
+
+		const schema = sections.find(s => s.name === '1. Database Schema')!;
+		const userTables = sections.find(s => s.name === '1.1 User Tables')!;
+		const userIndexes = sections.find(s => s.name === '1.1.1 User Indexes')!;
+		const orderTables = sections.find(s => s.name === '1.2 Order Tables')!;
+		const queries = sections.find(s => s.name === '2. Queries')!;
+
+		// Test depths
+		assert.strictEqual(schema.depth, 1);
+		assert.strictEqual(userTables.depth, 2);
+		assert.strictEqual(userIndexes.depth, 3);
+		assert.strictEqual(orderTables.depth, 2);
+		assert.strictEqual(queries.depth, 1);
+
+		// Test parent relationships
+		assert.strictEqual(schema.parentName, undefined);
+		assert.strictEqual(userTables.parentName, schema.uniqueId);
+		assert.strictEqual(userIndexes.parentName, userTables.uniqueId);
+		assert.strictEqual(orderTables.parentName, schema.uniqueId);
+		assert.strictEqual(queries.parentName, undefined);
+	});
+
+	test('Should handle indented SQL comments with tabs', () => {
+		const text = `
+-- Main Procedure ----
+DELIMITER $$
+CREATE PROCEDURE GetUserOrders()
+BEGIN
+	---- Inner Query ----
+	SELECT u.name, COUNT(o.id) as order_count
+	FROM users u
+	LEFT JOIN orders o ON u.id = o.user_id
+	
+		------ Grouping ----
+		GROUP BY u.id, u.name
+		ORDER BY order_count DESC;
+END$$
+DELIMITER ;
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 3);
+
+		assert.strictEqual(sections[0].name, 'Main Procedure');
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[1].name, 'Inner Query');
+		assert.strictEqual(sections[1].depth, 2);
+		assert.strictEqual(sections[2].name, 'Grouping');
+		assert.strictEqual(sections[2].depth, 3);
+	});
+
+	test('Should handle mixed SQL indentation scenarios', () => {
+		const text = `
+-- Database Setup ----
+CREATE DATABASE test;
+
+    ---- Views ----
+    CREATE VIEW user_summary AS
+    SELECT id, name FROM users;
+    
+	------ View Permissions ----
+	GRANT SELECT ON user_summary TO public;
+
+    ---- Triggers ----
+    CREATE TRIGGER update_timestamp
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    SET NEW.updated_at = NOW();
+`;
+		const sections = findSections(text);
+		assert.strictEqual(sections.length, 4);
+
+		const setup = sections.find(s => s.name === 'Database Setup')!;
+		const views = sections.find(s => s.name === 'Views')!;
+		const permissions = sections.find(s => s.name === 'View Permissions')!;
+		const triggers = sections.find(s => s.name === 'Triggers')!;
+
+		// Verify indented comments with mixed spaces/tabs work
+		assert.strictEqual(setup.parentName, undefined);
+		assert.strictEqual(views.parentName, setup.uniqueId);
+		assert.strictEqual(permissions.parentName, views.uniqueId);
+		assert.strictEqual(triggers.parentName, setup.uniqueId);
+	});
 });
