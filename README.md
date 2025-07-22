@@ -31,8 +31,9 @@ Transform your code files into organized, navigable documents with a table of co
 - **Multi-language support**: Works with any comment style
 - **Lightweight & fast**: Only responds to simple comments, no complex parsing
 - **VS Code integration**: Seamless outline view, breadcrumbs, and Go to Symbol
-- **Zero configuration**: Works immediately  
-
+- **Zero configuration**: Works immediately
+  
+<img src="./assets/images/snip_demo_python.png" alt="Code Organizer Snip Demo Python" >
 ## Quick Start
 
 **To use:**
