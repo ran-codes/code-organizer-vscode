@@ -151,7 +151,7 @@ After installation, your comment sections will appear in:
 
 ## Contributing
 
-Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/your-username/friendly-code-outlines).
+Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/ran-codes/code-organizer-vscode).
 
 ## License
 
