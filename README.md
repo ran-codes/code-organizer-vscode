@@ -1,168 +1,221 @@
 # Friendly Code Outlines
 
-A VS Code extension that creates navigable code sections using comment patterns. Organize your code with simple comment-based section headers that appear in VS Code's outline view.
+<p align="center">
+  <img src="icon.png" alt="Friendly Code Outlines Logo" width="128" height="128">
+</p>
 
-## Features
+<p align="center">
+  <strong>RStudio-style code section navigation for VS Code</strong><br>
+  Organize and navigate large files with simple comment patterns
+</p>
 
-- **Simple Syntax**: Create sections with hash comments ending in 4+ dashes
-- **Nested Sections**: Support for up to 4 levels of nesting using multiple # symbols
-- **Multi-Language**: Works with any programming language that supports # comments
-- **VS Code Integration**: Sections appear in the built-in Outline view
-- **No Code Changes**: Uses only comments, doesn't affect your actual code
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/ran-codes.friendly-code-outlines-vscode?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="VS Code Marketplace">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/ran-codes.friendly-code-outlines-vscode?style=flat-square" alt="Installs">
+  </a>
+  <a href="https://github.com/ran-codes/friendly-code-outlines-vscode">
+    <img src="https://img.shields.io/github/stars/ran-codes/friendly-code-outlines-vscode?style=flat-square" alt="GitHub Stars">
+  </a>
+</p>
 
-## Usage
+## 🎬 See It In Action
 
-### Basic Sections
+> **[GIF PLACEHOLDER - I will add the demo GIF here]**
+> 
+> *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
 
-Add hash comments with 4 or more dashes:
+## ✨ Features & Quick Start
+
+### Core Features
+- **RStudio-inspired syntax**: `# Section Name ----`
+- **Hierarchical nesting**: `##`, `###`, `####`
+- **Multi-language support**: Works with any comment style
+- **Lightweight & fast**: Only responds to simple comments, no complex parsing
+- **VS Code integration**: Outline view, breadcrumbs, Go to Symbol
+- **Zero configuration**: Works immediately
+
+### 🚀 Quick Start
 
 ```python
-# Main Configuration ----
-database_url = "localhost"
-api_key = "secret"
+# 1. Configuration ----
+DATABASE_URL = "localhost"
+API_KEY = "secret"
 
-# Helper Functions ----
-def process_data():
-    pass
-
-# Constants ----
-MAX_RETRIES = 3
-TIMEOUT = 30
-```
-
-### Nested Sections
-
-Use multiple # symbols for nested organization:
-
-```python
-# Database Layer ----
-
-## Connection Management ----
+## 1.1 Database Settings ----
 def connect():
-    pass
+    return db.connect(DATABASE_URL)
 
-## Query Helpers ----
-def execute_query():
-    pass
+### 1.1.1 Connection Pool ----
+def create_pool():
+    return ConnectionPool()
 
-### SQL Builders ----
-def build_select():
-    pass
+## 1.2 API Settings ----
+def setup_api():
+    return API(API_KEY)
 
-# API Layer ----
-
-## Authentication ----
-def login():
-    pass
+# 2. Main Application ----
+def run():
+    db = connect()
+    api = setup_api()
 ```
 
-### Multi-Language Support
+**To use:**
+1. Add comment sections ending with `----` (4 or more dashes)
+2. Check the **Outline** panel in VS Code's Explorer sidebar
+3. Click any section to jump to it instantly
 
-Works with any language that supports hash (#) comments:
+## 🌍 Language Support & Examples
+
+### Supported Comment Styles
+
+| Language | Example | Nesting |
+|----------|---------|---------|
+| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
+| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
+| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
+
+**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
+
+### JavaScript Example
 
 ```javascript
-// Note: Only # comments are supported, not // comments
-// Use # instead:
+// 1. App Configuration ----
+const config = {
+    apiUrl: 'https://api.example.com',
+    timeout: 5000
+};
 
-# Frontend Components ----
-const Button = () => <button />;
+//// 1.1 Helper Functions ----
+function getData() {
+    return fetch(config.apiUrl);
+}
 
-# State Management ----
-const store = createStore();
+function processData(data) {
+    return data.map(item => item.value);
+}
+
+// 2. Main Application ----
+class App {
+    constructor() {
+        this.data = [];
+    }
+    
+    //// 2.1 Event Handlers ----
+    handleClick(event) {
+        console.log('Clicked:', event.target);
+    }
+}
 ```
 
-```python
-# Database Schema ----
-def create_tables():
-    pass
+### SQL Example
 
-# Data Processing ----
-def process_data():
-    pass
+```sql
+-- 1. Database Setup ----
+CREATE DATABASE myapp;
+USE myapp;
+
+---- 1.1 Tables ----
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(255)
+);
+
+------ 1.1.1 Indexes ----
+CREATE INDEX idx_user_email ON users(email);
+
+---- 1.2 Stored Procedures ----
+DELIMITER $$
+CREATE PROCEDURE GetUser(IN user_id INT)
+BEGIN
+    SELECT * FROM users WHERE id = user_id;
+END$$
+DELIMITER ;
+
+-- 2. Sample Data ----
+INSERT INTO users VALUES (1, 'John Doe', 'john@example.com');
 ```
 
-## Configuration
+## 🤔 Why Use This Extension?
 
-Open VS Code settings and search for "Friendly Code Outlines":
+### The Problem
+- **Large files are hard to navigate** - scrolling through 1000+ line files
+- **VS Code's outline only shows functions/classes** - not logical code sections
+- **No consistent organization** across different programming languages
+- **Lost context** when jumping between different parts of complex files
 
-- **Enable/Disable**: Turn the extension on or off
-- **Supported Languages**: Choose which languages to support (default: all)
+### Our Solution
+Simple, universal comment patterns that work everywhere with instant VS Code integration.
 
-## Supported Patterns
+**Inspired by RStudio's Code Sections** - beloved by data scientists for organizing R scripts into navigable sections.
 
-The extension recognizes comment patterns in multiple programming languages:
+### Comparison with Alternatives
 
-| Language | Extension | Comment Style | Example |
-|----------|-----------|---------------|---------|
-| Python | `.py` | `# Text ----` | `# Main Section ----` |
-| R | `.R` | `# Text ----` | `# Data Analysis ----` |
-| JavaScript | `.js` | `// Text ----` | `// App Configuration ----` |
-| TypeScript | `.ts` | `// Text ----` | `// Type Definitions ----` |
-| C | `.c` | `// Text ----` | `// Helper Functions ----` |
-| C++ | `.cpp` | `// Text ----` | `// Class Definition ----` |
-| C# | `.cs` | `// Text ----` | `// Business Logic ----` |
-| Java | `.java` | `// Text ----` | `// Main Class ----` |
-| Go | `.go` | `// Text ----` | `// Package Functions ----` |
-| Rust | `.rs` | `// Text ----` | `// Implementation ----` |
-| Swift | `.swift` | `// Text ----` | `// Protocol Definition ----` |
-| PHP | `.php` | `// Text ----` | `// Application Logic ----` |
-| SQL | `.sql` | `-- Text ----` | `-- Database Setup ----` |
+| Feature | **Friendly Code Outlines** | Bookmarks | Better Comments | Region Folding |
+|---------|----------------------------|-----------|-----------------|----------------|
+| Automatic structure detection | ✅ | ❌ | ❌ | ❌ |
+| Hierarchical organization | ✅ | ❌ | ❌ | ⚠️ |
+| Multi-language support | ✅ | ✅ | ✅ | ⚠️ |
+| Outline integration | ✅ | ❌ | ❌ | ❌ |
+| Zero configuration | ✅ | ❌ | ❌ | ❌ |
+| Comment-based | ✅ | ❌ | ✅ | ⚠️ |
 
-### Nesting Support
+## 📦 Installation & Support
 
-All comment styles support up to 4 levels of nesting:
+### Installation
 
-| Level | Python/R | JavaScript/Java/etc | SQL |
-|-------|----------|---------------------|-----|
-| 1 | `# Section ----` | `// Section ----` | `-- Section ----` |
-| 2 | `## Subsection ----` | `//// Subsection ----` | `---- Subsection ----` |
-| 3 | `### Sub-sub ----` | `////// Sub-sub ----` | `------ Sub-sub ----` |
-| 4 | `#### Deep ----` | `//////// Deep ----` | `-------- Deep ----` |
+**VS Code Marketplace:** Open Extensions (Ctrl+Shift+X) → Search "Friendly Code Outlines" → Install
 
-**Note**: All patterns require exactly 4 or more dashes (`----`) after the section name.
+**Command Line:**
+```bash
+code --install-extension ran-codes.friendly-code-outlines-vscode
+```
 
-## Requirements
+### 💡 Tips & Best Practices
 
-- VS Code 1.102.0 or higher
-- No additional dependencies
+- **Use consistent spacing**: `# Section Name ----` (space after # and before dashes)
+- **Keep section names concise** for better readability in the outline
+- **Use 4+ dashes**: `----`, `-----`, `------` all work
+- **Nest logically**: Group related functionality under parent sections
+- **Be consistent**: Stick to one comment style per file
 
-## Installation
+### 🐛 Support & Contributing
 
-1. Open VS Code
-2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "Friendly Code Outlines"
-4. Click Install
+- **🐛 Found a bug?** [Report it on GitHub](https://github.com/ran-codes/friendly-code-outlines-vscode/issues)
+- **💡 Feature idea?** [Submit a feature request](https://github.com/ran-codes/friendly-code-outlines-vscode/issues)
+- **🛠️ Want to contribute?** Check out our [Contributing Guidelines](https://github.com/ran-codes/friendly-code-outlines-vscode/blob/main/CONTRIBUTING.md)
 
-## Viewing Sections
+### ☕ Support the Project
 
-After installation, your comment sections will appear in:
+If this extension helps you stay organized and productive:
 
-1. **Outline View**: Click the outline icon in the Explorer sidebar
-2. **Breadcrumbs**: Enable breadcrumbs in View menu
-3. **Go to Symbol**: Use Ctrl+Shift+O to navigate between sections
+- ⭐ **[Star us on GitHub](https://github.com/ran-codes/friendly-code-outlines-vscode)**
+- 🐦 **Follow me:** [@ran_codes](https://twitter.com/ran_codes)
+- ☕ **Support development:** [Patreon](https://patreon.com/ran_codes) • [Ko-fi](https://ko-fi.com/ran_codes)
+- 📝 **Write a review** on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode)
 
-## Tips
+---
 
-- Use consistent spacing: `# Section Name ----`
-- Keep section names concise for better readability
-- Use 4 or more dashes (----, -----, etc.)
-- Nest sections logically with ##, ###, ####
-- Only hash (#) comments are supported
+## 📋 Release Notes
 
-## Contributing
+See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
-Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/your-username/friendly-code-outlines).
+### 0.0.1 - Initial Release
+- Support for `#`, `//`, and `--` comment styles
+- Hierarchical section nesting up to 4 levels
+- VS Code outline integration
+- Multi-language support
+- Zero configuration setup
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## Release Notes
+---
 
-### 0.1.0
-
-- Initial release
-- Support for hash, slash, and block comment patterns
-- Nested section support up to 4 levels
-- Multi-language compatibility
-- Configuration options
+<p align="center">
+  <em>Inspired by RStudio's Code Sections • Built with ❤️ for the VS Code community</em>
+</p>
