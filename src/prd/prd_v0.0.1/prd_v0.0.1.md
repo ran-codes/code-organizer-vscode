@@ -1,6 +1,6 @@
  
 # Product Requirements Document (PRD)
-## Friendly Code Outlines VS Code Extension
+## Code Organizer VS Code Extension
 
 **Version:** v0.0.1
 **Date:** July 21, 2025  
@@ -11,7 +11,7 @@
 ## Describe Feature
 
 ### Overview
-The Friendly Code Outlines extension brings intuitive code section navigation to Visual Studio Code. It enables developers to organize and navigate large code files using simple comment-based sections with trailing dashes, providing hierarchical structure and seamless integration with VS Code's outline view.
+The Code Organizer extension brings intuitive code section navigation to Visual Studio Code. It enables developers to organize and navigate large code files using simple comment-based sections with trailing dashes, providing hierarchical structure and seamless integration with VS Code's outline view.
 
 ### Core Functionality
 **Comment-Based Code Sections**: Automatically detect and parse code sections from comments with specific patterns:
@@ -111,7 +111,7 @@ This feature is directly inspired by RStudio's Code Sections functionality, whic
 | Code Outline | 500K | AST parsing | ✅ | ⚠️ Limited | ❌ |
 | Better Comments | 3.2M | Visual enhancement | ❌ | ✅ | ✅ |
 | Region Folding | 150K | Explicit markers | ❌ | ⚠️ Limited | ⚠️ Partial |
-| **Friendly Outlines** | - | Comment parsing | ✅ | ✅ | ✅ |
+| **Code Organizer** | - | Comment parsing | ✅ | ✅ | ✅ |
 
 ## Describe Gap
 
@@ -169,7 +169,7 @@ Develop a VS Code extension that provides RStudio-style code section navigation 
 #### 1. **Document Symbol Provider Architecture**
 ```typescript
 // Core integration point with VS Code's symbol system
-class FriendlyOutlineSymbolProvider implements DocumentSymbolProvider {
+class CodeOrganizerSymbolProvider implements DocumentSymbolProvider {
   provideDocumentSymbols(document: TextDocument): DocumentSymbol[] {
     const sections = findSections(document.getText());
     return sections.map(section => new DocumentSymbol(

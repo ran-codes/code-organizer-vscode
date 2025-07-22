@@ -37,7 +37,7 @@ Transform your code files into organized, navigable documents with a table of co
 
 **To use:**
 1. Install the extension
-2. Add comment sections ending with `----` (4 or more dashes) to trigger friendly outline
+2. Add comment sections ending with `----` (4 or more dashes) to trigger code organization
 3. Check the **Outline** panel in VS Code's Explorer sidebar
 4. Click any section to jump to it instantly
 

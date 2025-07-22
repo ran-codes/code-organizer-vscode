@@ -3,10 +3,10 @@ import * as vscode from 'vscode';
 import { findSections, SectionMatch } from './utils/findSections';
 
 /**
- * Document Symbol Provider for friendly code outlines
+ * Document Symbol Provider for code organizer
  * Detects comment sections with pattern: # Section Name ----
  */
-export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
   /**
    * Helper method to add child symbols to a parent symbol (recursive)
@@ -90,3 +90,6 @@ export class FriendlyOutlineDocumentSymbolProvider implements vscode.DocumentSym
   }
 
 }
+
+// Export with old name for backward compatibility
+export const FriendlyOutlineDocumentSymbolProvider = CodeOrganizerDocumentSymbolProvider;

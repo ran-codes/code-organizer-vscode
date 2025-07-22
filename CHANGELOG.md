@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the "Friendly Code Outlines" extension will be documented in this file.
+All notable changes to the "Code Organizer" extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-18
 
 ### Added
-- Initial release of Friendly Code Outlines extension
+- Initial release of Code Organizer extension
 - Support for creating code sections using comment patterns
 - Pattern recognition for `# Section Name ----` (4+ dashes)
 - Hierarchical section support with nesting (##, ###, ####)

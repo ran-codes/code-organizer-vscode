@@ -1,6 +1,6 @@
 # 1. Project Documentation ----
 
-This is a test markdown file for the Friendly Code Outlines extension.
+This is a test markdown file for the Code Organizer extension.
 code
 code
 code
