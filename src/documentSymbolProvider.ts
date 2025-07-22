@@ -90,6 +90,3 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   }
 
 }
-
-// Export with old name for backward compatibility
-export const FriendlyOutlineDocumentSymbolProvider = CodeOrganizerDocumentSymbolProvider;
