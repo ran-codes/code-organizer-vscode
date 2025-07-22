@@ -34,6 +34,7 @@ Transform your code files into organized, navigable documents with a table of co
 - **Zero configuration**: Works immediately
   
 <img src="./assets/images/snip_demo_python.png" alt="Code Organizer Snip Demo Python" >
+
 ## Quick Start
 
 **To use:**
@@ -44,9 +45,18 @@ Transform your code files into organized, navigable documents with a table of co
 
 ### See It In Action
 
-> **[GIF PLACEHOLDER - I will add the demo GIF here]**
-> 
-> *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
+## Language Support & Examples
+
+| Language | Example | Nesting |
+|----------|---------|---------|
+| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
+| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
+| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
+
+**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
+
+### Python Example
+
 
 ```python
 # 1. Configuration ----
@@ -70,18 +80,6 @@ def run():
     db = connect()
     api = setup_api()
 ```
-
-## Language Support & Examples
-
-### Supported Comment Styles
-
-| Language | Example | Nesting |
-|----------|---------|---------|
-| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
-| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
-| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
-
-**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
 
 ### JavaScript Example
 
