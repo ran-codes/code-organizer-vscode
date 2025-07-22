@@ -21,23 +21,28 @@
   </a>
 </p>
 
-## 🎬 See It In Action
+## Features
+
+**RStudio-inspired syntax**: `# Section Name ----`  
+**Hierarchical nesting**: `##`, `###`, `####`  
+**Multi-language support**: Works with any comment style  
+**Lightweight & fast**: Only responds to simple comments, no complex parsing  
+**VS Code integration**: Outline view, breadcrumbs, Go to Symbol  
+**Zero configuration**: Works immediately  
+
+### See It In Action
 
 > **[GIF PLACEHOLDER - I will add the demo GIF here]**
 > 
 > *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
 
-## ✨ Features & Quick Start
+## Quick Start
 
-### Core Features
-- **RStudio-inspired syntax**: `# Section Name ----`
-- **Hierarchical nesting**: `##`, `###`, `####`
-- **Multi-language support**: Works with any comment style
-- **Lightweight & fast**: Only responds to simple comments, no complex parsing
-- **VS Code integration**: Outline view, breadcrumbs, Go to Symbol
-- **Zero configuration**: Works immediately
-
-### 🚀 Quick Start
+**To use:**
+1. Install the extension
+2. Add comment sections ending with `----` (4 or more dashes) to trigger friendly outline
+3. Check the **Outline** panel in VS Code's Explorer sidebar
+4. Click any section to jump to it instantly
 
 ```python
 # 1. Configuration ----
@@ -62,12 +67,7 @@ def run():
     api = setup_api()
 ```
 
-**To use:**
-1. Add comment sections ending with `----` (4 or more dashes)
-2. Check the **Outline** panel in VS Code's Explorer sidebar
-3. Click any section to jump to it instantly
-
-## 🌍 Language Support & Examples
+## Language Support & Examples
 
 ### Supported Comment Styles
 
@@ -139,7 +139,7 @@ DELIMITER ;
 INSERT INTO users VALUES (1, 'John Doe', 'john@example.com');
 ```
 
-## 🤔 Why Use This Extension?
+## Why Use This Extension?
 
 ### The Problem
 - **Large files are hard to navigate** - scrolling through 1000+ line files
@@ -163,9 +163,7 @@ Simple, universal comment patterns that work everywhere with instant VS Code int
 | Zero configuration | ✅ | ❌ | ❌ | ❌ |
 | Comment-based | ✅ | ❌ | ✅ | ⚠️ |
 
-## 📦 Installation & Support
-
-### Installation
+## Installation
 
 **VS Code Marketplace:** Open Extensions (Ctrl+Shift+X) → Search "Friendly Code Outlines" → Install
 
@@ -174,32 +172,9 @@ Simple, universal comment patterns that work everywhere with instant VS Code int
 code --install-extension ran-codes.friendly-code-outlines-vscode
 ```
 
-### 💡 Tips & Best Practices
-
-- **Use consistent spacing**: `# Section Name ----` (space after # and before dashes)
-- **Keep section names concise** for better readability in the outline
-- **Use 4+ dashes**: `----`, `-----`, `------` all work
-- **Nest logically**: Group related functionality under parent sections
-- **Be consistent**: Stick to one comment style per file
-
-### 🐛 Support & Contributing
-
-- **🐛 Found a bug?** [Report it on GitHub](https://github.com/ran-codes/friendly-code-outlines-vscode/issues)
-- **💡 Feature idea?** [Submit a feature request](https://github.com/ran-codes/friendly-code-outlines-vscode/issues)
-- **🛠️ Want to contribute?** Check out our [Contributing Guidelines](https://github.com/ran-codes/friendly-code-outlines-vscode/blob/main/CONTRIBUTING.md)
-
-### ☕ Support the Project
-
-If this extension helps you stay organized and productive:
-
-- ⭐ **[Star us on GitHub](https://github.com/ran-codes/friendly-code-outlines-vscode)**
-- 🐦 **Follow me:** [@ran_codes](https://twitter.com/ran_codes)
-- ☕ **Support development:** [Patreon](https://patreon.com/ran_codes) • [Ko-fi](https://ko-fi.com/ran_codes)
-- 📝 **Write a review** on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode)
-
 ---
 
-## 📋 Release Notes
+## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
@@ -210,7 +185,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 - Multi-language support
 - Zero configuration setup
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
