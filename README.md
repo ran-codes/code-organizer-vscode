@@ -23,18 +23,15 @@
 
 ## Features
 
-**RStudio-inspired syntax**: `# Section Name ----`  
-**Hierarchical nesting**: `##`, `###`, `####`  
-**Multi-language support**: Works with any comment style  
-**Lightweight & fast**: Only responds to simple comments, no complex parsing  
-**VS Code integration**: Outline view, breadcrumbs, Go to Symbol  
-**Zero configuration**: Works immediately  
+Navigate large code files effortlessly with simple comment patterns that create a structured outline. Jump directly to any section with a single click instead of endless scrolling. Core features:
 
-### See It In Action
 
-> **[GIF PLACEHOLDER - I will add the demo GIF here]**
-> 
-> *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
+- **Simple syntax**: `# Section Name ----`
+- **Hierarchical nesting**: `##`, `###`, `####`
+- **VS Code integration**: Outline view, breadcrumbs, Go to Symbol
+- **Multi-language support**: Works with any comment style
+- **Zero configuration**: Works immediately  
+- **Lightweight & fast**: Only responds to simple comments, no complex parsing
 
 ## Quick Start
 
@@ -43,6 +40,26 @@
 2. Add comment sections ending with `----` (4 or more dashes) to trigger friendly outline
 3. Check the **Outline** panel in VS Code's Explorer sidebar
 4. Click any section to jump to it instantly
+
+
+> **[GIF PLACEHOLDER - I will add the demo GIF here]**
+> 
+> *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
+
+
+## Language Support & Examples
+
+### Supported Comment Styles
+
+| Language | Comment Syntax | Nesting |
+|----------|---------|---------|
+| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
+| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
+| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
+
+**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
+
+### Python Example
 
 ```python
 # 1. Configuration ----
@@ -66,18 +83,6 @@ def run():
     db = connect()
     api = setup_api()
 ```
-
-## Language Support & Examples
-
-### Supported Comment Styles
-
-| Language | Example | Nesting |
-|----------|---------|---------|
-| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
-| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
-| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
-
-**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
 
 ### JavaScript Example
 
@@ -150,7 +155,7 @@ INSERT INTO users VALUES (1, 'John Doe', 'john@example.com');
 ### Our Solution
 Simple, universal comment patterns that work everywhere with instant VS Code integration.
 
-**Inspired by RStudio's Code Sections** - beloved by data scientists for organizing R scripts into navigable sections.
+Perfect for polyglot developers working across multiple programming languages.
 
 ### Comparison with Alternatives
 
