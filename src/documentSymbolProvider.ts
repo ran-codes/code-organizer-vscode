@@ -25,7 +25,6 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     processedIds.add(parentMatch.uniqueId);
 
     const children = allMatches.filter(item => item.parentName === parentMatch.uniqueId);
-    console.log(`Looking for children of "${parentMatch.uniqueId}", found ${children.length} children`);
 
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
@@ -61,14 +60,12 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     token: vscode.CancellationToken
   ): vscode.DocumentSymbol[] {
 
-    console.log('Code Organizer: provideDocumentSymbols called for', document.fileName);
 
     // Setup
     const text = document.getText();
     const all_matches: SectionMatch[] = findSections(text);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
 
-    console.log('Code Organizer: Found', all_matches.length, 'total sections,', matches.length, 'top-level sections');
 
     // Generate symbols
     const symbols: vscode.DocumentSymbol[] = [];
@@ -90,7 +87,6 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
       symbols.push(symbol);
     }
 
-    console.log('Code Organizer: Returning', symbols.length, 'symbols');
     return symbols;
   }
 
