@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>RStudio-style code section navigation for VS Code</strong><br>
+  <strong>Code section navigation for VS Code</strong><br>
   Organize and navigate large files with simple comment patterns
 </p>
 
