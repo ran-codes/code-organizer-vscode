@@ -1,7 +1,7 @@
-# Friendly Code Outlines
+# Code Organizer
 
 <p align="center">
-  <img src="icon.png" alt="Friendly Code Outlines Logo" width="128" height="128">
+  <img src="icon.png" alt="Code Organizer Logo" width="128" height="128">
 </p>
 
 <p align="center">
@@ -10,28 +10,28 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/ran-codes.friendly-code-outlines-vscode?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="VS Code Marketplace">
+  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.code-organizer-vscode">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/ran-codes.code-organizer-vscode?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="VS Code Marketplace">
   </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.friendly-code-outlines-vscode">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/ran-codes.friendly-code-outlines-vscode?style=flat-square" alt="Installs">
+  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.code-organizer-vscode">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/ran-codes.code-organizer-vscode?style=flat-square" alt="Installs">
   </a>
-  <a href="https://github.com/ran-codes/friendly-code-outlines-vscode">
-    <img src="https://img.shields.io/github/stars/ran-codes/friendly-code-outlines-vscode?style=flat-square" alt="GitHub Stars">
+  <a href="https://github.com/ran-codes/code-organizer-vscode">
+    <img src="https://img.shields.io/github/stars/ran-codes/code-organizer-vscode?style=flat-square" alt="GitHub Stars">
   </a>
 </p>
 
 ## Features
 
-Navigate large code files effortlessly with simple comment patterns that create a structured outline. Jump directly to any section with a single click instead of endless scrolling. Core features:
-
+Transform your code files into organized, navigable documents with a table of contents-like structure. Create sections using simple comments, then use VS Code's built-in Outline panel to view and instantly jump to any section with a single click.
 
 - **Simple syntax**: `# Section Name ----`
-- **Hierarchical nesting**: `##`, `###`, `####`
-- **VS Code integration**: Outline view, breadcrumbs, Go to Symbol
+- **Table of contents experience**: Comments become navigable outline entries
+- **Hierarchical nesting**: `##`, `###`, `####` for multi-level organization
 - **Multi-language support**: Works with any comment style
-- **Zero configuration**: Works immediately  
 - **Lightweight & fast**: Only responds to simple comments, no complex parsing
+- **VS Code integration**: Seamless outline view, breadcrumbs, and Go to Symbol
+- **Zero configuration**: Works immediately  
 
 ## Quick Start
 
@@ -41,25 +41,11 @@ Navigate large code files effortlessly with simple comment patterns that create 
 3. Check the **Outline** panel in VS Code's Explorer sidebar
 4. Click any section to jump to it instantly
 
+### See It In Action
 
 > **[GIF PLACEHOLDER - I will add the demo GIF here]**
 > 
 > *Demo showing: typing section comments → appearing in outline → clicking to navigate → nested sections across Python, JavaScript, and SQL*
-
-
-## Language Support & Examples
-
-### Supported Comment Styles
-
-| Language | Comment Syntax | Nesting |
-|----------|---------|---------|
-| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
-| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
-| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
-
-**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
-
-### Python Example
 
 ```python
 # 1. Configuration ----
@@ -83,6 +69,18 @@ def run():
     db = connect()
     api = setup_api()
 ```
+
+## Language Support & Examples
+
+### Supported Comment Styles
+
+| Language | Example | Nesting |
+|----------|---------|---------|
+| Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
+| JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
+| SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
+
+**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
 
 ### JavaScript Example
 
@@ -159,7 +157,7 @@ Perfect for polyglot developers working across multiple programming languages.
 
 ### Comparison with Alternatives
 
-| Feature | **Friendly Code Outlines** | Bookmarks | Better Comments | Region Folding |
+| Feature | **Code Organizer** | Bookmarks | Better Comments | Region Folding |
 |---------|----------------------------|-----------|-----------------|----------------|
 | Automatic structure detection | ✅ | ❌ | ❌ | ❌ |
 | Hierarchical organization | ✅ | ❌ | ❌ | ⚠️ |
@@ -170,11 +168,11 @@ Perfect for polyglot developers working across multiple programming languages.
 
 ## Installation
 
-**VS Code Marketplace:** Open Extensions (Ctrl+Shift+X) → Search "Friendly Code Outlines" → Install
+**VS Code Marketplace:** Open Extensions (Ctrl+Shift+X) → Search "Code Organizer" → Install
 
 **Command Line:**
 ```bash
-code --install-extension ran-codes.friendly-code-outlines-vscode
+code --install-extension ran-codes.code-organizer-vscode
 ```
 
 ---
