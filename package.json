@@ -56,7 +56,8 @@
     "minimap"
   ],
   "activationEvents": [
-    "onLanguage:*"
+    "*",
+    "onStartupFinished"
   ],
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -112,6 +113,11 @@
       }
     },
     "commands": [
+      {
+        "command": "codeOrganizer.test",
+        "title": "Test Code Organizer",
+        "category": "Code Organizer"
+      },
       {
         "command": "codeOrganizer.refreshOutline",
         "title": "Refresh Code Sections",
