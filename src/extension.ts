@@ -2,10 +2,15 @@ import * as vscode from 'vscode';
 import { CodeOrganizerDocumentSymbolProvider } from './documentSymbolProvider';
 
 export function activate(context: vscode.ExtensionContext) {
+	
+	// Show activation message
+	vscode.window.showInformationMessage('Code Organizer extension activated!');
+	
 	// Get configuration
 	const config = vscode.workspace.getConfiguration('codeOrganizer');
 	const isEnabled = config.get<boolean>('enable', true);
 	const supportedLanguages = config.get<string[]>('supportedLanguages', ['*']);
+
 
 	if (!isEnabled) {
 		return;
@@ -33,6 +38,13 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 		});
 	}
+
+
+	// Register a test command
+	const testCommand = vscode.commands.registerCommand('codeOrganizer.test', () => {
+		vscode.window.showInformationMessage('Code Organizer is working!');
+	});
+	context.subscriptions.push(testCommand);
 
 	// Listen for configuration changes
 	context.subscriptions.push(

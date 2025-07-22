@@ -54,17 +54,21 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   }
 
   /**
-   * Main method called by VS Code when it needs symbols for a Python file
+   * Main method called by VS Code when it needs symbols for a file
    */
   public provideDocumentSymbols(
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): vscode.DocumentSymbol[] {
 
+    console.log('Code Organizer: provideDocumentSymbols called for', document.fileName);
+
     // Setup
     const text = document.getText();
     const all_matches: SectionMatch[] = findSections(text);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
+
+    console.log('Code Organizer: Found', all_matches.length, 'total sections,', matches.length, 'top-level sections');
 
     // Generate symbols
     const symbols: vscode.DocumentSymbol[] = [];
@@ -86,6 +90,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
       symbols.push(symbol);
     }
 
+    console.log('Code Organizer: Returning', symbols.length, 'symbols');
     return symbols;
   }
 
