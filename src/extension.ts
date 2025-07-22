@@ -39,12 +39,11 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}
 
-
-	// Register a test command
-	const testCommand = vscode.commands.registerCommand('codeOrganizer.test', () => {
-		vscode.window.showInformationMessage('Code Organizer is working!');
+	// Register activation command as fallback
+	const activateCommand = vscode.commands.registerCommand('codeOrganizer.activate', () => {
+		vscode.window.showInformationMessage('Code Organizer is already active and working!');
 	});
-	context.subscriptions.push(testCommand);
+	context.subscriptions.push(activateCommand);
 
 	// Listen for configuration changes
 	context.subscriptions.push(

@@ -1,6 +1,6 @@
 {
   "name": "code-organizer",
-  "displayName": "Code Organizer - Comment-Based Sections & Navigation",
+  "displayName": "Code Organizer",
   "description": "Transform your code into organized, navigable sections using simple comment patterns. Create table-of-contents-like structure with # Section Name ---- syntax. Works with Python, JavaScript, TypeScript, C/C++, Java, Go, Rust, PHP, SQL and more. Perfect for large files and data science notebooks.",
   "version": "0.0.1",
   "publisher": "ran-codes",
@@ -114,13 +114,8 @@
     },
     "commands": [
       {
-        "command": "codeOrganizer.test",
-        "title": "Test Code Organizer",
-        "category": "Code Organizer"
-      },
-      {
-        "command": "codeOrganizer.refreshOutline",
-        "title": "Refresh Code Sections",
+        "command": "codeOrganizer.activate",
+        "title": "Activate",
         "category": "Code Organizer"
       }
     ]
