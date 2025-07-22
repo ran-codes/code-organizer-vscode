@@ -1,29 +1,75 @@
 {
   "name": "code-organizer",
-  "displayName": "Code Organizer",
-  "description": "Provides code section navigation for files using comment patterns. Create foldable sections with comments ending in 4+ dashes, equals, or hashes (e.g., # Section One ----). Navigate sections via VS Code's outline view.",
+  "displayName": "Code Organizer - Comment-Based Sections & Navigation",
+  "description": "Transform your code into organized, navigable sections using simple comment patterns. Create table-of-contents-like structure with # Section Name ---- syntax. Works with Python, JavaScript, TypeScript, C/C++, Java, Go, Rust, PHP, SQL and more. Perfect for large files and data science notebooks.",
   "version": "0.0.1",
   "publisher": "ran-codes",
+  "author": {
+    "name": "ran-codes",
+    "url": "https://github.com/ran-codes"
+  },
   "license": "MIT",
   "icon": "icon.png",
+  "preview": false,
   "engines": {
     "vscode": "^1.102.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Formatters", 
+    "Programming Languages",
+    "Snippets"
   ],
   "keywords": [
     "outline",
-    "navigation",
+    "navigation", 
     "sections",
     "comments",
     "code organization",
     "folding",
-    "structure"
+    "structure",
+    "table of contents",
+    "toc",
+    "breadcrumbs",
+    "python",
+    "javascript", 
+    "typescript",
+    "java",
+    "c++",
+    "go",
+    "rust",
+    "php", 
+    "sql",
+    "r",
+    "data science",
+    "notebook",
+    "large files",
+    "file organization",
+    "code sections",
+    "comment patterns",
+    "hierarchical",
+    "nested sections",
+    "symbol provider",
+    "document outline",
+    "code structure",
+    "goto symbol",
+    "minimap"
   ],
   "activationEvents": [
     "onLanguage:*"
   ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/github/stars/ran-codes/code-organizer-vscode?style=social",
+      "href": "https://github.com/ran-codes/code-organizer-vscode",
+      "description": "Star on GitHub"
+    }
+  ],
+  "qna": "https://github.com/ran-codes/code-organizer-vscode/discussions",
   "repository": {
     "type": "git",
     "url": "https://github.com/ran-codes/code-organizer-vscode.git"
@@ -33,7 +79,46 @@
   },
   "homepage": "https://github.com/ran-codes/code-organizer-vscode#readme",
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "configuration": {
+      "title": "Code Organizer",
+      "properties": {
+        "codeOrganizer.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable Code Organizer extension"
+        },
+        "codeOrganizer.supportedLanguages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["*"],
+          "description": "List of languages to support. Use '*' for all languages, or specify individual languages like 'python', 'javascript', etc."
+        },
+        "codeOrganizer.minDashes": {
+          "type": "number",
+          "default": 4,
+          "minimum": 2,
+          "description": "Minimum number of dashes required for section recognition (e.g., # Section ----)"
+        },
+        "codeOrganizer.maxNestingLevel": {
+          "type": "number",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Maximum nesting level for sections (1-6)"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "codeOrganizer.refreshOutline",
+        "title": "Refresh Code Sections",
+        "category": "Code Organizer"
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",
