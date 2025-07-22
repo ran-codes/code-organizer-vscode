@@ -5,14 +5,12 @@ DEBUG_MODE = True
 MAX_CONNECTIONS = 100
 TIMEOUT = 30
 
-# Load environment variables
 import os
 import logging
 import hashlib
 import re
 from datetime import datetime, timedelta
 
-# Initialize logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
