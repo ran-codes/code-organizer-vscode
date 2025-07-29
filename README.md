@@ -9,17 +9,6 @@
   Organize and navigate large files with simple comment patterns
 </p>
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.code-organizer-vscode">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/ran-codes.code-organizer-vscode?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="VS Code Marketplace">
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=ran-codes.code-organizer-vscode">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/ran-codes.code-organizer-vscode?style=flat-square" alt="Installs">
-  </a>
-  <a href="https://github.com/ran-codes/code-organizer-vscode">
-    <img src="https://img.shields.io/github/stars/ran-codes/code-organizer-vscode?style=flat-square" alt="GitHub Stars">
-  </a>
-</p>
 
 ## Features
 
