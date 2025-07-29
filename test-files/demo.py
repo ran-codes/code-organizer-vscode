@@ -1,4 +1,4 @@
-# 1. Setup ----
+# 1. Setup  ----
 import os
 import sys
 import logging
@@ -8,7 +8,7 @@ APP_NAME = "DataPipeline"
 VERSION = "1.0.0"
 ROOT_DIR = Path(__file__).parent
 
-## 1.1 Dependencies ----
+## 1.1 Dependencies  ----
 import pandas as pd
 import numpy as np
 import requests
@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-## 1.2 Secrets 
+## 1.2 Secrets -----
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///default.db')
 API_KEY = os.getenv('API_KEY', 'your-api-key-here')
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
@@ -36,7 +36,7 @@ for secret in required_secrets:
     if not os.getenv(secret):
         logger.warning(f"Missing required secret: {secret}")
 
-# 2. Pipelines 
+# 2. Pipelines -----
 class DataPipeline:
     def __init__(self, name: str):
         self.name = name
@@ -96,7 +96,7 @@ def run_pipeline(config: dict):
     pipeline.load_data(clean_data, config['destination'])
     logger.info(f"Pipeline {config['name']} completed successfully")
 
-# 3. Deploy 
+# 3. Deploy ----
 def main():
     """Main deployment function"""
     print(f"🚀 Starting {APP_NAME} v{VERSION}")
