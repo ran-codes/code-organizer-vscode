@@ -17,7 +17,7 @@ Transform your code files into organized, navigable documents with a table of co
 - **Simple syntax**: `# Section Name ----`
 - **Table of contents experience**: Comments become navigable outline entries
 - **Hierarchical nesting**: `##`, `###`, `####` for multi-level organization
-- **Multi-language support**: Works with any comment style
+- **Multi-language support**: Works with any comment style including JSX `{/* // Section ---- */}`
 - **Lightweight & fast**: Only responds to simple comments, no complex parsing
 - **VS Code integration**: Seamless outline view, breadcrumbs, and Go to Symbol
 - **Zero configuration**: Works immediately
@@ -49,9 +49,10 @@ Transform your code files into organized, navigable documents with a table of co
 |----------|---------|---------|
 | Python, R, Shell | `# Section ----` | `##`, `###`, `####` |
 | JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
+| React JSX, TSX | `{/* // Section ---- */}` | `{/* //// */}`, `{/* ////// */}` |
 | SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
 
-**Works with:** Python • JavaScript • TypeScript • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
+**Works with:** Python • JavaScript • TypeScript • **React/JSX** • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
 
 ### Python Example
 
@@ -77,6 +78,41 @@ def setup_api():
 def run():
     db = connect()
     api = setup_api()
+```
+
+### React/JSX Example
+
+```jsx
+{/* // 1. Component Setup ---- */}
+import React, { useState, useEffect } from 'react';
+
+function TodoApp() {
+  {/* // 1.1 State Management ---- */}
+  const [todos, setTodos] = useState([]);
+  const [filter, setFilter] = useState('all');
+
+  {/* //// 1.1.1 Todo Operations ---- */}
+  const addTodo = (text) => {
+    setTodos([...todos, { id: Date.now(), text, done: false }]);
+  };
+
+  {/* // 2. Render Logic ---- */}
+  return (
+    <div className="todo-app">
+      {/* // 2.1 Header Section ---- */}
+      <header>
+        <h1>Todo List</h1>
+        <TodoInput onAdd={addTodo} />
+      </header>
+
+      {/* // 2.2 Main Content ---- */}
+      <main>
+        <TodoList todos={filteredTodos} />
+        <TodoFilters currentFilter={filter} onFilterChange={setFilter} />
+      </main>
+    </div>
+  );
+}
 ```
 
 ### JavaScript Example
@@ -177,6 +213,12 @@ code --install-extension ran-codes.code-organizer-vscode
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
+
+### 0.0.3 - Latest
+- **🆕 JSX/TSX Support**: Added React JSX comment syntax `{/* // Section ---- */}`
+- Enhanced regex pattern to handle whitespace variations in JSX comments
+- Improved language support for React and TypeScript React developers
+- Comprehensive test coverage for JSX comment detection
 
 ### 0.0.1 - Initial Release
 - Support for `#`, `//`, and `--` comment styles

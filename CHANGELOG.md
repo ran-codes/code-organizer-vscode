@@ -5,6 +5,27 @@ All notable changes to the "Code Organizer" extension will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3] - 2025-08-14
+
+### Added
+- **JSX/TSX Support**: Added support for React JSX comment syntax `{/* // Section ---- */}`
+- Enhanced language support for React developers
+- Comprehensive test suite for JSX comment detection
+
+### Fixed
+- Improved JSX regex pattern to handle whitespace variations in comment syntax
+- Fixed issue where JSX comments with spaces before closing `*/}` weren't detected
+
+### Changed
+- Updated package.json activation events to include React file types
+- Improved extension description to highlight React/JSX support
+
+### Technical
+- Added regex pattern for JSX comment detection in findSections.ts
+- Added activation events for `javascriptreact` and `typescriptreact` languages
+- Created jsx-comments.test.ts with 7 comprehensive test cases
+- Refined JSX regex to handle `{/* // Section ---- */ }` format with trailing spaces
+
 ## [0.0.1] - 2025-07-29
 
 ### Added
