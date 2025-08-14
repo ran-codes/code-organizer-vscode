@@ -23,7 +23,10 @@ export function findSections(text: string): SectionMatch[] {
     { regex: /^[ \t]*(\/\/+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '//' },
     
     // SQL comments: -- Section Name ---- (SQL)
-    { regex: /^[ \t]*(--+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '--' }
+    { regex: /^[ \t]*(--+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '--' },
+    
+    // JSX comments: {/* // Section Name ---- */} (React, JSX, TSX)
+    { regex: /^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}/gm, commentType: 'jsx' }
   ];
 
   for (const pattern of patterns) {
@@ -37,6 +40,10 @@ export function findSections(text: string): SectionMatch[] {
       if (pattern.commentType === '#') {
         // Hash comments: depth based on number of # symbols
         depth = Math.min(commentSymbols.length, 4);
+      } else if (pattern.commentType === 'jsx') {
+        // JSX comments: depth based on number of / symbols in //
+        const baseLength = 2; // "//" = 2 characters
+        depth = Math.min(Math.max(1, Math.floor(commentSymbols.length / baseLength)), 4);
       } else {
         // Other comments (//, --): depth based on repetition
         // // = depth 1, //// = depth 2, etc.
