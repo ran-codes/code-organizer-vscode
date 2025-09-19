@@ -5,6 +5,15 @@ All notable changes to the "Code Organizer" extension will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4] - 2025-09-19
+
+### Fixed
+- **Cursor Compatibility**: Downgraded VSCode engine requirement from ^1.102.0 to ^1.99.0 for Cursor editor compatibility
+- Enables installation in Cursor v1.3.9 and other VSCode-based editors
+
+### Changed
+- Updated minimum VSCode version requirement to support broader editor ecosystem
+
 ## [0.0.3] - 2025-08-14
 
 ### Added
