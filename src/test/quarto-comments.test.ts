@@ -2,218 +2,92 @@ import * as assert from 'assert';
 import { findSections } from '../utils/findSections';
 
 suite('Quarto Header Section Detection', () => {
-  test('should detect realistic Quarto headers as sections', () => {
-    const text = `
-# 1. Project Documentation
-This is a test markdown file for the Code Organizer extension.
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+  test('should detect Quarto headers but ignore headers in code blocks', () => {
+    const text = `---
+title: "My Quarto Document"
+format: html
+---
 
-## 1.1 Installation
-Install the extension from VS Code marketplace.
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+# 1. Introduction
+This is a Quarto document with code blocks.
 
-### 1.1.1 Requirements
-- VS Code 1.102.0 or higher
-- No additional dependencies
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+## 1.1 Setup
+Let's load some libraries:
 
-## 1.2 Usage
-Create sections using hash comments followed by 4+ dashes.
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+\`\`\`{r}
+# This header should be ignored
+## This sub-header should also be ignored
+library(ggplot2)
+\`\`\`
 
-### 1.2.1 Basic Syntax
-# Section Name
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+### 1.1.1 Data Import
+Here's how to import data:
 
-### 1.2.2 Nested Sections
-Use multiple hash symbols for nesting:
-# Main Section
-## Sub Section
-### Sub-Sub Section
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+\`\`\`python
+# Another header to ignore
+import pandas as pd
+data = pd.read_csv("file.csv")
+\`\`\`
 
-# 2. Examples
-Here are some examples of how to use the extension.
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+## 1.2 Analysis
+Now let's analyze the data.
 
-## 2.1 Code Examples
-The extension works with any file type that supports hash comments.
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
-code
+### 1.2.1 Visualization
+Creating plots:
+
+\`\`\`{r}
+#| echo: false
+# Yet another header in code that should be ignored
+ggplot(data) + geom_point()
+\`\`\`
+
+# 2. Results
+Here are our findings.
+
+## 2.1 Summary
+The analysis shows interesting patterns.
 `;
     const sections = findSections(text, 'qmd');
-    assert.strictEqual(sections.length, 12);
-    assert.strictEqual(sections[0].name, '1. Project Documentation');
+    
+    // Should only detect the real document headers, not the ones inside code blocks
+    assert.strictEqual(sections.length, 7);
+    assert.strictEqual(sections[0].name, '1. Introduction');
     assert.strictEqual(sections[0].depth, 1);
-    assert.strictEqual(sections[1].name, '1.1 Installation');
+    assert.strictEqual(sections[1].name, '1.1 Setup');
     assert.strictEqual(sections[1].depth, 2);
-    assert.strictEqual(sections[2].name, '1.1.1 Requirements');
+    assert.strictEqual(sections[2].name, '1.1.1 Data Import');
     assert.strictEqual(sections[2].depth, 3);
-    assert.strictEqual(sections[3].name, '1.2 Usage');
+    assert.strictEqual(sections[3].name, '1.2 Analysis');
     assert.strictEqual(sections[3].depth, 2);
-    assert.strictEqual(sections[4].name, '1.2.1 Basic Syntax');
+    assert.strictEqual(sections[4].name, '1.2.1 Visualization');
     assert.strictEqual(sections[4].depth, 3);
-    assert.strictEqual(sections[5].name, '1.2.2 Nested Sections');
-    assert.strictEqual(sections[5].depth, 3);
-    assert.strictEqual(sections[6].name, 'Main Section');
-    assert.strictEqual(sections[6].depth, 1);
-    assert.strictEqual(sections[7].name, 'Sub Section');
-    assert.strictEqual(sections[7].depth, 2);
-    assert.strictEqual(sections[8].name, 'Sub-Sub Section');
-    assert.strictEqual(sections[8].depth, 3);
-    assert.strictEqual(sections[9].name, '2. Examples');
-    assert.strictEqual(sections[9].depth, 1);
-    assert.strictEqual(sections[10].name, 'Section Name');
-    assert.strictEqual(sections[10].depth, 1);
-    assert.strictEqual(sections[11].name, '2.1 Code Examples');
-    assert.strictEqual(sections[11].depth, 2);
+    assert.strictEqual(sections[5].name, '2. Results');
+    assert.strictEqual(sections[5].depth, 1);
+    assert.strictEqual(sections[6].name, '2.1 Summary');
+    assert.strictEqual(sections[6].depth, 2);
+  });
+
+  test('should handle empty code blocks and nested blocks', () => {
+    const text = `# Main Header
+
+\`\`\`
+# This should be ignored
+\`\`\`
+
+## Sub Header
+
+\`\`\`python
+# This should also be ignored
+## And this too
+\`\`\`
+
+### Another Header
+Content here.
+`;
+    const sections = findSections(text, 'qmd');
+    assert.strictEqual(sections.length, 3);
+    assert.strictEqual(sections[0].name, 'Main Header');
+    assert.strictEqual(sections[1].name, 'Sub Header');
+    assert.strictEqual(sections[2].name, 'Another Header');
   });
 });
