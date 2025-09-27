@@ -68,7 +68,6 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     ////// 1.2.1 Document Processing ----
     const text = document.getText();
     const languageId = document.languageId;
-    console.log(`[Code Organizer] Document language: ${languageId}`);
     const all_matches: SectionMatch[] = findSections(text, languageId);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
 

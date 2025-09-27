@@ -14,7 +14,7 @@ export interface SectionMatch {
  * Supports multiple comment syntaxes: #, //, --
  */
 export function findSections(text: string, languageId?: string): SectionMatch[] {
-  console.log(`[Code Organizer > findSections] Processing file type: ${languageId}`);
+  // console.log(`[Code Organizer > findSections] Processing file type: ${languageId}`);
   const matches: SectionMatch[] = [];
 
   //// 2.1 Pattern Definitions ----
