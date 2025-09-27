@@ -1,14 +1,31 @@
 import * as assert from 'assert';
 import { findSections } from '../utils/findSections';
 
-describe('Quarto Header Section Detection', () => {
-  it('should detect realistic Quarto headers as sections', () => {
+suite('Quarto Header Section Detection', () => {
+  test('should detect realistic Quarto headers as sections', () => {
     const text = `
 # 1. Project Documentation
 This is a test markdown file for the Code Organizer extension.
 code
 code
-
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 
 ## 1.1 Installation
 Install the extension from VS Code marketplace.
@@ -17,11 +34,42 @@ code
 code
 code
 code
-
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 
 ### 1.1.1 Requirements
 - VS Code 1.102.0 or higher
 - No additional dependencies
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 code
 code
 code
@@ -33,9 +81,39 @@ code
 code
 code
 code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 
 ### 1.2.1 Basic Syntax
 # Section Name
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 code
 code
 code
@@ -56,9 +134,37 @@ code
 code
 code
 code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 
 # 2. Examples
 Here are some examples of how to use the extension.
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 code
 code
 code
@@ -69,9 +175,22 @@ code
 The extension works with any file type that supports hash comments.
 code
 code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
+code
 `;
     const sections = findSections(text, 'qmd');
-    assert.strictEqual(sections.length, 10);
+    assert.strictEqual(sections.length, 12);
     assert.strictEqual(sections[0].name, '1. Project Documentation');
     assert.strictEqual(sections[0].depth, 1);
     assert.strictEqual(sections[1].name, '1.1 Installation');
@@ -92,6 +211,9 @@ code
     assert.strictEqual(sections[8].depth, 3);
     assert.strictEqual(sections[9].name, '2. Examples');
     assert.strictEqual(sections[9].depth, 1);
-    // You can add more assertions for the rest if needed
+    assert.strictEqual(sections[10].name, 'Section Name');
+    assert.strictEqual(sections[10].depth, 1);
+    assert.strictEqual(sections[11].name, '2.1 Code Examples');
+    assert.strictEqual(sections[11].depth, 2);
   });
 });
