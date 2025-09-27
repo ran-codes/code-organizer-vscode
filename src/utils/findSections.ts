@@ -13,7 +13,8 @@ export interface SectionMatch {
  * Find all section matches in text
  * Supports multiple comment syntaxes: #, //, --
  */
-export function findSections(text: string): SectionMatch[] {
+export function findSections(text: string, languageId?: string): SectionMatch[] {
+  console.log(`[Code Organizer > findSections] Processing file type: ${languageId}`);
   const matches: SectionMatch[] = [];
 
   //// 2.1 Pattern Definitions ----
