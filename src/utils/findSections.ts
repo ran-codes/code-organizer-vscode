@@ -12,14 +12,21 @@ export interface SectionMatch {
 /**
  * Find all section matches in text
  * Supports multiple comment syntaxes: #, //, --
+ * Special handling for Markdown/Quarto: headers without ----
  */
 export function findSections(text: string, languageId?: string): SectionMatch[] {
   // console.log(`[Code Organizer > findSections] Processing file type: ${languageId}`);
   const matches: SectionMatch[] = [];
 
+  // Check if this is a Markdown or Quarto file
+  const isMarkdownOrQuarto = languageId && ['markdown', 'quarto', 'md', 'qmd', 'rmd'].includes(languageId.toLowerCase());
+
   //// 2.1 Pattern Definitions ----
   // Define patterns for different comment styles
-  const patterns = [
+  const patterns = isMarkdownOrQuarto ? [
+    // Markdown/Quarto headers: # Header, ## Header, etc. (without requiring ----)
+    { regex: /^(#{1,6})\s+(.+?)\s*$/gm, commentType: 'markdown' }
+  ] : [
     // Hash comments: # Section Name ---- (Python, R, shell, etc.)
     { regex: /^[ \t]*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '#' },
 
@@ -43,7 +50,11 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
       let depth: number;
 
       ////// 2.2.1 Depth Calculation ----
-      if (pattern.commentType === '#') {
+      if (pattern.commentType === 'markdown') {
+        // Markdown headers: depth based on number of # symbols
+        // Limit to 4 levels for consistency with outline view
+        depth = Math.min(commentSymbols.length, 4);
+      } else if (pattern.commentType === '#') {
         // Hash comments: depth based on number of # symbols
         depth = Math.min(commentSymbols.length, 4);
       } else if (pattern.commentType === 'jsx') {
