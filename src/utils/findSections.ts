@@ -21,6 +21,41 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
   // Check if this is a Markdown or Quarto file
   const isMarkdownOrQuarto = languageId && ['markdown', 'quarto', 'md', 'qmd', 'rmd'].includes(languageId.toLowerCase());
 
+  // For Markdown/Quarto files, find code block ranges to exclude from parsing
+  const codeBlocks: { start: number; end: number }[] = [];
+  if (isMarkdownOrQuarto) {
+    const lines = text.split('\n');
+    let inCodeBlock = false;
+    let codeBlockStart = 0;
+    
+    lines.forEach((line, index) => {
+      if (line.trim().startsWith('```')) {
+        if (!inCodeBlock) {
+          inCodeBlock = true;
+          codeBlockStart = index;
+        } else {
+          inCodeBlock = false;
+          codeBlocks.push({ 
+            start: codeBlockStart, 
+            end: index 
+          });
+        }
+      }
+    });
+  }
+
+  // Helper function to check if a match index is inside a code block
+  const isInCodeBlock = (matchIndex: number): boolean => {
+    if (!isMarkdownOrQuarto) return false;
+    
+    const lines = text.substring(0, matchIndex).split('\n');
+    const matchLineNumber = lines.length - 1;
+    
+    return codeBlocks.some(block => 
+      matchLineNumber >= block.start && matchLineNumber <= block.end
+    );
+  };
+
   //// 2.1 Pattern Definitions ----
   // Define patterns for different comment styles
   const patterns = isMarkdownOrQuarto ? [
@@ -70,7 +105,8 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
       ////// 2.2.2 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace
-      if (sectionName && !sectionName.match(/^[-\s]*$/)) {
+      // Also skip if this match is inside a code block (for Markdown/Quarto)
+      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isInCodeBlock(match.index)) {
 
         ////// 2.2.3 Parent Resolution ----
         // Find parent: look backwards for a section with smaller depth
