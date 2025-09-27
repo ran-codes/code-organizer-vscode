@@ -42,6 +42,10 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
         }
       }
     });
+    // Edge case: unmatched opening code block at end of file
+    if (inCodeBlock) {
+      codeBlocks.push({ start: codeBlockStart, end: lines.length - 1 });
+    }
   }
 
   // Helper function to check if a match index is inside a code block
