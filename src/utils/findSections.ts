@@ -12,14 +12,60 @@ export interface SectionMatch {
 /**
  * Find all section matches in text
  * Supports multiple comment syntaxes: #, //, --
+ * Special handling for Markdown/Quarto: headers without ----
  */
 export function findSections(text: string, languageId?: string): SectionMatch[] {
   // console.log(`[Code Organizer > findSections] Processing file type: ${languageId}`);
   const matches: SectionMatch[] = [];
 
+  // Check if this is a Markdown or Quarto file
+  const isMarkdownOrQuarto = languageId && ['markdown', 'quarto', 'md', 'qmd', 'rmd'].includes(languageId.toLowerCase());
+
+  // For Markdown/Quarto files, find code block ranges to exclude from parsing
+  const codeBlocks: { start: number; end: number }[] = [];
+  if (isMarkdownOrQuarto) {
+    const lines = text.split('\n');
+    let inCodeBlock = false;
+    let codeBlockStart = 0;
+    
+    lines.forEach((line, index) => {
+      if (line.trim().startsWith('```')) {
+        if (!inCodeBlock) {
+          inCodeBlock = true;
+          codeBlockStart = index;
+        } else {
+          inCodeBlock = false;
+          codeBlocks.push({ 
+            start: codeBlockStart, 
+            end: index 
+          });
+        }
+      }
+    });
+    // Edge case: unmatched opening code block at end of file
+    if (inCodeBlock) {
+      codeBlocks.push({ start: codeBlockStart, end: lines.length - 1 });
+    }
+  }
+
+  // Helper function to check if a match index is inside a code block
+  const isInCodeBlock = (matchIndex: number): boolean => {
+    if (!isMarkdownOrQuarto) return false;
+    
+    const lines = text.substring(0, matchIndex).split('\n');
+    const matchLineNumber = lines.length - 1;
+    
+    return codeBlocks.some(block => 
+      matchLineNumber >= block.start && matchLineNumber <= block.end
+    );
+  };
+
   //// 2.1 Pattern Definitions ----
   // Define patterns for different comment styles
-  const patterns = [
+  const patterns = isMarkdownOrQuarto ? [
+    // Markdown/Quarto headers: # Header, ## Header, etc. (without requiring ----)
+    { regex: /^(#{1,6})\s+(.+?)\s*$/gm, commentType: 'markdown' }
+  ] : [
     // Hash comments: # Section Name ---- (Python, R, shell, etc.)
     { regex: /^[ \t]*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '#' },
 
@@ -43,7 +89,11 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
       let depth: number;
 
       ////// 2.2.1 Depth Calculation ----
-      if (pattern.commentType === '#') {
+      if (pattern.commentType === 'markdown') {
+        // Markdown headers: depth based on number of # symbols
+        // Limit to 4 levels for consistency with outline view
+        depth = Math.min(commentSymbols.length, 4);
+      } else if (pattern.commentType === '#') {
         // Hash comments: depth based on number of # symbols
         depth = Math.min(commentSymbols.length, 4);
       } else if (pattern.commentType === 'jsx') {
@@ -59,7 +109,8 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
       ////// 2.2.2 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace
-      if (sectionName && !sectionName.match(/^[-\s]*$/)) {
+      // Also skip if this match is inside a code block (for Markdown/Quarto)
+      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isInCodeBlock(match.index)) {
 
         ////// 2.2.3 Parent Resolution ----
         // Find parent: look backwards for a section with smaller depth

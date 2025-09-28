@@ -23,8 +23,7 @@ function MyComponent() {
   );
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 3);
         assert.strictEqual(sections[0].name, 'Main Component');
         assert.strictEqual(sections[0].depth, 1);
@@ -62,29 +61,23 @@ function Layout() {
   );
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 5);
-        
         // Main Layout (depth 1)
         assert.strictEqual(sections[0].name, 'Main Layout');
         assert.strictEqual(sections[0].depth, 1);
-        
         // Navigation (depth 2)
         assert.strictEqual(sections[1].name, 'Navigation');
         assert.strictEqual(sections[1].depth, 2);
         assert.strictEqual(sections[1].parentName, sections[0].uniqueId);
-        
         // Menu Items (depth 3)
         assert.strictEqual(sections[2].name, 'Menu Items');
         assert.strictEqual(sections[2].depth, 3);
         assert.strictEqual(sections[2].parentName, sections[1].uniqueId);
-        
         // User Actions (depth 3)
         assert.strictEqual(sections[3].name, 'User Actions');
         assert.strictEqual(sections[3].depth, 3);
         assert.strictEqual(sections[3].parentName, sections[1].uniqueId);
-        
         // Main Content (depth 2)
         assert.strictEqual(sections[4].name, 'Main Content');
         assert.strictEqual(sections[4].depth, 2);
@@ -98,8 +91,7 @@ function Component() {
   return <div></div>;
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 1);
         assert.strictEqual(sections[0].name, 'Spaced Section');
         assert.strictEqual(sections[0].depth, 1);
@@ -113,8 +105,7 @@ function Component() {
   return <div></div>;
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 1);
         assert.strictEqual(sections[0].name, 'Valid Section');
     });
@@ -129,8 +120,7 @@ function Component() {
   return <div></div>;
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 1);
         assert.strictEqual(sections[0].name, 'Proper Section');
     });
@@ -150,8 +140,7 @@ function Component() {
   );
 }
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'jsx');
         assert.strictEqual(sections.length, 3);
         assert.strictEqual(sections[0].name, 'Traditional JS Comment');
         assert.strictEqual(sections[0].depth, 1);
@@ -185,8 +174,7 @@ const MyComponent: React.FC<Props> = ({ title }) => {
   );
 };
 `;
-
-        const sections = findSections(text);
+        const sections = findSections(text, 'tsx');
         assert.strictEqual(sections.length, 3);
         assert.strictEqual(sections[0].name, 'Component Definition');
         assert.strictEqual(sections[0].depth, 1);
