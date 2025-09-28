@@ -23,15 +23,12 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
   // For Markdown/Quarto files, find code block ranges to exclude from parsing
   const codeBlocks: { start: number; end: number }[] = [];
-  let lineStartIndices: number[] = [];
   if (isMarkdownOrQuarto) {
     const lines = text.split('\n');
     let inCodeBlock = false;
     let codeBlockStart = 0;
-    let charIndex = 0;
-    lineStartIndices = [];
+    
     lines.forEach((line, index) => {
-      lineStartIndices.push(charIndex);
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
           inCodeBlock = true;
@@ -44,7 +41,6 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
           });
         }
       }
-      charIndex += line.length + 1; // +1 for '\n'
     });
     // Edge case: unmatched opening code block at end of file
     if (inCodeBlock) {
@@ -55,18 +51,10 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
   // Helper function to check if a match index is inside a code block
   const isInCodeBlock = (matchIndex: number): boolean => {
     if (!isMarkdownOrQuarto) return false;
-    // Binary search to find line number for matchIndex
-    let left = 0, right = lineStartIndices.length - 1;
-    let matchLineNumber = 0;
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
-      if (lineStartIndices[mid] <= matchIndex) {
-        matchLineNumber = mid;
-        left = mid + 1;
-      } else {
-        right = mid - 1;
-      }
-    }
+    
+    const lines = text.substring(0, matchIndex).split('\n');
+    const matchLineNumber = lines.length - 1;
+    
     return codeBlocks.some(block => 
       matchLineNumber >= block.start && matchLineNumber <= block.end
     );
