@@ -214,6 +214,15 @@ code --install-extension ran-codes.code-organizer-vscode
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
+### 0.0.5 - Latest
+- **🆕 Markdown & Quarto Support**: Native header detection for `.md` and `.qmd` files
+- Smart code chunk handling - ignores headers inside fenced code blocks
+- Language-specific parsing for markdown documents
+- Perfect for data science workflows in Posit/VSCode
+
+### 0.0.4
+- **Cursor Compatibility**: Downgraded VSCode engine to ^1.99.0 for broader editor support
+
 ### 0.0.3 - Latest
 - **🆕 JSX/TSX Support**: Added React JSX comment syntax `{/* // Section ---- */}`
 - Enhanced regex pattern to handle whitespace variations in JSX comments
