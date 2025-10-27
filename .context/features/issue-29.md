@@ -491,6 +491,182 @@ Consider adding these settings:
 
 ## Estimated Time: 1-2 hours for complete implementation
 
+---
+
+## Git Commit Checklist
+
+Copy this checklist for your implementation workflow. Each item represents a logical, testable commit.
+
+### Setup & Configuration Commits
+
+```markdown
+- [ ] feat: add TreeView and command contributions to package.json #29
+      - Add "codeOrganizerOutline" view under explorer
+      - Add "codeOrganizer.goToSection" command registration
+      - Test: View appears in Explorer sidebar, command is registered
+
+- [ ] test: compile and verify package.json changes #29
+      - Run `npm run compile`
+      - Press F5 to test in Extension Development Host
+      - Verify no build errors
+```
+
+### Core Implementation Commits
+
+```markdown
+- [ ] feat: create SectionTreeItem class for tree view items #29
+      - Add src/treeDataProvider.ts
+      - Implement SectionTreeItem extending vscode.TreeItem
+      - Set icons based on section depth
+      - Add command for click navigation
+      - Test: Class compiles without errors
+
+- [ ] feat: create CodeOrganizerTreeDataProvider class #29
+      - Implement TreeDataProvider interface
+      - Add refresh() method with EventEmitter
+      - Implement getTreeItem() and getChildren()
+      - Add getSections() and getCurrentDocument() getters
+      - Test: Provider compiles, methods return expected types
+
+- [ ] feat: create editor decoration module #29
+      - Add src/decorations.ts
+      - Implement initializeDecorations() with theme-aware colors
+      - Implement updateSectionHighlight() for current section
+      - Implement disposeDecorations() cleanup
+      - Test: Module compiles, decorations can be created
+
+- [ ] feat: register TreeView in extension activation #29
+      - Import CodeOrganizerTreeDataProvider in extension.ts
+      - Create treeDataProvider and treeView instances
+      - Add to context.subscriptions
+      - Test: TreeView appears in Explorer sidebar when extension loads
+
+- [ ] feat: register goToSection command handler #29
+      - Implement command to jump to section position
+      - Use document.positionAt() for offset conversion
+      - Use editor.revealRange() with InCenter option
+      - Test: Clicking tree items scrolls editor to correct location
+```
+
+### Cursor Tracking Commits
+
+```markdown
+- [ ] feat: implement getCurrentSection helper function #29
+      - Add function to find section containing cursor offset
+      - Handle section boundary calculation
+      - Return deepest nested section at cursor position
+      - Test: Function returns correct section for various cursor positions
+
+- [ ] feat: implement updateHighlight function with caching #29
+      - Add updateHighlight() async function
+      - Implement document caching logic
+      - Call treeDataProvider.refresh() on document change
+      - Call updateSectionHighlight() for editor decoration
+      - Call treeView.reveal() for outline highlighting
+      - Add try-catch for reveal() errors
+      - Test: Manually trigger function, verify highlighting works
+
+- [ ] feat: add cursor selection change listener with debouncing #29
+      - Register onDidChangeTextEditorSelection event
+      - Implement 150ms debounce timeout
+      - Call updateHighlight() after debounce
+      - Test: Moving cursor updates highlight after brief delay
+
+- [ ] feat: add active editor change listener #29
+      - Register onDidChangeActiveTextEditor event
+      - Call updateHighlight() immediately on editor switch
+      - Test: Switching between tabs updates highlight
+
+- [ ] feat: add document change listener for cache invalidation #29
+      - Register onDidChangeTextDocument event
+      - Clear lastDocument cache when document modified
+      - Test: Editing document triggers tree refresh on next cursor move
+
+- [ ] feat: add initial highlight on extension activation #29
+      - Call updateHighlight() if activeTextEditor exists
+      - Test: Opening VS Code with file shows immediate highlighting
+
+- [ ] feat: add deactivate cleanup for decorations #29
+      - Call disposeDecorations() in deactivate()
+      - Test: Extension deactivates cleanly without errors
+```
+
+### Polish & Documentation Commits
+
+```markdown
+- [ ] docs: add inline comments for cursor tracking logic #29
+      - Document getCurrentSection algorithm
+      - Explain section boundary calculation
+      - Add comments for debouncing rationale
+
+- [ ] refactor: optimize icon selection for tree items #29
+      - Use depth-based icon logic (symbol-module, symbol-method, etc.)
+      - Test: Icons display correctly for all depth levels
+
+- [ ] test: manual testing across all supported languages #29
+      - Test JavaScript, Python, SQL, JSX, Markdown
+      - Verify section detection and highlighting work
+      - Document any issues found
+
+- [ ] test: edge case testing #29
+      - Test empty files
+      - Test files with single section
+      - Test deeply nested sections (4 levels)
+      - Test cursor outside any section
+      - Test rapid cursor movement
+
+- [ ] fix: any bugs discovered during testing #29
+      - Address specific issues from testing
+      - One commit per bug fix with description
+
+- [ ] docs: update README with new TreeView feature #29
+      - Add screenshot of TreeView with highlighting
+      - Document editor → outline synchronization
+      - Explain both TreeView and built-in Outline are available
+```
+
+### Optional Enhancement Commits (Future)
+
+```markdown
+- [ ] feat: add configuration for highlighting behavior #29
+      - Add codeOrganizer.highlightCurrentSection setting
+      - Add codeOrganizer.showEditorDecoration setting
+      - Add codeOrganizer.highlightDebounceMs setting
+      - Test: Settings control feature behavior
+
+- [ ] feat: add status bar item showing current section #29
+      - Create status bar item
+      - Update text on cursor change
+      - Show section icon and name
+      - Test: Status bar updates with cursor movement
+```
+
+---
+
+## Commit Message Format
+
+Use this format for consistency:
+
+```
+<type>: <short description> #29
+
+<optional longer description>
+<optional bullet points>
+
+Relates to #29
+```
+
+**Types:** feat, fix, docs, test, refactor, perf, chore
+
+**Examples:**
+- `feat: add TreeView registration to package.json #29`
+- `feat: implement cursor tracking with debouncing #29`
+- `fix: handle reveal errors for sections not in tree #29`
+- `test: verify highlighting works across all languages #29`
+- `docs: update README with editor sync feature #29`
+
+---
+
 ## Related Documentation
 
 - [window-events.md](../vs-code-api/window-events.md) - Cursor tracking APIs
