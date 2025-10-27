@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "*"
+      "*",
+      "Bash(npm run compile:*)",
+      "Bash(cat:*)",
+      "Bash(code --list-extensions)"
     ],
     "deny": [
       "Bash(git:*)"
