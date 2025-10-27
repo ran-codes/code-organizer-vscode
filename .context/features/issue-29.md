@@ -48,6 +48,101 @@ The codebase is well-structured with all necessary foundations in place.
 - L No `reveal()` method available on built-in Outline view
 - L No event listeners for cursor position tracking
 
+---
+
+## View Location Strategy: Three Approaches
+
+### Approach A: Built-in Outline View (Original - Limited)
+
+**What it is:**
+- Uses `DocumentSymbolProvider` API
+- Appears in VS Code's built-in "Outline" panel (bottom of Explorer sidebar)
+
+**Pros:**
+- ✅ Standard location, integrates with breadcrumbs
+- ✅ Minimal code required
+
+**Cons:**
+- ❌ **Cannot programmatically highlight current section**
+- ❌ No `reveal()` method to auto-scroll
+
+**Status:** Already in codebase, lacks highlighting.
+
+---
+
+### Approach B: Explorer View Section (Current ✅)
+
+**What it is:**
+- Custom `TreeView` section within Explorer sidebar
+- Appears in EXPLORER tab alongside file tree, Outline, Timeline
+
+**Visual:**
+```
+EXPLORER (📁 tab)
+├─ OPEN EDITORS
+├─ OUTLINE (built-in)
+├─ CODE ORGANIZER ← Your section
+```
+
+**Pros:**
+- ✅ **Full highlighting with `treeView.reveal()`**
+- ✅ Auto-scroll to current section
+- ✅ Familiar location, minimal UI footprint
+
+**Cons:**
+- ⚠️ Shares space with other extensions
+
+**Examples:** Todo Tree, GitLens, Bookmarks
+
+**Status:** ✅ **Currently implemented**.
+
+---
+
+### Approach C: Custom Activity Bar Tab
+
+**What it is:**
+- Own top-level tab with dedicated icon
+- Like "TODOS" tab from Todo Tree
+
+**Visual:**
+```
+Activity Bar:
+├─ 📁 EXPLORER
+├─ 🔍 SEARCH
+├─ 🗂️ CODE ORGANIZER ← Your own tab
+```
+
+**Pros:**
+- ✅ Dedicated, prominent location
+- ✅ No competition for space
+- ✅ Room to grow (settings, stats, etc.)
+
+**Cons:**
+- ❌ Takes activity bar slot
+- ❌ Less discoverable
+
+**Examples:** Todo Tree ("TODOS" tab), GitLens
+
+**Status:** Not implemented.
+
+---
+
+### Decision Matrix
+
+| Criteria | Outline (A) | Explorer (B) | Custom Tab (C) |
+|----------|-------------|--------------|----------------|
+| Highlighting | ❌ No | ✅ Yes | ✅ Yes |
+| Auto-scroll | ❌ No | ✅ Yes | ✅ Yes |
+| Discoverability | ✅ High | ✅ High | ⚠️ Medium |
+| UI Footprint | ✅ Minimal | ✅ Minimal | ⚠️ Medium |
+| Separation | ⚠️ Shared | ⚠️ Shared | ✅ Separate |
+| Complexity | ✅ Simple | ✅ Simple | ⚠️ Moderate |
+| Current Status | Exists | ✅ **Active** | Not impl. |
+
+**Current: Approach B (Explorer Section)** - Provides highlighting, minimal footprint, can upgrade later.
+
+---
+
 ## Approach: Hybrid (Custom TreeView + Editor Decorations)
 
 Add custom TreeView with full highlighting control alongside existing DocumentSymbolProvider.
