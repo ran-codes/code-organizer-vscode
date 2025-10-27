@@ -3,7 +3,9 @@
     "allow": [
       "*"
     ],
-    "deny": [],
+    "deny": [
+      "Bash(git:*)"
+    ],
     "ask": []
   }
 }
