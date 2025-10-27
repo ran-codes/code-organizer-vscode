@@ -4,7 +4,8 @@
       "*",
       "Bash(npm run compile:*)",
       "Bash(cat:*)",
-      "Bash(code --list-extensions)"
+      "Bash(code --list-extensions)",
+      "Bash(code --install-extension:*)"
     ],
     "deny": [
       "Bash(git:*)"
