@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Improved Hex Outline Extension Icon -->
+  
+  <!-- Hexagon background with gradient-ready fill -->
+  <defs>
+    <linearGradient id="hexGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E5F8A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Filled hexagon -->
+  <path d="M12 2 L20 7 L20 17 L12 22 L4 17 L4 7 Z"
+        fill="url(#hexGradient)"
+        stroke="#2E5F8A"
+        stroke-width="0.5"/>
+  
+  <!-- Code sections with hash symbols and lines (representing outline structure) -->
+  <!-- Top section -->
+  <g opacity="0.95">
+    <text x="7" y="7.5" fill="white" font-family="monospace" font-size="3" font-weight="bold">#</text>
+    <line x1="9" y1="6.5" x2="17" y2="6.5" stroke="white" stroke-width="0.6" stroke-linecap="round"/>
+    <line x1="9" y1="8" x2="15" y2="8" stroke="white" stroke-width="0.5" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Second section -->
+  <g opacity="0.85">
+    <text x="8" y="11" fill="white" font-family="monospace" font-size="2.5" font-weight="bold">#</text>
+    <line x1="10" y1="10.2" x2="16" y2="10.2" stroke="white" stroke-width="0.5" stroke-linecap="round"/>
+    <line x1="10" y1="11.5" x2="14.5" y2="11.5" stroke="white" stroke-width="0.4" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Third section -->
+  <g opacity="0.75">
+    <text x="9" y="14.5" fill="white" font-family="monospace" font-size="2.5" font-weight="bold">#</text>
+    <line x1="11" y1="13.7" x2="15.5" y2="13.7" stroke="white" stroke-width="0.5" stroke-linecap="round"/>
+    <line x1="11" y1="15" x2="14" y2="15" stroke="white" stroke-width="0.4" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Bottom section -->
+  <g opacity="0.95">
+    <text x="7" y="18" fill="white" font-family="monospace" font-size="3" font-weight="bold">#</text>
+    <line x1="9" y1="17" x2="17" y2="17" stroke="white" stroke-width="0.6" stroke-linecap="round"/>
+    <line x1="9" y1="18.5" x2="15" y2="18.5" stroke="white" stroke-width="0.5" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>
