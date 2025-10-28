@@ -38,7 +38,7 @@ Transform your code files into organized, navigable documents with a table of co
 4. Check the **Outline** panel in VS Code's Explorer sidebar
 5. Click any section to jump to it instantly
 
-**Tip**: Use Command Palette (Ctrl+Shift+P) → `Code Organizer: Show Code Organizer` to quickly open the view
+**Tip**: Use Command Palette (Ctrl+Shift+P / Cmd+Shift+P) → `Code Organizer: Show Code Organizer` to quickly open the view
 
 ![Code Organizer Demo](./assets/images/demo_v2.gif)
 
