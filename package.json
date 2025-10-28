@@ -2,7 +2,7 @@
   "name": "code-organizer",
   "displayName": "🗂️ Code Organizer",
   "description": "Transform your code into organized, navigable sections using simple comment patterns. Create table-of-contents-like structure with # Section Name ---- syntax. Works with Python, JavaScript, TypeScript, React/JSX, C/C++, Java, Go, Rust, PHP, SQL and more. Perfect for large files and data science notebooks.",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "publisher": "ran-codes",
   "author": {
     "name": "ran-codes",
