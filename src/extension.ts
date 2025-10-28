@@ -76,6 +76,14 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
+	// Register "Show Code Organizer" command
+	context.subscriptions.push(
+		vscode.commands.registerCommand('codeOrganizer.showView', async () => {
+			// Use the auto-generated .focus command for our view
+			await vscode.commands.executeCommand('codeOrganizerOutlineActivity.focus');
+		})
+	);
+
 	// Helper function to find current section from cursor position
 	function getCurrentSection(
 		cursorPos: vscode.Position,
