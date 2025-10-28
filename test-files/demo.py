@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 from pathlib import Path
+from typing import Dict, Any
 
 APP_NAME = "DataPipeline"
 VERSION = "1.0.0"
@@ -13,7 +14,9 @@ import pandas as pd
 import numpy as np
 import requests
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 import boto3
+from botocore.client import BaseClient
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -40,8 +43,8 @@ for secret in required_secrets:
 class DataPipeline:
     def __init__(self, name: str):
         self.name = name
-        self.engine = create_engine(DATABASE_URL)
-        self.s3_client = boto3.client('s3') if AWS_ACCESS_KEY else None
+        self.engine: Engine = create_engine(DATABASE_URL)
+        self.s3_client: BaseClient | None = boto3.client('s3') if AWS_ACCESS_KEY else None
         logger.info(f"Initialized pipeline: {name}")
     
     def extract_data(self, source: str) -> pd.DataFrame:
@@ -49,6 +52,7 @@ class DataPipeline:
         if source.startswith('http'):
             headers = {'Authorization': f'Bearer {API_KEY}'}
             response = requests.get(source, headers=headers)
+            response.raise_for_status()  # Check for HTTP errors
             data = response.json()
             return pd.DataFrame(data)
         elif source.endswith('.csv'):
@@ -68,13 +72,16 @@ class DataPipeline:
         logger.info(f"Transformed {len(df)} rows")
         return df
     
-    def load_data(self, df: pd.DataFrame, destination: str):
+    def load_data(self, df: pd.DataFrame, destination: str) -> None:
         """Load data to destination"""
         if destination.startswith('s3://'):
+            if self.s3_client is None:
+                raise ValueError("S3 client not initialized. Check AWS credentials.")
             bucket = destination.replace('s3://', '').split('/')[0]
             key = '/'.join(destination.replace('s3://', '').split('/')[1:])
-            df.to_parquet(f'/tmp/{key}')
-            self.s3_client.upload_file(f'/tmp/{key}', bucket, key)
+            temp_file = f'/tmp/{key}'
+            df.to_parquet(temp_file)
+            self.s3_client.upload_file(temp_file, bucket, key)
         elif destination.endswith('.csv'):
             df.to_csv(destination, index=False)
         else:
@@ -83,7 +90,7 @@ class DataPipeline:
         
         logger.info(f"Loaded data to: {destination}")
 
-def run_pipeline(config: dict):
+def run_pipeline(config: Dict[str, Any]) -> None:
     """Execute a complete ETL pipeline"""
     pipeline = DataPipeline(config['name'])
     
@@ -97,7 +104,7 @@ def run_pipeline(config: dict):
     logger.info(f"Pipeline {config['name']} completed successfully")
 
 # 3. Deploy ----
-def main():
+def main() -> None:
     """Main deployment function"""
     print(f"🚀 Starting {APP_NAME} v{VERSION}")
     
@@ -122,6 +129,8 @@ def main():
     for config in pipelines:
         try:
             run_pipeline(config)
+        except Exception as e:
+            logger.error(f"Pipeline {config['name']} failed: {e}")
 
 if __name__ == "__main__":
     main()
