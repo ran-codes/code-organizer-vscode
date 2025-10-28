@@ -5,7 +5,9 @@
       "Bash(npm run compile:*)",
       "Bash(cat:*)",
       "Bash(code --list-extensions)",
-      "Bash(code --install-extension:*)"
+      "Bash(code --install-extension:*)",
+      "Bash(npm install:*)",
+      "Bash(vsce package:*)"
     ],
     "deny": [
       "Bash(git:*)"
