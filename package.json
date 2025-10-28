@@ -139,11 +139,6 @@
         "command": "codeOrganizer.activate",
         "title": "Activate",
         "category": "Code Organizer"
-      },
-      {
-        "command": "codeOrganizer.goToSection",
-        "title": "Go to Code Organizer",
-        "category": "Code Organizer"
       }
     ]
   },
