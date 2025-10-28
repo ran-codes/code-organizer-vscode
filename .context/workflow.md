@@ -1,5 +1,7 @@
 **Development:**
 - [ ] `git checkout -b feature/[issue-number]-[description]`
+- [ ] Research and store research in context 
+    - [ ] https://code.visualstudio.com/api/references/vscode-api
 - [ ] Update code in `src/`
 - [ ] `npm run compile`
 - [ ] Press `F5` to test in Extension Development Host
