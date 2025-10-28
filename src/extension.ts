@@ -43,13 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	// Create custom TreeView for enhanced outline with highlighting
+	// Use shared TreeDataProvider for both activity bar and explorer views
 	const treeDataProvider = new CodeOrganizerTreeDataProvider();
-	const treeView = vscode.window.createTreeView('codeOrganizerOutline', {
+
+	// Register TreeView in Activity Bar (dedicated tab)
+	const treeViewActivity = vscode.window.createTreeView('codeOrganizerOutlineActivity', {
 		treeDataProvider: treeDataProvider,
 		showCollapseAll: true
 	});
-	context.subscriptions.push(treeView);
-	console.log('[Code Organizer] TreeView created');
+	context.subscriptions.push(treeViewActivity);
+	console.log('[Code Organizer] Activity bar TreeView created');
 
 	// Initialize editor decorations
 	const decoration = initializeDecorations();
@@ -137,7 +140,7 @@ export function activate(context: vscode.ExtensionContext) {
 			console.log('[Code Organizer] Tree item found:', !!item);
 			if (item) {
 				try {
-					await treeView.reveal(item, {
+					await treeViewActivity.reveal(item, {
 						select: true,
 						focus: false,
 						expand: 1

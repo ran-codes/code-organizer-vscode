@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Option 8: Hex Sticker (R Package Style) - Iconic & Recognizable -->
+  <!-- Hexagon outline -->
+  <path d="M12 2 L20 7 L20 17 L12 22 L4 17 L4 7 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"/>
+
+  <!-- Stacked sections inside hex -->
+  <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2" opacity="0.9"/>
+  <line x1="9" y1="11" x2="15" y2="11" stroke="currentColor" stroke-width="1.8" opacity="0.75"/>
+  <line x1="10" y1="14" x2="14" y2="14" stroke="currentColor" stroke-width="1.6" opacity="0.6"/>
+  <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" stroke-width="2" opacity="0.9"/>
+
+  <!-- Dots showing hierarchy -->
+  <circle cx="8.5" cy="8" r="0.9" fill="currentColor"/>
+  <circle cx="9.5" cy="11" r="0.8" fill="currentColor" opacity="0.8"/>
+  <circle cx="10.5" cy="14" r="0.7" fill="currentColor" opacity="0.7"/>
+  <circle cx="8.5" cy="17" r="0.9" fill="currentColor"/>
+</svg>

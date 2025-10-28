@@ -117,10 +117,19 @@
         }
       }
     },
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "id": "codeOrganizerOutline",
+          "id": "codeOrganizer",
+          "title": "Code Organizer",
+          "icon": "resources/activity-bar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "codeOrganizer": [
+        {
+          "id": "codeOrganizerOutlineActivity",
           "name": "Code Organizer",
           "when": "resourceLangId"
         }
@@ -130,11 +139,6 @@
       {
         "command": "codeOrganizer.activate",
         "title": "Activate",
-        "category": "Code Organizer"
-      },
-      {
-        "command": "codeOrganizer.goToSection",
-        "title": "Go to Section",
         "category": "Code Organizer"
       }
     ]

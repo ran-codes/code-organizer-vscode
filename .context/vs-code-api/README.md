@@ -7,28 +7,9 @@ This directory contains documentation for implementing editor → outline synchr
 ## Documentation Files
 
 1. **[window-events.md](window-events.md)** - Tracking cursor position and editor changes
-   - `window.onDidChangeTextEditorSelection` - Detect cursor movements
-   - `window.onDidChangeActiveTextEditor` - Detect editor switches
-   - `Selection` and `Position` classes
-   - Converting between Position and character offsets
-
 2. **[tree-view.md](tree-view.md)** - Custom tree views for outline with highlighting support
-   - `window.createTreeView()` - Create custom sidebar views
-   - `TreeView.reveal()` - **Key method for highlighting and scrolling**
-   - `TreeDataProvider` interface
-   - Comparison with DocumentSymbolProvider
-
 3. **[document-symbols.md](document-symbols.md)** - Understanding your current implementation
-   - `DocumentSymbolProvider` interface (what you currently use)
-   - `DocumentSymbol` class and hierarchy
-   - Limitations for programmatic highlighting
-   - Converting between offsets and positions
-
 4. **[editor-decorations.md](editor-decorations.md)** - Highlighting sections in the editor
-   - `TextEditorDecorationType` - Define visual styles
-   - `TextEditor.setDecorations()` - Apply highlights to ranges
-   - `ThemeColor` - Theme-aware colors
-   - Alternative approach to outline highlighting
 
 ## Current Extension Architecture
 
