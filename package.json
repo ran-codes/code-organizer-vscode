@@ -122,7 +122,7 @@
         {
           "id": "codeOrganizer",
           "title": "Code Organizer",
-          "icon": "icon_v2.svg"
+          "icon": "resources/activity-bar-icon.svg"
         }
       ]
     },
