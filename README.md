@@ -33,9 +33,12 @@ Transform your code files into organized, navigable documents with a table of co
 
 **To use:**
 1. Install the extension
-2. Add comment sections ending with `----` (4 or more dashes) to trigger code organization
-3. Check the **Outline** panel in VS Code's Explorer sidebar
-4. Click any section to jump to it instantly
+2. Open any code file (or create a new one)
+3. Add comment sections ending with `----` (4 or more dashes) to trigger code organization
+4. Check the **Outline** panel in VS Code's Explorer sidebar
+5. Click any section to jump to it instantly
+
+**Tip**: Use Command Palette (Ctrl+Shift+P) → `Code Organizer: Show Code Organizer` to quickly open the view
 
 ![Code Organizer Demo](./assets/images/demo_v2.gif)
 
@@ -214,7 +217,15 @@ code --install-extension ran-codes.code-organizer-vscode
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
-### 0.0.5 - Latest
+### 0.0.6 - Latest
+- **🆕 Custom Activity Bar View**: Dedicated Code Organizer tab with custom icon
+- **🆕 Editor-Outline Sync**: Auto-scroll outline view as you navigate through code
+- **🆕 "Show Code Organizer" Command**: Quick access via Command Palette
+- **🆕 High Resolution Icon**: Professional hexagon design for marketplace
+- Enhanced TreeView with caching for reliable navigation
+- Improved section highlighting with visual decorations
+
+### 0.0.5
 - **🆕 Markdown & Quarto Support**: Native header detection for `.md` and `.qmd` files
 - Smart code chunk handling - ignores headers inside fenced code blocks
 - Language-specific parsing for markdown documents
@@ -223,7 +234,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 ### 0.0.4
 - **Cursor Compatibility**: Downgraded VSCode engine to ^1.99.0 for broader editor support
 
-### 0.0.3 - Latest
+### 0.0.3
 - **🆕 JSX/TSX Support**: Added React JSX comment syntax `{/* // Section ---- */}`
 - Enhanced regex pattern to handle whitespace variations in JSX comments
 - Improved language support for React and TypeScript React developers
