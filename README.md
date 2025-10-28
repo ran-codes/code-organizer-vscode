@@ -1,7 +1,7 @@
 # Code Organizer
 
 <p align="center">
-  <img src="icon.svg" alt="Code Organizer Logo" width="128" height="128">
+  <img src="icon_v2.png" alt="Code Organizer Logo" width="128" height="128">
 </p>
 
 <p align="center">

@@ -9,7 +9,7 @@
     "url": "https://github.com/ran-codes"
   },
   "license": "MIT",
-  "icon": "icon.png",
+  "icon": "icon_v2.png",
   "preview": false,
   "engines": {
     "vscode": "^1.60.0"
@@ -122,7 +122,7 @@
         {
           "id": "codeOrganizer",
           "title": "Code Organizer",
-          "icon": "resources/activity-bar-icon.svg"
+          "icon": "icon_v2.svg"
         }
       ]
     },
