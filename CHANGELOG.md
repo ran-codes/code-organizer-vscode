@@ -4,7 +4,51 @@ All notable changes to the "Code Organizer" extension will be documented in this
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
- 
+
+
+## [0.0.6] - 2025-10-28
+
+### Added
+
+- **Custom Activity Bar View**: Dedicated Code Organizer tab in the activity bar with custom icon
+  - Independent view container for Code Organizer sections
+  - Enhanced navigation experience separate from built-in Outline
+  - Monochrome SVG icon that adapts to VS Code themes
+- **Editor → Outline Synchronization**: Bidirectional navigation between editor and outline (#29)
+  - Auto-scroll outline view as cursor moves through sections
+  - Highlight current section in both editor and outline
+  - Visual indicators with themed colors (border highlight + hover messages)
+  - Debounced cursor tracking (150ms) for performance
+- **"Show Code Organizer" Command**: Quick access command to open and focus the view (#31)
+  - Accessible via Command Palette: `Code Organizer: Show Code Organizer`
+  - Programmatically opens view when closed
+  - Uses VS Code's auto-generated `.focus` command for reliability
+- **High Resolution Icon**: Professional hexagon design for marketplace (#26)
+  - Hex sticker style inspired by R packages
+  - Code section visual metaphor (hash symbols with lines)
+  - Gradient fill for visual appeal
+  - Separate monochrome activity bar icon for theme compatibility
+
+### Changed
+
+- Consolidated view architecture: Removed redundant Explorer section, kept custom Activity Bar tab + legacy Outline integration
+- Enhanced TreeView with caching mechanism for reliable `reveal()` functionality
+- Improved section highlight with visual decorations (left border + background highlight)
+- Updated extension icon to `icon_v2.png` with modern hexagon design
+
+### Technical
+
+- Implemented `CodeOrganizerTreeDataProvider` with TreeItem caching using `Map<uniqueId, TreeItem>`
+- Created `decorations.ts` for editor highlighting with theme-aware colors
+- Added cursor position tracking with `getCurrentSection()` helper function
+- Registered `codeOrganizer.showView` command for view focus functionality
+- Document caching to avoid unnecessary re-parsing of sections
+- Event listeners for editor selection changes, active editor switches, and document changes
+
+### Fixed
+
+- TreeView `reveal()` now works correctly by using cached TreeItem instances
+- Removed confusing `goToSection` command from Command Palette (kept for programmatic use only)
 
 ## [0.0.5] - 2025-09-27
 
