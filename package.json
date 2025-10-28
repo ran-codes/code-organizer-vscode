@@ -121,7 +121,8 @@
       "activitybar": [
         {
           "id": "codeOrganizer",
-          "title": "Code Organizer"
+          "title": "Code Organizer",
+          "icon": "resources/activity-bar-icon.svg"
         }
       ]
     },
