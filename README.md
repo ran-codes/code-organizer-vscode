@@ -37,7 +37,7 @@ Transform your code files into organized, navigable documents with a table of co
 3. Check the **Outline** panel in VS Code's Explorer sidebar
 4. Click any section to jump to it instantly
 
-![Code Organizer Demo](./assets/images/demo.gif)
+![Code Organizer Demo](./assets/images/demo_v2.gif)
 
 
 
