@@ -140,6 +140,11 @@
         "command": "codeOrganizer.activate",
         "title": "Activate",
         "category": "Code Organizer"
+      },
+      {
+        "command": "codeOrganizer.showView",
+        "title": "Show Code Organizer",
+        "category": "Code Organizer"
       }
     ]
   },
