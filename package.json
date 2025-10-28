@@ -117,10 +117,18 @@
         }
       }
     },
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "id": "codeOrganizerOutline",
+          "id": "codeOrganizer",
+          "title": "Code Organizer"
+        }
+      ]
+    },
+    "views": {
+      "codeOrganizer": [
+        {
+          "id": "codeOrganizerOutlineActivity",
           "name": "Code Organizer",
           "when": "resourceLangId"
         }
@@ -134,7 +142,7 @@
       },
       {
         "command": "codeOrganizer.goToSection",
-        "title": "Go to Section",
+        "title": "Go to Code Organizer",
         "category": "Code Organizer"
       }
     ]
