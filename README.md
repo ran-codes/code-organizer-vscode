@@ -22,7 +22,7 @@ Transform your code files into organized, navigable documents with a table of co
 - **VS Code integration**: Seamless outline view, breadcrumbs, and Go to Symbol
 - **Zero configuration**: Works immediately
   
-<img src="./assets/images/snip_demo_python.png" alt="Code Organizer Snip Demo Python" >
+<img src="./assets/images/snip_demo_python_v2.png" alt="Code Organizer Snip Demo Python" >
 
 
 
