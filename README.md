@@ -217,7 +217,7 @@ code --install-extension ran-codes.code-organizer-vscode
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
-### 0.0.6 - Latest
+### 0.1.0 - Latest
 - **🆕 Custom Activity Bar View**: Dedicated Code Organizer tab with custom icon
 - **🆕 Editor-Outline Sync**: Auto-scroll outline view as you navigate through code
 - **🆕 "Show Code Organizer" Command**: Quick access via Command Palette
