@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none">
+  <!-- Improved Hex Outline Extension Icon - Properly scaled to 300x300 -->
+  
+  <!-- Hexagon background with gradient-ready fill -->
+  <defs>
+    <linearGradient id="hexGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E5F8A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Filled hexagon (scaled 12.5x) -->
+  <path d="M150 25 L250 87.5 L250 212.5 L150 275 L50 212.5 L50 87.5 Z"
+        fill="url(#hexGradient)"
+        stroke="#2E5F8A"
+        stroke-width="6"/>
+  
+  <!-- Code sections with hash symbols and lines (representing outline structure) -->
+  <!-- Top section -->
+  <g opacity="0.95">
+    <text x="87.5" y="93.75" fill="white" font-family="monospace" font-size="37.5" font-weight="bold">#</text>
+    <line x1="112.5" y1="81.25" x2="212.5" y2="81.25" stroke="white" stroke-width="7.5" stroke-linecap="round"/>
+    <line x1="112.5" y1="100" x2="187.5" y2="100" stroke="white" stroke-width="6.25" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Second section -->
+  <g opacity="0.85">
+    <text x="100" y="137.5" fill="white" font-family="monospace" font-size="31.25" font-weight="bold">#</text>
+    <line x1="125" y1="127.5" x2="200" y2="127.5" stroke="white" stroke-width="6.25" stroke-linecap="round"/>
+    <line x1="125" y1="143.75" x2="181.25" y2="143.75" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Third section -->
+  <g opacity="0.75">
+    <text x="112.5" y="181.25" fill="white" font-family="monospace" font-size="31.25" font-weight="bold">#</text>
+    <line x1="137.5" y1="171.25" x2="193.75" y2="171.25" stroke="white" stroke-width="6.25" stroke-linecap="round"/>
+    <line x1="137.5" y1="187.5" x2="175" y2="187.5" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  
+  <!-- Bottom section -->
+  <g opacity="0.95">
+    <text x="87.5" y="225" fill="white" font-family="monospace" font-size="37.5" font-weight="bold">#</text>
+    <line x1="112.5" y1="212.5" x2="212.5" y2="212.5" stroke="white" stroke-width="7.5" stroke-linecap="round"/>
+    <line x1="112.5" y1="231.25" x2="187.5" y2="231.25" stroke="white" stroke-width="6.25" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>
