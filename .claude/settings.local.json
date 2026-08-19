@@ -1,18 +1,25 @@
 {
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
-      "*",
-      "Bash(npm run compile:*)",
-      "Bash(cat:*)",
-      "Bash(code --list-extensions)",
-      "Bash(code --install-extension:*)",
-      "Bash(npm install:*)",
-      "Bash(vsce package:*)",
-      "Bash(mkdir:*)"
+      "PowerShell",
+      "Bash",
+      "WebSearch",
+      "WebFetch",
+      "Agent",
+      "Skill",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskStop",
+      "Edit",
+      "Write",
+      "Monitor"
     ],
-    "deny": [
-      "Bash(git:*)"
-    ],
-    "ask": []
+    "ask": [
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
+      "Edit(.git/**)",
+      "Write(.git/**)"
+    ]
   }
 }
