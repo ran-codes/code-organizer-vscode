@@ -97,9 +97,16 @@ before cutting a release; the summary above is deliberately abbreviated.
 
 ## 5. Sources of Truth (Glossary)
 
-Canonical location for each fact about this project. When a fact here conflicts
-with something stated elsewhere (including this file), the listed file wins.
+**This table is a glossary — use it to resolve what I mean.** When I refer to
+one of these things in conversation (by the glossary term or anything close to
+it), this table says what I am pointing at. Go read the listed file before
+acting; do not answer from the one-line summary here, and do not guess from
+context when a term is in this table.
 
-| File | Summary | Label |
-| --- | --- | --- |
-| `.context/workflow.md` | End-to-end manual release checklist: develop → metadata → local test → GitHub release → publish to VS Marketplace and Open VSX. Mirrored per release as an issue from `.github/ISSUE_TEMPLATE/release.md`. | Developer workflow |
+The listed file is canonical. When it conflicts with something stated elsewhere —
+including this CLAUDE.md, a past conversation, or the summary in this row — the
+file wins.
+
+| Glossary Term | Label | Summary | File |
+| --- | --- | --- | --- |
+| "workflow", "release workflow", "dev workflow", "how we ship" | Workflow | End-to-end manual release checklist: develop → metadata → local test → GitHub release → publish to VS Marketplace and Open VSX. Mirrored per release as a tracking issue from `.github/ISSUE_TEMPLATE/release.md`. | `.context/workflow.md` |
