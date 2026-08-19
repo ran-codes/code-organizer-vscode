@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import { SectionMatch, findSections } from './utils/findSections';
+import { buildChildrenMap, childrenOf } from './utils/sectionTree';
 
 export class SectionTreeItem extends vscode.TreeItem {
   constructor(
     public readonly section: SectionMatch,
-    private allSections: SectionMatch[],
+    childrenByParentId: Map<string, SectionMatch[]>,
     public readonly document: vscode.TextDocument
   ) {
-    const hasChildren = allSections.some(s => s.parentName === section.uniqueId);
+    const hasChildren = childrenByParentId.has(section.uniqueId);
     super(
       section.name,
       hasChildren
@@ -40,12 +41,14 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
   private sections: SectionMatch[] = [];
+  private childrenByParentId: Map<string, SectionMatch[]> = new Map();
   private currentDocument?: vscode.TextDocument;
   private treeItemCache: Map<string, SectionTreeItem> = new Map();
 
   refresh(document: vscode.TextDocument): void {
     this.currentDocument = document;
     this.sections = findSections(document.getText(), document.languageId);
+    this.childrenByParentId = buildChildrenMap(this.sections);
     this.treeItemCache.clear();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -66,14 +69,13 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
         .map(s => this.getOrCreateTreeItem(s));
     } else {
       // Return children of this section
-      return this.sections
-        .filter(s => s.parentName === element.section.uniqueId)
+      return childrenOf(this.childrenByParentId, element.section.uniqueId)
         .map(s => this.getOrCreateTreeItem(s));
     }
   }
 
   getParent(element: SectionTreeItem): SectionTreeItem | undefined {
-    const parentSection = this.sections.find(s => s.uniqueId === element.section.parentName);
+    const parentSection = this.sections.find(s => s.uniqueId === element.section.parentId);
     if (parentSection) {
       return this.getOrCreateTreeItem(parentSection);
     }
@@ -85,7 +87,7 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     if (cached) {
       return cached;
     }
-    const item = new SectionTreeItem(section, this.sections, this.currentDocument!);
+    const item = new SectionTreeItem(section, this.childrenByParentId, this.currentDocument!);
     this.treeItemCache.set(section.uniqueId, item);
     return item;
   }

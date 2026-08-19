@@ -69,19 +69,19 @@ function Layout() {
         // Navigation (depth 2)
         assert.strictEqual(sections[1].name, 'Navigation');
         assert.strictEqual(sections[1].depth, 2);
-        assert.strictEqual(sections[1].parentName, sections[0].uniqueId);
+        assert.strictEqual(sections[1].parentId, sections[0].uniqueId);
         // Menu Items (depth 3)
         assert.strictEqual(sections[2].name, 'Menu Items');
         assert.strictEqual(sections[2].depth, 3);
-        assert.strictEqual(sections[2].parentName, sections[1].uniqueId);
+        assert.strictEqual(sections[2].parentId, sections[1].uniqueId);
         // User Actions (depth 3)
         assert.strictEqual(sections[3].name, 'User Actions');
         assert.strictEqual(sections[3].depth, 3);
-        assert.strictEqual(sections[3].parentName, sections[1].uniqueId);
+        assert.strictEqual(sections[3].parentId, sections[1].uniqueId);
         // Main Content (depth 2)
         assert.strictEqual(sections[4].name, 'Main Content');
         assert.strictEqual(sections[4].depth, 2);
-        assert.strictEqual(sections[4].parentName, sections[0].uniqueId);
+        assert.strictEqual(sections[4].parentId, sections[0].uniqueId);
     });
 
     test('Should handle JSX comments with extra whitespace', () => {
@@ -148,7 +148,7 @@ function Component() {
         assert.strictEqual(sections[1].depth, 1);
         assert.strictEqual(sections[2].name, 'JSX Subsection');
         assert.strictEqual(sections[2].depth, 2);
-        assert.strictEqual(sections[2].parentName, sections[1].uniqueId);
+        assert.strictEqual(sections[2].parentId, sections[1].uniqueId);
     });
 
     test('Should handle JSX comments in TSX files', () => {

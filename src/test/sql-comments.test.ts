@@ -67,7 +67,7 @@ CREATE TABLE users (id INT);
 		assert.ok(sections[1].uniqueId.includes('Tables'));
 		
 		// Parent relationship should use unique ID
-		assert.strictEqual(sections[1].parentName, sections[0].uniqueId);
+		assert.strictEqual(sections[1].parentId, sections[0].uniqueId);
 	});
 
 	test('Should handle comprehensive SQL example', () => {
@@ -110,11 +110,11 @@ SELECT COUNT(*) as user_count FROM users;
 		const aggregations = sections.find(s => s.name === '2.2 Aggregations')!;
 
 		// Test parent relationships
-		assert.strictEqual(dbSetup.parentName, undefined);
-		assert.strictEqual(tables.parentName, dbSetup.uniqueId);
-		assert.strictEqual(queries.parentName, undefined);
-		assert.strictEqual(joins.parentName, queries.uniqueId);
-		assert.strictEqual(aggregations.parentName, queries.uniqueId);
+		assert.strictEqual(dbSetup.parentId, undefined);
+		assert.strictEqual(tables.parentId, dbSetup.uniqueId);
+		assert.strictEqual(queries.parentId, undefined);
+		assert.strictEqual(joins.parentId, queries.uniqueId);
+		assert.strictEqual(aggregations.parentId, queries.uniqueId);
 	});
 
 	test('Should ignore invalid SQL patterns', () => {
@@ -172,9 +172,9 @@ DELIMITER ;
 		assert.strictEqual(functions.depth, 1);
 
 		// Test parent relationships
-		assert.strictEqual(userProcs.parentName, procedures.uniqueId);
-		assert.strictEqual(orderProcs.parentName, procedures.uniqueId);
-		assert.strictEqual(functions.parentName, undefined);
+		assert.strictEqual(userProcs.parentId, procedures.uniqueId);
+		assert.strictEqual(orderProcs.parentId, procedures.uniqueId);
+		assert.strictEqual(functions.parentId, undefined);
 	});
 
 	test('Should handle indented SQL comments with spaces', () => {
@@ -220,11 +220,11 @@ SELECT COUNT(*) FROM users;
 		assert.strictEqual(queries.depth, 1);
 
 		// Test parent relationships
-		assert.strictEqual(schema.parentName, undefined);
-		assert.strictEqual(userTables.parentName, schema.uniqueId);
-		assert.strictEqual(userIndexes.parentName, userTables.uniqueId);
-		assert.strictEqual(orderTables.parentName, schema.uniqueId);
-		assert.strictEqual(queries.parentName, undefined);
+		assert.strictEqual(schema.parentId, undefined);
+		assert.strictEqual(userTables.parentId, schema.uniqueId);
+		assert.strictEqual(userIndexes.parentId, userTables.uniqueId);
+		assert.strictEqual(orderTables.parentId, schema.uniqueId);
+		assert.strictEqual(queries.parentId, undefined);
 	});
 
 	test('Should handle indented SQL comments with tabs', () => {
@@ -282,9 +282,9 @@ CREATE DATABASE test;
 		const triggers = sections.find(s => s.name === 'Triggers')!;
 
 		// Verify indented comments with mixed spaces/tabs work
-		assert.strictEqual(setup.parentName, undefined);
-		assert.strictEqual(views.parentName, setup.uniqueId);
-		assert.strictEqual(permissions.parentName, views.uniqueId);
-		assert.strictEqual(triggers.parentName, setup.uniqueId);
+		assert.strictEqual(setup.parentId, undefined);
+		assert.strictEqual(views.parentId, setup.uniqueId);
+		assert.strictEqual(permissions.parentId, views.uniqueId);
+		assert.strictEqual(triggers.parentId, setup.uniqueId);
 	});
 });

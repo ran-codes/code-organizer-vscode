@@ -3,6 +3,7 @@ import { CodeOrganizerDocumentSymbolProvider } from './documentSymbolProvider';
 import { CodeOrganizerTreeDataProvider } from './treeDataProvider';
 import { initializeDecorations, updateSectionHighlight, disposeDecorations } from './decorations';
 import { SectionMatch } from './utils/findSections';
+import { sectionRange } from './utils/vscodeHelpers';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -65,7 +66,9 @@ export function activate(context: vscode.ExtensionContext) {
 			(section: SectionMatch, document: vscode.TextDocument) => {
 				const editor = vscode.window.activeTextEditor;
 				if (editor && editor.document === document) {
-					const position = document.positionAt(section.index);
+					// Only the start position is wanted here; revealRange deliberately
+					// keeps an empty range so the editor centers without selecting the line.
+					const position = sectionRange(section, document).start;
 					editor.selection = new vscode.Selection(position, position);
 					editor.revealRange(
 						new vscode.Range(position, position),
