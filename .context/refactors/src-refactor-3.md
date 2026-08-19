@@ -16,7 +16,7 @@
 ### Acceptance criteria
 - `extension.ts` `activate()` is wiring only: read config, register providers/commands/listeners, delegate. Target well under 100 lines.
 - `getCurrentSection` lives in `src/utils/` (vscode-type-light, unit-testable) with new unit tests covering: cursor before any section, inside a depth-1 section, inside a nested section (returns deepest), after the last section.
-- One `findSections` call per (document URI, `document.version`) — verifiable by a temporary log or a spy in tests.
+- One `findSections` call per (document URI, `document.version`), locked by a **committed** test — not a temporary log. No spy machinery needed: assert that two `getSections(doc)` calls at the same version return the **same array reference** (`strictEqual`), and that an edit which bumps `document.version` returns a different one. Same identity idiom as the TreeItem test below; it requires the index to hand back its cached array rather than a copy, which matches `treeDataProvider.getSections()` returning `this.sections` directly today.
 - `reveal()` still works: the `treeItemCache` invariant in `CodeOrganizerTreeDataProvider` is untouched (root CLAUDE.md §3 — reveal silently fails on non-cached instances).
 - A test in `src/test/` asserting TreeItem **instance identity** across the tree provider, using `strictEqual` (never `deepStrictEqual`) — full rationale and snippet in "Addition to the plan" below.
 - The `log()` helper logs the cache-miss branch in `updateHighlight` instead of returning silently.
@@ -31,6 +31,8 @@
   getChildrenMap(document: vscode.TextDocument): Map<string | undefined, SectionMatch[]>
   ```
   Cache key: `document.uri.toString()`; invalidate when stored `document.version` differs. **Decided: a Map plus one `workspace.onDidCloseTextDocument` eviction listener** — not single-entry (split editors alternate documents and would re-parse on every alternation) and not unbounded (closed documents would leak entries).
+- **Disposable ownership — decided:** the index exposes `dispose()` (which disposes its eviction listener) and `extension.ts` pushes the instance onto `context.subscriptions`, exactly like every other disposable in that file. The index does not reach for `context` itself.
+- **Returns the cached array directly, not a copy** — required by the identity test in §Acceptance criteria, and consistent with `treeDataProvider.getSections()`.
 - Consumers:
   - `documentSymbolProvider.ts`: take the index via constructor; replace its direct `findSections` call.
   - `treeDataProvider.ts`: `refresh()` pulls `sections` + children map from the index instead of calling `findSections`. Keep firing `_onDidChangeTreeData` and clearing `treeItemCache` exactly as today.
@@ -38,7 +40,8 @@
 
 ### 2. Cursor-sync module — new `src/cursorSync.ts`
 - Move from `extension.ts`: `updateHighlight`, the `updateTimeout`/`lastDocument` state, and the three listeners (`onDidChangeTextEditorSelection` with 150 ms debounce, `onDidChangeActiveTextEditor`, `onDidChangeTextDocument`).
-- Shape: a `registerCursorSync(context, treeView, treeDataProvider, sectionIndex, decoration)` function (or small class) that pushes its own disposables onto `context.subscriptions`. `extension.ts` calls it once.
+- Shape: a `registerCursorSync(context, treeView, treeDataProvider, decoration)` function (or small class) that pushes its own disposables onto `context.subscriptions`. `extension.ts` calls it once.
+- **Where cursorSync reads sections from — decided: `treeDataProvider.getSections()`, never the index directly.** It is not passed the index at all. The duplicate parse this refactor removes is the one between `refresh()` and `provideDocumentSymbols`; cursorSync was never the second parse, so pointing it at the index buys nothing and costs the invariant. Today `updateHighlight` refreshes the tree *before* reading sections, so the `uniqueId`s it feeds to `findTreeItemBySection` always match what is in `treeItemCache`. Reading version-keyed sections from the index instead would let cursorSync hold version N while the tree is still built from N−1 — the lookup misses, and reveal silently stops working. That is Concern 1's exact failure mode, reintroduced by the fix meant to avoid it.
 - Replace the scattered `console.log` calls with a `log()` helper backed by a **`vscode.OutputChannel` named "Code Organizer"** (decided over a console helper — users can check the channel in the wild, which is what confirms whether the Concern 3 latent bugs are real).
 
 ### 3. Pure logic — move `getCurrentSection` to `src/utils/getCurrentSection.ts`
@@ -53,12 +56,14 @@ Remains: config read + enable check, provider registrations, TreeView creation, 
 Decided removals: the startup info toast is deleted (the one sanctioned visible change — see Non-goals), and `getCurrentDocument()` in `treeDataProvider.ts` goes too (zero callers).
 
 ### 5. Folder documentation
-Update every per-folder CLAUDE.md created in src-refactor-1 (create them per `src-refactor-1.md` §5 if they don't exist — every folder under `src/` gets one, describing that folder's organization and deferring to downstream folders' CLAUDE.md for details):
+Update the repo-root CLAUDE.md **and** every per-folder CLAUDE.md created in src-refactor-1 (create them per `src-refactor-1.md` §5 if they don't exist — every folder under `src/` gets one, describing that folder's organization and deferring to downstream folders' CLAUDE.md for details):
+- **Root `CLAUDE.md` §3** — currently states the two consumers "call it independently — there is no shared state between them." This refactor makes that false and it is easy to miss, since §5 of this plan otherwise lists only `src/` files. Reframe rather than delete: the parser is still the single source of truth, and `sectionIndex` is a memo over it — one parse per (URI, version), shared by both consumers, with the same propagate-everywhere consequence as before.
 - `src/CLAUDE.md` — new module map: `extension.ts` (wiring only) → `cursorSync.ts` (sync + debounce) → `sectionIndex.ts` (single shared parse, version-keyed) → providers → `utils/`. State the invariants: one parse per document version; `treeItemCache` required for `reveal()`.
 - `src/utils/CLAUDE.md` — add `getCurrentSection.ts` (pure, deepest-containing-section rule) and the rule that nothing in `utils/` may hold vscode runtime state.
 - `src/test/CLAUDE.md` — add the pure-logic unit test file and how it differs from the syntax suites.
 
 ### 6. Verify
+- **Two commits, in this order: extraction (§2–§4) first, then the cache (§1).** The two goals are independent, and keeping them separate leaves the "no visible behavior change" claim bisectable if the F5 pass turns up something odd.
 - `npm run compile`, `npm run lint`, `npm run test` — green.
 - Manual `F5` pass: open `assets/test-files/test.py` and `test.md`; confirm (a) outline + tree identical to master, (b) cursor movement still highlights and reveals with the same feel (150 ms debounce), (c) editing the document refreshes the tree, (d) switching editors re-syncs.
 
