@@ -13,34 +13,25 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   //// 1.1 Child Symbol Processing ----
   /**
    * Helper method to add child symbols to a parent symbol (recursive)
+   *
+   * No cycle guard is needed: `findSections` resolves each parent by scanning
+   * backwards for the nearest strictly smaller depth, so parent chains strictly
+   * decrease in depth and this recursion always terminates.
    */
   private addChildSymbols(
     parentSymbol: vscode.DocumentSymbol,
     parentMatch: SectionMatch,
     childrenByParentId: Map<string, SectionMatch[]>,
-    document: vscode.TextDocument,
-    processedIds: Set<string> = new Set()
+    document: vscode.TextDocument
   ): void {
 
-    ////// 1.1.1 Recursion Prevention ----
-    // Prevent infinite recursion by tracking processed parent unique IDs
-    if (processedIds.has(parentMatch.uniqueId)) {
-      return;
-    }
-    processedIds.add(parentMatch.uniqueId);
-
-    ////// 1.1.2 Child Filtering ----
+    ////// 1.1.1 Child Filtering ----
     const children = childrenOf(childrenByParentId, parentMatch.uniqueId);
 
-    ////// 1.1.3 Child Symbol Creation ----
+    ////// 1.1.2 Child Symbol Creation ----
     if (children.length > 0) {
       for (let j = 0; j < children.length; j++) {
         const child = children[j];
-
-        // Additional safety check to prevent infinite loops
-        if (child.name === parentMatch.name) {
-          continue;
-        }
 
         const range = sectionRange(child, document);
         const childSymbol = new vscode.DocumentSymbol(
@@ -48,8 +39,8 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
           vscode.SymbolKind.Module, range, range
         );
 
-        // Recursively add children to this child symbol with updated processed set
-        this.addChildSymbols(childSymbol, child, childrenByParentId, document, new Set(processedIds));
+        // Recursively add children to this child symbol
+        this.addChildSymbols(childSymbol, child, childrenByParentId, document);
 
         parentSymbol.children.push(childSymbol);
       }

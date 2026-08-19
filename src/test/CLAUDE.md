@@ -1,8 +1,10 @@
 # src/test/
 
-Mocha suites — **one file per comment syntax**, plus one per non-parser util. They
-call `src/utils/` directly, which is possible only because those modules never
-import `vscode`.
+Mocha suites — **one file per comment syntax**, plus one per non-parser module. The
+syntax and util suites call `src/utils/` directly, which is possible only because
+those modules never import `vscode`. The provider suite is the exception: it imports
+`vscode` and builds documents with `workspace.openTextDocument`, which works because
+`vscode-test` runs everything inside the extension host.
 
 | File | Covers |
 | --- | --- |
@@ -12,6 +14,7 @@ import `vscode`.
 | `jsx-comments.test.ts` | `{/* // Section ---- */}` |
 | `md-comments.test.ts` · `quarto-comments.test.ts` | Native `#` headers, fence exclusion |
 | `sectionTree.test.ts` | `buildChildrenMap()` / `childrenOf()` — not a syntax suite |
+| `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
 
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
