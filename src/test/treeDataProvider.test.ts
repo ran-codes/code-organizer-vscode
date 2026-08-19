@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { CodeOrganizerTreeDataProvider } from '../treeDataProvider';
-import { findSections } from '../utils/findSections';
+import { SectionIndex } from '../sectionIndex';
 
 // The invariant this suite exists for: `TreeView.reveal()` matches elements by
 // **object reference** against what `getChildren()` handed back. A rebuilt
@@ -16,14 +16,17 @@ import { findSections } from '../utils/findSections';
 // refactor and hand back false confidence.
 suite('Tree Data Provider Tests (reveal identity)', () => {
 
+	let index: SectionIndex;
 	let provider: CodeOrganizerTreeDataProvider;
 
 	setup(() => {
-		provider = new CodeOrganizerTreeDataProvider();
+		index = new SectionIndex();
+		provider = new CodeOrganizerTreeDataProvider(index);
 	});
 
-	const sectionsOf = (document: vscode.TextDocument) =>
-		findSections(document.getText(), document.languageId);
+	teardown(() => {
+		index.dispose();
+	});
 
 	async function refreshedWith(content: string) {
 		const document = await vscode.workspace.openTextDocument({ content, language: 'python' });
@@ -68,7 +71,7 @@ suite('Tree Data Provider Tests (reveal identity)', () => {
 		// Duplicate section names are legal. Two sections sharing a name must not
 		// collapse onto one cached item, or reveal would jump to the wrong one.
 		const document = await refreshedWith('# Setup ----\n# Setup ----\n');
-		const sections = sectionsOf(document);
+		const sections = index.getSections(document);
 
 		const roots = provider.getChildren();
 		assert.strictEqual(roots.length, 2);
@@ -85,7 +88,7 @@ suite('Tree Data Provider Tests (reveal identity)', () => {
 		// real, it is out of scope for this refactor (no visible behavior change),
 		// and cursorSync now logs the miss instead of returning in silence.
 		const document = await refreshedWith('# Root ----\n');
-		const section = sectionsOf(document)[0];
+		const section = index.getSections(document)[0];
 
 		assert.strictEqual(provider.findTreeItemBySection(section), undefined);
 

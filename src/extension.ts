@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { CodeOrganizerDocumentSymbolProvider } from './documentSymbolProvider';
 import { CodeOrganizerTreeDataProvider } from './treeDataProvider';
+import { SectionIndex } from './sectionIndex';
 import { registerCursorSync } from './cursorSync';
 import { initializeDecorations, disposeDecorations } from './decorations';
 import { initializeLog, log, disposeLog } from './log';
@@ -17,9 +18,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(initializeLog());
 
-	// 2. Providers ----
+	// 2. Shared Parse ----
+	// One findSections call per (document URI, version), read by both providers.
+	const sectionIndex = new SectionIndex();
+	context.subscriptions.push(sectionIndex);
+
+	// 3. Providers ----
 	// Feeds the built-in Outline, breadcrumbs, and Go to Symbol.
-	const symbolProvider = new CodeOrganizerDocumentSymbolProvider();
+	const symbolProvider = new CodeOrganizerDocumentSymbolProvider(sectionIndex);
 	const selectors: vscode.DocumentSelector[] = supportedLanguages.includes('*')
 		? ['*']
 		: supportedLanguages.map(language => ({ language }));
@@ -30,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	// Backs the custom Activity Bar TreeView.
-	const treeDataProvider = new CodeOrganizerTreeDataProvider();
+	const treeDataProvider = new CodeOrganizerTreeDataProvider(sectionIndex);
 	const treeViewActivity = vscode.window.createTreeView('codeOrganizerOutlineActivity', {
 		treeDataProvider: treeDataProvider,
 		showCollapseAll: true
@@ -41,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const decoration = initializeDecorations();
 	context.subscriptions.push(decoration);
 
-	// 3. Commands ----
+	// 4. Commands ----
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			'codeOrganizer.goToSection',
@@ -70,13 +76,13 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// 4. Cursor Sync ----
+	// 5. Cursor Sync ----
 	const syncNow = registerCursorSync(context, treeViewActivity, treeDataProvider, decoration);
 	if (vscode.window.activeTextEditor) {
 		syncNow();
 	}
 
-	// 5. Configuration Changes ----
+	// 6. Configuration Changes ----
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration('codeOrganizer')) {

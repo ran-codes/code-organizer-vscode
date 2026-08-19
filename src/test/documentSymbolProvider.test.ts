@@ -1,12 +1,13 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { CodeOrganizerDocumentSymbolProvider } from '../documentSymbolProvider';
+import { SectionIndex } from '../sectionIndex';
 
 // Unlike the syntax suites, this one imports `vscode` — it exercises the provider
 // that feeds the built-in Outline, not the vscode-free parser underneath it.
 suite('Document Symbol Provider Tests', () => {
 
-	const provider = new CodeOrganizerDocumentSymbolProvider();
+	const provider = new CodeOrganizerDocumentSymbolProvider(new SectionIndex());
 
 	async function symbolsFor(content: string, language = 'python') {
 		const document = await vscode.workspace.openTextDocument({ content, language });

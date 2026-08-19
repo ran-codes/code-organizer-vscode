@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { SectionMatch, findSections } from './utils/findSections';
-import { buildChildrenMap, childrenOf } from './utils/sectionTree';
+import { SectionMatch } from './utils/findSections';
+import { childrenOf } from './utils/sectionTree';
+import { SectionIndex } from './sectionIndex';
 
 export class SectionTreeItem extends vscode.TreeItem {
   constructor(
@@ -45,10 +46,12 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   private currentDocument?: vscode.TextDocument;
   private treeItemCache: Map<string, SectionTreeItem> = new Map();
 
+  constructor(private readonly sectionIndex: SectionIndex) { }
+
   refresh(document: vscode.TextDocument): void {
     this.currentDocument = document;
-    this.sections = findSections(document.getText(), document.languageId);
-    this.childrenByParentId = buildChildrenMap(this.sections);
+    this.sections = this.sectionIndex.getSections(document);
+    this.childrenByParentId = this.sectionIndex.getChildrenMap(document);
     this.treeItemCache.clear();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -99,7 +102,7 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   /**
    * The snapshot the visible tree was last built from — the same one
    * `treeItemCache` is keyed against, which is why `cursorSync` resolves the
-   * cursor through here.
+   * cursor through here rather than querying `SectionIndex` directly.
    */
   getSections(): SectionMatch[] {
     return this.sections;

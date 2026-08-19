@@ -6,12 +6,34 @@ section syntax lives here.
 | File | Imports `vscode`? | Purpose |
 | --- | --- | --- |
 | `findSections.ts` | **no** | THE parser. Text → `SectionMatch[]`. |
+| `getCurrentSection.ts` | **no** | Cursor offset → the deepest containing section. |
 | `sectionTree.ts` | **no** | `buildChildrenMap()` / `childrenOf()` — parent→children index. |
 | `vscodeHelpers.ts` | yes | `sectionRange()` — `SectionMatch` → `vscode.Range`. |
 
-**The vscode-free rule:** `findSections.ts` and `sectionTree.ts` must never import
-`vscode`, so the test suites can call them directly. Anything needing the API goes
-in `vscodeHelpers.ts` — that separation is the only reason that file exists.
+**The vscode-free rule:** every file here except `vscodeHelpers.ts` must never
+import `vscode`, so the test suites can call them directly. Anything needing the
+API goes in `vscodeHelpers.ts` — that separation is the only reason that file
+exists. Nothing in `utils/` may hold VS Code runtime state either: these are pure
+functions over data, and caches keyed on a `TextDocument` belong in
+`src/sectionIndex.ts` instead.
+
+## `getCurrentSection` contract
+
+`getCurrentSection(offset, textLength, sections)` takes plain numbers rather than
+a `Position`/`TextDocument` precisely to stay on the vscode-free side of that
+rule; callers pass `document.offsetAt(cursorPos)` and `document.getText().length`.
+
+Two things it encodes:
+
+- **The deepest containing section wins**, which reduces to *the last section
+  starting at or before the offset* — nothing starts between that section and the
+  cursor, and any shallower section would have terminated it before the cursor.
+  That equivalence is what lets one scan replace a per-section boundary search;
+  `getCurrentSection.test.ts` cross-checks it at every offset in a fixture.
+- **A cursor at `offset === textLength` returns `undefined`**, because a section
+  ends *before* its terminator and the last section's terminator is the end of the
+  text. A known quirk (the highlight drops at the very end of a file), asserted on
+  purpose. Do not "fix" it here without an issue and a changelog entry.
 
 ## `findSections` contract
 
