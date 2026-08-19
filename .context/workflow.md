@@ -1,8 +1,12 @@
 Release process for this extension. Everything is manual — there is no CI/CD.
 
+| What | Where |
+| --- | --- |
+| Worked examples — past release issues, with this checklist ticked off and test logs pasted in | v0.0.4 → https://github.com/ran-codes/code-organizer-vscode/issues/19 <br> v0.0.5 → https://github.com/ran-codes/code-organizer-vscode/issues/21 <br> v0.1 + v0.1.1 → https://github.com/ran-codes/code-organizer-vscode/issues/33 |
+
 For each release, open a tracking issue from the `Release` issue template
 (`.github/ISSUE_TEMPLATE/release.md`) titled `[Release] v[version]` and check the
-boxes off there. Past examples: #19 (v0.0.4), #21 (v0.0.5), #33 (v0.1 + v0.1.1).
+boxes off there.
 
 **Development:**
 - [ ] `git checkout -b feature/[issue-number]-[description]`
