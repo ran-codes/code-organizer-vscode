@@ -1,6 +1,6 @@
 # src-refactor-3: Extension wiring — cursor-sync module + shared parse cache
 
-**Branch:** `feature/[issue]-src-refactor-3-wiring-cache`
+**Branch:** `feature/[issue]-src-refactor-3-wiring-cache` — open the tracking issue first, then merge `reafactor-2` and branch off master (the eval below was validated against `reafactor-2`'s code, so don't start from a master that predates it).
 **Order:** Requires **src-refactor-1** (uses `buildChildrenMap` / `sectionTree.ts` and the `parentId` rename). Independent of src-refactor-2.
 
 ## PRD
@@ -10,7 +10,7 @@
 2. Every document is parsed twice — VS Code calls `CodeOrganizerDocumentSymbolProvider.provideDocumentSymbols` (calls `findSections`) and `CodeOrganizerTreeDataProvider.refresh` calls `findSections` again on the same text. Add a small shared cache so both consumers share one parse.
 
 ### Non-goals
-- No parser logic changes. No visible behavior change (same outline, same highlight, same 150 ms debounce).
+- No parser logic changes. No visible behavior change (same outline, same highlight, same 150 ms debounce). **One decided exception:** the startup info toast is dropped in this PR (see §4).
 - No new configuration options.
 
 ### Acceptance criteria
@@ -28,7 +28,7 @@
   getSections(document: vscode.TextDocument): SectionMatch[]
   getChildrenMap(document: vscode.TextDocument): Map<string | undefined, SectionMatch[]>
   ```
-  Cache key: `document.uri.toString()`; invalidate when stored `document.version` differs. A single-entry or small Map cache is plenty — no eviction sophistication needed.
+  Cache key: `document.uri.toString()`; invalidate when stored `document.version` differs. **Decided: a Map plus one `workspace.onDidCloseTextDocument` eviction listener** — not single-entry (split editors alternate documents and would re-parse on every alternation) and not unbounded (closed documents would leak entries).
 - Consumers:
   - `documentSymbolProvider.ts`: take the index via constructor; replace its direct `findSections` call.
   - `treeDataProvider.ts`: `refresh()` pulls `sections` + children map from the index instead of calling `findSections`. Keep firing `_onDidChangeTreeData` and clearing `treeItemCache` exactly as today.
@@ -37,15 +37,18 @@
 ### 2. Cursor-sync module — new `src/cursorSync.ts`
 - Move from `extension.ts`: `updateHighlight`, the `updateTimeout`/`lastDocument` state, and the three listeners (`onDidChangeTextEditorSelection` with 150 ms debounce, `onDidChangeActiveTextEditor`, `onDidChangeTextDocument`).
 - Shape: a `registerCursorSync(context, treeView, treeDataProvider, sectionIndex, decoration)` function (or small class) that pushes its own disposables onto `context.subscriptions`. `extension.ts` calls it once.
-- Replace the scattered `console.log` calls with a single module-level `log()` helper (or a `vscode.OutputChannel` named "Code Organizer") so debug output has one on/off switch.
+- Replace the scattered `console.log` calls with a `log()` helper backed by a **`vscode.OutputChannel` named "Code Organizer"** (decided over a console helper — users can check the channel in the wild, which is what confirms whether the Concern 3 latent bugs are real).
 
 ### 3. Pure logic — move `getCurrentSection` to `src/utils/getCurrentSection.ts`
 - Signature change to make it vscode-free and testable: `getCurrentSection(offset: number, textLength: number, sections: SectionMatch[]): SectionMatch | undefined` — caller does `document.offsetAt(cursorPos)` / `getText().length`.
 - While moving, fix the incidental O(n²): sections are sorted by index, so the "next section at same-or-smaller depth" boundary can be found with a forward scan from the current section's position instead of `sections.find` per section. Keep the "deepest containing section wins" semantics exactly.
 - New unit test file `src/test/getCurrentSection.test.ts` covering the four cases in the acceptance criteria. These tests need no VS Code host if the function is pure — but they run under the same vscode-test harness as the rest, which is fine.
+- **EOF edge case — do not "fix" in passing:** a cursor at the very end of the document has `offset === textLength`, and `offset < sectionEnd` fails for the last section, so `getCurrentSection` returns `undefined` there today. The tests must assert `undefined` at EOF (no-behavior-change rule); the pre-existing bug gets its own issue alongside Concern 3.
 
 ### 4. `src/extension.ts` after the dust settles
-Remains: activation message (consider dropping the popup — an info toast on every startup is noisy; at minimum move it behind the debug log), config read + enable check, provider registrations, TreeView creation, decoration init, `goToSection` / `showView` / `activate` commands, config-change listener, one `registerCursorSync(...)` call, initial highlight kick.
+Remains: config read + enable check, provider registrations, TreeView creation, decoration init, `goToSection` / `showView` / `activate` commands, config-change listener, one `registerCursorSync(...)` call, initial highlight kick.
+
+Decided removals: the startup info toast is deleted (the one sanctioned visible change — see Non-goals), and `getCurrentDocument()` in `treeDataProvider.ts` goes too (zero callers).
 
 ### 5. Folder documentation
 Update every per-folder CLAUDE.md created in src-refactor-1 (create them per `src-refactor-1.md` §5 if they don't exist — every folder under `src/` gets one, describing that folder's organization and deferring to downstream folders' CLAUDE.md for details):
