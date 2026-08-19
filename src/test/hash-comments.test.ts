@@ -40,6 +40,12 @@ Final content
 		assert.strictEqual(sections[2].depth, 3);
 		assert.strictEqual(sections[3].depth, 4);
 		assert.strictEqual(sections[4].depth, 4); // Capped at 4
+
+		// The `#` token is bounded at 4 (`#{1,4}`), so the 5th `#` is not consumed
+		// by the token group and stays part of the parsed name. Asserting the name
+		// here keeps an unbounded `(#+)` token from silently changing output.
+		assert.strictEqual(sections[3].name, 'Level 4');
+		assert.strictEqual(sections[4].name, '# Level 5 (should be capped at 4)');
 	});
 
 	test('Should create unique IDs for hash sections', () => {
@@ -54,7 +60,7 @@ Final content
 		assert.ok(sections[1].uniqueId.includes('Sub Section'));
 		
 		// Parent relationship should use unique ID
-		assert.strictEqual(sections[1].parentName, sections[0].uniqueId);
+		assert.strictEqual(sections[1].parentId, sections[0].uniqueId);
 	});
 
 	test('Should handle duplicate hash section names', () => {
@@ -121,10 +127,10 @@ def helper():
 		const utils = sections.find(s => s.name === '2. Utils')!;
 
 		// Test parent relationships
-		assert.strictEqual(config.parentName, undefined);
-		assert.strictEqual(dbSettings.parentName, config.uniqueId);
-		assert.strictEqual(apiSettings.parentName, config.uniqueId);
-		assert.strictEqual(utils.parentName, undefined);
+		assert.strictEqual(config.parentId, undefined);
+		assert.strictEqual(dbSettings.parentId, config.uniqueId);
+		assert.strictEqual(apiSettings.parentId, config.uniqueId);
+		assert.strictEqual(utils.parentId, undefined);
 	});
 
 	test('Should handle indented hash comments with spaces', () => {
@@ -166,11 +172,11 @@ if __name__ == '__main__':
 		assert.strictEqual(entryPoint.depth, 1);
 
 		// Test parent relationships
-		assert.strictEqual(mainModule.parentName, undefined);
-		assert.strictEqual(helpers.parentName, mainModule.uniqueId);
-		assert.strictEqual(deepHelper.parentName, helpers.uniqueId);
-		assert.strictEqual(config.parentName, mainModule.uniqueId);
-		assert.strictEqual(entryPoint.parentName, undefined);
+		assert.strictEqual(mainModule.parentId, undefined);
+		assert.strictEqual(helpers.parentId, mainModule.uniqueId);
+		assert.strictEqual(deepHelper.parentId, helpers.uniqueId);
+		assert.strictEqual(config.parentId, mainModule.uniqueId);
+		assert.strictEqual(entryPoint.parentId, undefined);
 	});
 
 	test('Should handle indented hash comments with tabs', () => {
@@ -227,10 +233,10 @@ mean_value <- mean(data$value)
 		const stats = sections.find(s => s.name === '2. Statistics')!;
 
 		// Verify indented comments work correctly
-		assert.strictEqual(dataAnalysis.parentName, undefined);
-		assert.strictEqual(dataLoading.parentName, dataAnalysis.uniqueId);
-		assert.strictEqual(validation.parentName, dataLoading.uniqueId);
-		assert.strictEqual(plotting.parentName, dataAnalysis.uniqueId);
-		assert.strictEqual(stats.parentName, undefined);
+		assert.strictEqual(dataAnalysis.parentId, undefined);
+		assert.strictEqual(dataLoading.parentId, dataAnalysis.uniqueId);
+		assert.strictEqual(validation.parentId, dataLoading.uniqueId);
+		assert.strictEqual(plotting.parentId, dataAnalysis.uniqueId);
+		assert.strictEqual(stats.parentId, undefined);
 	});
 });

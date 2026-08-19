@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { findSections, SectionMatch } from './utils/findSections';
+import { buildChildrenMap, childrenOf } from './utils/sectionTree';
+import { sectionRange } from './utils/vscodeHelpers';
 
 // 1. Document Symbol Provider Class ----
 /**
@@ -15,7 +17,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   private addChildSymbols(
     parentSymbol: vscode.DocumentSymbol,
     parentMatch: SectionMatch,
-    allMatches: SectionMatch[],
+    childrenByParentId: Map<string, SectionMatch[]>,
     document: vscode.TextDocument,
     processedIds: Set<string> = new Set()
   ): void {
@@ -28,7 +30,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     processedIds.add(parentMatch.uniqueId);
 
     ////// 1.1.2 Child Filtering ----
-    const children = allMatches.filter(item => item.parentName === parentMatch.uniqueId);
+    const children = childrenOf(childrenByParentId, parentMatch.uniqueId);
 
     ////// 1.1.3 Child Symbol Creation ----
     if (children.length > 0) {
@@ -40,16 +42,14 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
           continue;
         }
 
-        const range = new vscode.Range(
-          document.positionAt(child.index),
-          document.positionAt(child.index + child.fullText.length));
+        const range = sectionRange(child, document);
         const childSymbol = new vscode.DocumentSymbol(
           child.name, "",
           vscode.SymbolKind.Module, range, range
         );
 
         // Recursively add children to this child symbol with updated processed set
-        this.addChildSymbols(childSymbol, child, allMatches, document, new Set(processedIds));
+        this.addChildSymbols(childSymbol, child, childrenByParentId, document, new Set(processedIds));
 
         parentSymbol.children.push(childSymbol);
       }
@@ -69,6 +69,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     const text = document.getText();
     const languageId = document.languageId;
     const all_matches: SectionMatch[] = findSections(text, languageId);
+    const childrenByParentId = buildChildrenMap(all_matches);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
 
     ////// 1.2.2 Symbol Generation ----
@@ -76,16 +77,14 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
       const sectionName = match.name;
-      const range = new vscode.Range(
-        document.positionAt(match.index),
-        document.positionAt(match.index + match.fullText.length));
+      const range = sectionRange(match, document);
       const symbol = new vscode.DocumentSymbol(
         sectionName, '',
         vscode.SymbolKind.File, range, range
       );
 
       // Child Level Logic
-      this.addChildSymbols(symbol, match, all_matches, document);
+      this.addChildSymbols(symbol, match, childrenByParentId, document);
 
       // Return
       symbols.push(symbol);

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { SectionMatch } from './utils/findSections';
+import { sectionRange } from './utils/vscodeHelpers';
 
 let currentSectionDecoration: vscode.TextEditorDecorationType | undefined;
 
@@ -28,9 +29,7 @@ export function updateSectionHighlight(
     return;
   }
 
-  const startPos = editor.document.positionAt(section.index);
-  const endPos = editor.document.positionAt(section.index + section.fullText.length);
-  const range = new vscode.Range(startPos, endPos);
+  const range = sectionRange(section, editor.document);
 
   const options: vscode.DecorationOptions[] = [{
     range: range,

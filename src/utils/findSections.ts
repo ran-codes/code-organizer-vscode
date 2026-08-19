@@ -4,11 +4,61 @@ export interface SectionMatch {
   index: number;
   fullText: string;
   depth: number;
-  parentName?: string;
+  /** The parent section's `uniqueId`, or undefined when no shallower section precedes it. */
+  parentId?: string;
   uniqueId: string; // New property: name + index for unique identification
 }
 
-// 2. Main Section Parser ----
+/**
+ * A comment style, as data. To support a new comment token, add one entry to
+ * COMMENT_PATTERNS — no new regex loop and no new depth branch is needed.
+ */
+interface PatternSpec {
+  /** Regex source with exactly two capture groups: (1) comment symbols, (2) section name. */
+  source: string;
+  /** Characters of comment symbol per depth level (`#` = 1, `//` and `--` = 2). */
+  symbolUnit: number;
+}
+
+// 2. Pattern Table ----
+/**
+ * Dash-terminated comment sections: `<token> Section Name ----`.
+ *
+ * The token pattern is spelled out per entry rather than derived, because the
+ * quantifiers genuinely differ: `#` is bounded at 4 while `//` and `--` are
+ * unbounded. Generating `(#+)` instead of `(#{1,4})` would change parsed names
+ * — on `##### Level 5 ----` the 5th `#` is currently part of the name.
+ */
+const dashSource = (tokenPattern: string): string =>
+  String.raw`^[ \t]*${tokenPattern}\s*(.+?)\s+[-]{4,}\s*$`;
+
+const COMMENT_PATTERNS: PatternSpec[] = [
+  // Hash comments: # Section Name ---- (Python, R, shell, etc.)
+  { source: dashSource(String.raw`(#{1,4})`), symbolUnit: 1 },
+
+  // Double slash comments: // Section Name ---- (JS, TS, C, C++, C#, Java, Go, Rust, Swift)
+  { source: dashSource(String.raw`(\/\/+)`), symbolUnit: 2 },
+
+  // SQL comments: -- Section Name ---- (SQL)
+  { source: dashSource(String.raw`(--+)`), symbolUnit: 2 },
+
+  // JSX comments: {/* // Section Name ---- */} (React, JSX, TSX)
+  // Hand-written — the wrapper makes its shape different from the dash family.
+  { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
+];
+
+const MARKDOWN_PATTERNS: PatternSpec[] = [
+  // Markdown/Quarto headers: # Header, ## Header, etc. (without requiring ----)
+  { source: String.raw`^(#{1,6})\s+(.+?)\s*$`, symbolUnit: 1 },
+];
+
+const MAX_DEPTH = 4;
+
+/** Depth from the matched comment symbols. Covers every comment style. */
+const depthFor = (symbols: string, symbolUnit: number): number =>
+  Math.min(Math.max(1, Math.floor(symbols.length / symbolUnit)), MAX_DEPTH);
+
+// 3. Main Section Parser ----
 /**
  * Find all section matches in text
  * Supports multiple comment syntaxes: #, //, --
@@ -27,7 +77,7 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     const lines = text.split('\n');
     let inCodeBlock = false;
     let codeBlockStart = 0;
-    
+
     lines.forEach((line, index) => {
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
@@ -35,9 +85,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
           codeBlockStart = index;
         } else {
           inCodeBlock = false;
-          codeBlocks.push({ 
-            start: codeBlockStart, 
-            end: index 
+          codeBlocks.push({
+            start: codeBlockStart,
+            end: index
           });
         }
       }
@@ -51,80 +101,47 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
   // Helper function to check if a match index is inside a code block
   const isInCodeBlock = (matchIndex: number): boolean => {
     if (!isMarkdownOrQuarto) return false;
-    
+
     const lines = text.substring(0, matchIndex).split('\n');
     const matchLineNumber = lines.length - 1;
-    
-    return codeBlocks.some(block => 
+
+    return codeBlocks.some(block =>
       matchLineNumber >= block.start && matchLineNumber <= block.end
     );
   };
 
-  //// 2.1 Pattern Definitions ----
-  // Define patterns for different comment styles
-  const patterns = isMarkdownOrQuarto ? [
-    // Markdown/Quarto headers: # Header, ## Header, etc. (without requiring ----)
-    { regex: /^(#{1,6})\s+(.+?)\s*$/gm, commentType: 'markdown' }
-  ] : [
-    // Hash comments: # Section Name ---- (Python, R, shell, etc.)
-    { regex: /^[ \t]*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '#' },
+  //// 3.1 Pattern Construction ----
+  // Compile the specs fresh on every call. The RegExp objects are deliberately
+  // NOT hoisted to module level: /gm regexes carry `lastIndex` between uses, and
+  // per-call construction keeps that state from leaking across documents.
+  const patterns = (isMarkdownOrQuarto ? MARKDOWN_PATTERNS : COMMENT_PATTERNS)
+    .map(spec => ({ regex: new RegExp(spec.source, 'gm'), symbolUnit: spec.symbolUnit }));
 
-    // Double slash comments: // Section Name ---- (JS, TS, C, C++, C#, Java, Go, Rust, Swift)
-    { regex: /^[ \t]*(\/\/+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '//' },
-
-    // SQL comments: -- Section Name ---- (SQL)
-    { regex: /^[ \t]*(--+)\s*(.+?)\s+[-]{4,}\s*$/gm, commentType: '--' },
-
-    // JSX comments: {/* // Section Name ---- */} (React, JSX, TSX)
-    { regex: /^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}/gm, commentType: 'jsx' }
-  ];
-
-  //// 2.2 Pattern Matching Loop ----
+  //// 3.2 Pattern Matching Loop ----
   for (const pattern of patterns) {
     let match: RegExpExecArray | null;
 
     while ((match = pattern.regex.exec(text)) !== null) {
       const commentSymbols = match[1];
       const sectionName = match[2].trim();
-      let depth: number;
+      const depth = depthFor(commentSymbols, pattern.symbolUnit);
 
-      ////// 2.2.1 Depth Calculation ----
-      if (pattern.commentType === 'markdown') {
-        // Markdown headers: depth based on number of # symbols
-        // Limit to 4 levels for consistency with outline view
-        depth = Math.min(commentSymbols.length, 4);
-      } else if (pattern.commentType === '#') {
-        // Hash comments: depth based on number of # symbols
-        depth = Math.min(commentSymbols.length, 4);
-      } else if (pattern.commentType === 'jsx') {
-        // JSX comments: depth based on number of / symbols in //
-        const baseLength = 2; // "//" = 2 characters
-        depth = Math.min(Math.max(1, Math.floor(commentSymbols.length / baseLength)), 4);
-      } else {
-        // Other comments (//, --): depth based on repetition
-        // // = depth 1, //// = depth 2, etc.
-        const baseLength = pattern.commentType.length;
-        depth = Math.min(Math.max(1, Math.floor(commentSymbols.length / baseLength)), 4);
-      }
-
-      ////// 2.2.2 Section Validation ----
+      ////// 3.2.1 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace
       // Also skip if this match is inside a code block (for Markdown/Quarto)
       if (sectionName && !sectionName.match(/^[-\s]*$/) && !isInCodeBlock(match.index)) {
 
-        ////// 2.2.3 Parent Resolution ----
+        ////// 3.2.2 Parent Resolution ----
         // Find parent: look backwards for a section with smaller depth
-        let parentName: string | undefined = undefined;
         let parentUniqueId: string | undefined = undefined;
         for (let i = matches.length - 1; i >= 0; i--) {
           if (matches[i].depth < depth) {
-            parentName = matches[i].name;
             parentUniqueId = matches[i].uniqueId;
             break;
           }
         }
 
-        ////// 2.2.4 Match Storage ----
+        ////// 3.2.3 Match Storage ----
         // Create unique ID by combining name and index
         const uniqueId = `${sectionName}_${match.index}`;
 
@@ -133,17 +150,16 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
           index: match.index,
           fullText: match[0],
           depth: depth,
-          parentName: parentUniqueId,
+          parentId: parentUniqueId,
           uniqueId: uniqueId
         });
       }
     }
-
-    // Reset regex state for next iteration
-    pattern.regex.lastIndex = 0;
+    // No lastIndex reset needed: each regex is built above for this call only,
+    // and exec() already resets lastIndex to 0 when it returns null.
   }
 
-  //// 2.3 Result Sorting ----
+  //// 3.3 Result Sorting ----
   // Sort matches by index to maintain document order
   return matches.sort((a, b) => a.index - b.index);
 }

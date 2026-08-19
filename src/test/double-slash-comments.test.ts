@@ -58,7 +58,7 @@ function getData() {}
 		assert.ok(sections[1].uniqueId.includes('Helper Functions'));
 		
 		// Parent relationship should use unique ID
-		assert.strictEqual(sections[1].parentName, sections[0].uniqueId);
+		assert.strictEqual(sections[1].parentId, sections[0].uniqueId);
 	});
 
 	test('Should handle JavaScript-style comments', () => {
@@ -95,10 +95,10 @@ function handleClick(event) {
 		const eventHandlers = sections.find(s => s.name === '2.1 Event Handlers')!;
 
 		// Test parent relationships
-		assert.strictEqual(appConfig.parentName, undefined);
-		assert.strictEqual(helpers.parentName, appConfig.uniqueId);
-		assert.strictEqual(mainApp.parentName, undefined);
-		assert.strictEqual(eventHandlers.parentName, mainApp.uniqueId);
+		assert.strictEqual(appConfig.parentId, undefined);
+		assert.strictEqual(helpers.parentId, appConfig.uniqueId);
+		assert.strictEqual(mainApp.parentId, undefined);
+		assert.strictEqual(eventHandlers.parentId, mainApp.uniqueId);
 	});
 
 	test('Should handle TypeScript-style comments', () => {
@@ -134,8 +134,8 @@ function isValidEmail(email: string): boolean {
 		assert.strictEqual(tsApp.depth, 1);
 		assert.strictEqual(userService.depth, 2);
 		assert.strictEqual(utils.depth, 1);
-		assert.strictEqual(userService.parentName, tsApp.uniqueId);
-		assert.strictEqual(utils.parentName, undefined);
+		assert.strictEqual(userService.parentId, tsApp.uniqueId);
+		assert.strictEqual(utils.parentId, undefined);
 	});
 
 	test('Should ignore invalid double slash patterns', () => {
@@ -180,11 +180,11 @@ function another() {}
 		const anotherMain = sections.find(s => s.name === 'Another Main')!;
 
 		// Test complex nesting relationships
-		assert.strictEqual(mainFunc.parentName, undefined);
-		assert.strictEqual(helper1.parentName, mainFunc.uniqueId);
-		assert.strictEqual(deepHelper.parentName, helper1.uniqueId);
-		assert.strictEqual(helper2.parentName, mainFunc.uniqueId);
-		assert.strictEqual(anotherMain.parentName, undefined);
+		assert.strictEqual(mainFunc.parentId, undefined);
+		assert.strictEqual(helper1.parentId, mainFunc.uniqueId);
+		assert.strictEqual(deepHelper.parentId, helper1.uniqueId);
+		assert.strictEqual(helper2.parentId, mainFunc.uniqueId);
+		assert.strictEqual(anotherMain.parentId, undefined);
 	});
 
 	test('Should handle indented double slash comments with spaces', () => {
@@ -229,11 +229,11 @@ function helper() {
 		assert.strictEqual(utility.depth, 1);
 
 		// Test parent relationships
-		assert.strictEqual(outer.parentName, undefined);
-		assert.strictEqual(constructor.parentName, outer.uniqueId);
-		assert.strictEqual(initialization.parentName, constructor.uniqueId);
-		assert.strictEqual(operations.parentName, outer.uniqueId);
-		assert.strictEqual(utility.parentName, undefined);
+		assert.strictEqual(outer.parentId, undefined);
+		assert.strictEqual(constructor.parentId, outer.uniqueId);
+		assert.strictEqual(initialization.parentId, constructor.uniqueId);
+		assert.strictEqual(operations.parentId, outer.uniqueId);
+		assert.strictEqual(utility.parentId, undefined);
 	});
 
 	test('Should handle indented double slash comments with tabs', () => {
