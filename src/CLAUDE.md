@@ -13,7 +13,7 @@ the extension. A file not reachable from `extension.ts` does not exist at runtim
 | `treeDataProvider.ts` | Backs the custom Activity Bar TreeView (`codeOrganizerOutlineActivity`). |
 | `decorations.ts` | The current-section editor highlight (`TextEditorDecorationType`). |
 | `utils/` | The parser and the shared helpers. See `utils/CLAUDE.md`. |
-| `test/` | Mocha suites, one per comment syntax. See `test/CLAUDE.md`. |
+| `test/` | Mocha suites — one per comment syntax, plus one per non-parser util. See `test/CLAUDE.md`. |
 
 ## The one invariant
 
