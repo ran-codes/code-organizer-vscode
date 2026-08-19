@@ -18,6 +18,8 @@
 - `getCurrentSection` lives in `src/utils/` (vscode-type-light, unit-testable) with new unit tests covering: cursor before any section, inside a depth-1 section, inside a nested section (returns deepest), after the last section.
 - One `findSections` call per (document URI, `document.version`) — verifiable by a temporary log or a spy in tests.
 - `reveal()` still works: the `treeItemCache` invariant in `CodeOrganizerTreeDataProvider` is untouched (root CLAUDE.md §3 — reveal silently fails on non-cached instances).
+- A test in `src/test/` asserting TreeItem **instance identity** across the tree provider, using `strictEqual` (never `deepStrictEqual`) — full rationale and snippet in "Addition to the plan" below.
+- The `log()` helper logs the cache-miss branch in `updateHighlight` instead of returning silently.
 - Per-folder CLAUDE.md files updated (see below).
 
 ## Implementation plan
