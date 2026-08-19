@@ -56,3 +56,88 @@ Update every per-folder CLAUDE.md created in src-refactor-1 (create them per `sr
 ### 6. Verify
 - `npm run compile`, `npm run lint`, `npm run test` — green.
 - Manual `F5` pass: open `assets/test-files/test.py` and `test.md`; confirm (a) outline + tree identical to master, (b) cursor movement still highlights and reveals with the same feel (150 ms debounce), (c) editing the document refreshes the tree, (d) switching editors re-syncs.
+
+## Opus agent eval
+
+Review of this plan against the code as it stands on `reafactor-2`. Verdict: **agree with
+the plan as written.** One gap to add to it, plus two unverified behaviors to check while
+the code is open. Line references are pre-refactor.
+
+### Concern 1 — the `treeItemCache` invariant fails silently
+
+§Acceptance criteria correctly names `treeItemCache` as the thing not to break. Worth
+recording *why* it is the riskiest item here: breaking it produces no error of any kind.
+Three layers stack up.
+
+1. **The guard swallows the miss.** `extension.ts:147-149` — `findTreeItemBySection()`
+   returns `undefined` on a cache miss and the `if (item)` guard skips the whole reveal
+   block. Nothing throws.
+2. **A real failure is buried.** The `catch` at `extension.ts:157` routes a reveal
+   rejection to `console.error`, visible only in the Extension Host devtools console.
+3. **The visible half keeps working.** `updateSectionHighlight()` (`extension.ts:142`)
+   is a separate path that never touches the cache, so the editor line still highlights.
+   Only the sidebar quietly stops scrolling.
+
+Underlying cause: `TreeView.reveal()` matches elements by **object reference** against
+what `getChildren()` returned. A rebuilt `SectionTreeItem` with identical field values is
+a stranger to the tree. `getParent()` (`treeDataProvider.ts:77-83`) carries the same
+requirement — reveal walks the parent chain and every link must also be a cached instance.
+
+### Concern 2 — the invariant is documented but not tested
+
+It is stated in prose in three places (root `CLAUDE.md` §3, `src/CLAUDE.md` gotchas, and
+§Acceptance criteria above) and asserted in zero tests. Prose warns; it does not fail a
+build. A refactor that violates it gets a green `npm run test`.
+
+Splitting testability by layer:
+
+| Layer | Example | Testable | Status |
+| --- | --- | --- | --- |
+| Pure logic | `findSections`, `buildChildrenMap`, `getCurrentSection` | Yes, trivially | Covered — except `getCurrentSection`, which §3 of this plan extracts precisely so it can be |
+| Provider contract | "the same instance comes back twice" | Yes, today | **Gap** |
+| Host UI behavior | does the sidebar visually scroll | No | Manual `F5`, correctly |
+
+The gap is the middle row and it needs no new infrastructure — `documentSymbolProvider.test.ts`
+already opens real documents inside the `vscode-test` host.
+
+### Addition to the plan
+
+Add to §Acceptance criteria:
+
+- A test in `src/test/` asserting instance identity across the tree provider:
+
+  ```ts
+  provider.refresh(doc);
+  const roots = provider.getChildren();
+  assert.strictEqual(provider.findTreeItemBySection(roots[0].section), roots[0]);
+  ```
+
+  **`strictEqual`, never `deepStrictEqual`.** The bug class *is* identity — two objects
+  with identical contents are exactly the failure mode, so a deep-equality assertion
+  would pass against a broken refactor and give false confidence.
+
+- The `log()` helper introduced in §2 logs the cache-miss branch at `extension.ts:149`
+  rather than returning silently.
+
+Add to §5 (`src/test/CLAUDE.md`): the identity suite and the `strictEqual` rule above.
+
+General principle worth carrying past this refactor: **any invariant that had to be
+written in prose because the type system cannot enforce it needs a test.** TypeScript
+type-checks `new SectionTreeItem(...)` identically to a cached lookup, so the compiler
+will never catch this class of regression.
+
+### Concern 3 — two unverified latent behaviors
+
+Readings of the code, **not** reproduced. `refresh()` clears `treeItemCache`
+(`treeDataProvider.ts:52`) and fires `_onDidChangeTreeData`, but the cache only refills
+lazily when VS Code calls `getChildren()`. That implies:
+
+- On the first cursor move into a newly-opened document, `findTreeItemBySection`
+  (`extension.ts:147`) may run before VS Code has rebuilt — cache empty, reveal skipped.
+- Under a **collapsed** parent, VS Code never calls `getChildren()`, so descendants are
+  never cached — reveal on a deep section may no-op.
+
+Both are invisible today because of the `if (item)` guard. The logging change above is
+what tells you whether they are real. **If they are, they are pre-existing bugs and
+belong in their own issue — not in this refactor**, whose stated non-goal is any visible
+behavior change.
