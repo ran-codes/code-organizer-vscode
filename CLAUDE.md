@@ -2,13 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Overview
+## 1. Overview
 
 `code-organizer` is a VS Code extension (publisher `ran-codes`) that turns comment
 patterns like `# Section Name ----` into a navigable outline. Written in TypeScript,
 bundled with esbuild.
 
-## Commands
+## 2. Commands
 
 | Task | Command |
 | --- | --- |
@@ -34,7 +34,7 @@ both need the tests compiled to `out/` first (`npm run compile-tests`), since
   `files: 'out/test/hash-comments.test.js'`, then `npx vscode-test`. Revert after.
 - Add Mocha `.only()` to a `suite`/`test` in the `src/test/*.ts` file, then recompile.
 
-## Architecture
+## 3. Architecture
 
 Everything flows from a single parser. `src/utils/findSections.ts` exports
 `findSections(text, languageId)`, which returns a flat, document-ordered
@@ -69,7 +69,7 @@ calls `treeViewActivity.reveal()`.
 keeps a `Map` of `uniqueId → TreeItem`; `reveal()` silently fails against freshly
 constructed items. If you touch the tree provider, keep that cache intact.
 
-## Workflow
+## 4. Workflow
 
 Releases are **fully manual — there is no CI/CD** in this repo. `.github/` contains
 only an issue template; there are no GitHub Actions.
@@ -95,7 +95,7 @@ in the project — a type error or lint failure blocks a publish.
 **`.context/workflow.md` is the source of truth for the full checklist.** Read it
 before cutting a release; the summary above is deliberately abbreviated.
 
-## Sources of Truth
+## 5. Sources of Truth (Glossary)
 
 Canonical location for each fact about this project. When a fact here conflicts
 with something stated elsewhere (including this file), the listed file wins.
