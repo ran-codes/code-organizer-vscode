@@ -96,11 +96,12 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     return this.treeItemCache.get(section.uniqueId);
   }
 
+  /**
+   * The snapshot the visible tree was last built from — the same one
+   * `treeItemCache` is keyed against, which is why `cursorSync` resolves the
+   * cursor through here.
+   */
   getSections(): SectionMatch[] {
     return this.sections;
-  }
-
-  getCurrentDocument(): vscode.TextDocument | undefined {
-    return this.currentDocument;
   }
 }
