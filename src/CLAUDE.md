@@ -36,6 +36,11 @@ Two shared helpers sit between the parser and its consumers:
   `reveal()` silently fails against freshly constructed items. Keep that cache intact.
 - **Roots are `depth === 1`, not "no parent."** A file opening with `### Foo ----`
   produces a depth-3 section with no parent that is deliberately *not* a root.
+- **Section identity is `uniqueId`, never `name`.** Duplicate names are legal and
+  expected. `documentSymbolProvider.addChildSymbols` builds its tree by plain
+  recursion over the children map with no cycle guard — termination is guaranteed
+  because parent chains strictly decrease in depth. A name-based guard used to live
+  there and silently dropped whole subtrees (#47); don't reintroduce one.
 - **`extension.ts` reveals an empty range** at the section start, so jumping to a
   section centers the line without selecting it. Do not pass the full section range.
 - Cursor sync is debounced at 150 ms in `onDidChangeTextEditorSelection`.
