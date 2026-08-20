@@ -79,22 +79,35 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
     // YAML front matter: `---` as the very first line, closed by the next
     // `---` or `...` line (Pandoc accepts both). trimEnd(), not trim() — an
-    // *indented* `---` is not a delimiter in YAML/Jekyll/Quarto.
+    // *indented* `---` is not a delimiter in YAML/Jekyll/Quarto. trimEnd() is
+    // also what strips the `\r` of a CRLF document, so every delimiter check
+    // here has to keep going through it; an exact `=== '---'` compare would
+    // break every CRLF file on Windows.
+    //
+    // The search stops at the first *unindented* ``` and reports no closer. A
+    // fence cannot open at column 0 inside real YAML front matter, so a `---`
+    // past that point belongs to a code block, not to metadata. Without the
+    // stop, a line-1 horizontal rule plus any `---` inside a fence would
+    // swallow every header in between.
     //
     // Unclosed => excluded as NOT front matter, deliberately unlike the fence
     // handling below (which extends an unmatched fence to EOF): a lone top rule
     // must not swallow every header in the file.
     //
-    // Known limitation (#44): a line-1 `---` with a coincidental later `---` is
-    // taken as front matter even when both were meant as horizontal rules.
-    // Accepted on purpose — Pandoc/Quarto read the same file the same way, so
-    // the outline agrees with what the document renders as.
-    if (lines.length > 0 && lines[0].trimEnd() === '---') {
-      const closer = lines.findIndex(
-        (line, index) => index > 0 && ['---', '...'].includes(line.trimEnd())
-      );
-      if (closer !== -1) {
-        excludedRanges.push({ start: 0, end: closer });
+    // Known limitation (#44): a line-1 `---` with a coincidental later `---` or
+    // `...` is taken as front matter even when both were meant as horizontal
+    // rules. Accepted on purpose — Pandoc/Quarto read the same file the same
+    // way, so the outline agrees with what the document renders as.
+    let frontMatterEnd = -1;
+    if (lines[0].trimEnd() === '---') {
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trimEnd();
+        if (line.startsWith('```')) break;
+        if (line === '---' || line === '...') {
+          frontMatterEnd = i;
+          excludedRanges.push({ start: 0, end: i });
+          break;
+        }
       }
     }
 
@@ -102,6 +115,11 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     let codeBlockStart = 0;
 
     lines.forEach((line, index) => {
+      // Front matter is metadata, not document body. A ``` inside a block
+      // scalar (`desc: >`) must not open a phantom fence that then runs to EOF
+      // and blanks the entire outline.
+      if (index <= frontMatterEnd) return;
+
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
           inCodeBlock = true;

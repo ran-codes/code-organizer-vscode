@@ -69,9 +69,20 @@ is one exclusion check, not two.
 
 Front matter is `---` on the *very first* line, closed by the next line that is
 exactly `---` or `...` (Pandoc accepts both); `trimEnd()`, not `trim()`, because
-an indented `---` is not a delimiter. An **unclosed** opening `---` excludes
+an indented `---` is not a delimiter — and because `trimEnd()` is also what
+strips the `\r` of a CRLF document. An **unclosed** opening `---` excludes
 nothing — deliberately unlike a fence, which extends to EOF, since a lone top
 rule must not swallow every header in the file (#44).
+
+The two scans are ordered and each respects the other's territory:
+
+- The closer search **stops at the first unindented ```** and reports no closer.
+  A fence cannot open at column 0 inside real YAML, so a `---` past that point
+  belongs to a code block. Without the stop, a line-1 horizontal rule plus any
+  `---` inside a fence swallows every header in between.
+- The fence scan **skips the front-matter range**. A ``` inside a block scalar
+  (`desc: >`) is metadata; treating it as a fence opener leaves an unmatched
+  fence running to EOF and blanks the entire outline.
 
 **Known limitation, asserted on purpose:** a line-1 `---` with a coincidental
 later `---`/`...` is read as front matter even when both were meant as horizontal

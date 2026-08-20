@@ -274,4 +274,61 @@ library(ggplot2)
     assert.strictEqual(sections.length, 1);
     assert.strictEqual(sections[0].name, 'Real Header');
   });
+
+  test('should not accept a `---` inside a code fence as the closing delimiter', () => {
+    // A line-1 `---` meant as a horizontal rule, where the only later `---`
+    // sits inside a fence. The closer search stops at the unindented ```, so
+    // the block reads as unclosed and excludes nothing — `Header A` survives.
+    const text = `---
+
+# Header A
+
+\`\`\`r
+---
+\`\`\`
+
+# Header B
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, 'Header A');
+    assert.strictEqual(sections[1].name, 'Header B');
+  });
+
+  test('should not let a ``` inside front matter open a phantom fence', () => {
+    // A fence marker in a YAML block scalar is metadata, not a fence opener.
+    // Scanning it as one leaves an unmatched fence that runs to EOF and blanks
+    // the whole outline, so the fence scan skips the front-matter range.
+    const text = `---
+title: "Block Scalar"
+desc: >
+  \`\`\`
+---
+
+# Real Header
+
+## Real Sub Header
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, 'Real Header');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, 'Real Sub Header');
+    assert.strictEqual(sections[1].depth, 2);
+  });
+
+  test('should exclude front matter in a CRLF document', () => {
+    // trimEnd() is what strips the `\r`. An exact `=== '---'` compare would
+    // break every CRLF file on Windows and no other test would notice.
+    const text = '---\r\ntitle: "x"\r\n# a YAML comment\r\n---\r\n\r\n# 1. Setup\r\n\r\n## 1.1 Sub\r\n';
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, '1. Setup');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, '1.1 Sub');
+    assert.strictEqual(sections[1].depth, 2);
+  });
 });
