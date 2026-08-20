@@ -88,12 +88,19 @@ flowchart TD
 %% # ----
 %%   ----
 %% just an ordinary mermaid comment
+%%%% # Four Percents ----
 `;
 		const sections = findSections(text, 'mermaid');
 
 		// Only the one valid section. Note `%% Name Without Hashes ----` is
 		// deliberately NOT a section: the bare `%%` form (no hashes) is out of
 		// scope for #43, so it must not match.
+		//
+		// `%%%% # Four Percents ----` is also NOT a section, and that one is worth
+		// stating outright because ./CLAUDE.md calls `%%%%` a legal Mermaid comment
+		// while comparing it to `////` — which *does* parse, at depth 2. The token
+		// is anchored `^[ \t]*%%`, so a third `%` kills the match. The rejection is
+		// deliberate: repeating `%%` carries no depth here, hashes do.
 		assert.strictEqual(sections.length, 1);
 		assert.strictEqual(sections[0].name, 'Valid Section');
 	});
@@ -151,6 +158,23 @@ x = 1
 		assert.strictEqual(sections.length, 1);
 		assert.strictEqual(sections[0].name, 'Load data');
 		assert.strictEqual(sections[0].depth, 2);
+	});
+
+	test('Should not span lines between the name and the dashes', () => {
+		// The third `\s` gap in dashSource, before the dash run. `singleLine` closes
+		// it along with the other two — without it, `%% # Notes` swallows the `----`
+		// on the next line and reports a section that isn't one.
+		assert.deepStrictEqual(findSections('%% # Notes\n----\n', 'plaintext'), []);
+		assert.deepStrictEqual(findSections('%% ## Notes\n  ------\n', 'plaintext'), []);
+
+		// ...and the trailing gap, so a section never absorbs the blank lines under it.
+		const spaced = '%% # A ----\n\n\n%% # B ----\n';
+		const sections = findSections(spaced, 'plaintext');
+		assert.strictEqual(sections.length, 2);
+		assert.ok(
+			!sections[0].fullText.includes('\n\n'),
+			'a section must not absorb the blank lines that follow it'
+		);
 	});
 
 	test('Known limitation (#56): a bare # line above a %% section still duplicates', () => {

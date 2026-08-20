@@ -65,20 +65,26 @@ Four things the table encodes deliberately:
   `##### Level 5 ----`, changing the parsed name — `hash-comments.test.ts` asserts
   that name to lock it in. The Mermaid entry's hash ladder is bounded the same way
   and for the same reason; `mermaid-comments.test.ts` asserts its 5th-hash name too.
-- **`\s*` inside an entry spans lines — know which gaps use it.** `\s` matches
-  `\n`, so a `\s*` between two parts of a pattern lets a match run past the end of
-  its line. `"#\nName ----"` is one section today, and has been since before the
-  table existed. Two gaps are involved and they are **not** in the same state:
-  - `dashSource`'s **`nameGap`** (token → name) still defaults to `\s*`, so `#`,
-    `//`, `--` and JSX all still span lines. Harmless only while no two entries can
-    claim the same line, which stopped being true when Mermaid landed — **#56**
-    tracks the class, with reproductions and the options.
-  - **Inside a token pattern, use `[ \t]*`.** The Mermaid entry does, and it also
-    opts its `nameGap` out of the default, because `%%` is the first token that
-    overlaps another entry's territory: with `\s*` a `%%`-and-hashes line binds to
-    a `#` header below it and either duplicates that header's section or swallows
-    it. `mermaid-comments.test.ts` pins both directions, including the one case
-    #56 leaves open (a bare `#` line above a `%%` section).
+- **`\s` inside an entry spans lines — know which gaps use it.** `\s` matches `\n`,
+  so any `\s` class between two parts of a pattern lets a match run past the end of
+  its line. `"#\nName ----"` and `"# Name\n----"` are each one section today, and
+  have been since before the table existed. `dashSource` has **three** such gaps —
+  before the name, before the dash run, and after it — plus whatever a token
+  pattern spells out itself. They are **not** all in the same state:
+  - **By default all three stay `\s`**, so `#`, `//`, `--` and (via its
+    hand-written literal) JSX all still span lines. Harmless only while no two
+    entries can claim the same line, which stopped being true when Mermaid landed —
+    **#56** tracks the class, with reproductions and the options.
+  - **`dashSource(token, singleLine = true)` swaps all three for `[ \t]`**, and
+    inside a token pattern write `[ \t]*` directly. The Mermaid entry does both,
+    because `%%` is the first token that overlaps another entry's territory: left
+    spanning lines, a `%%`-and-hashes line binds to a `#` header below it and
+    either duplicates that header's section or swallows it.
+  - `singleLine` is **not** what makes CRLF work — `$` under `/m` treats `\r` as a
+    line terminator, so a trailing `[ \t]*` parses CRLF exactly as `\s*` did.
+  - `mermaid-comments.test.ts` pins every direction, including the one case #56
+    leaves open: a bare `#` line above a `%%` section, where it is the *hash*
+    pattern reaching forward, so no change to the Mermaid entry can close it.
 - **The specs are module-level data; the `RegExp` objects are built per call.** The
   `/gm` regexes carry `lastIndex`, so hoisting the compiled objects would leak state
   across documents. Keep construction inside `findSections`.

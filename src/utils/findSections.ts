@@ -33,15 +33,25 @@ interface PatternSpec {
  * unbounded. Generating `(#+)` instead of `(#{1,4})` would change parsed names
  * — on `##### Level 5 ----` the 5th `#` is currently part of the name.
  *
- * `nameGap` is the whitespace between the token and the section name. It defaults
- * to `\s*`, which **matches `\n`** and so lets a match run past the end of its
- * line: `"#\nName ----"` is one section today. That is long-standing behaviour for
- * `#`, `//` and `--`, harmless while no two entries can claim the same line, and
- * left alone here rather than changed underneath four comment styles at once —
- * see #56. An entry that cannot afford it passes `[ \t]*` instead.
+ * Three of the gaps in this shape are `\s` classes — before the name, before the
+ * dash run, and after it — and **`\s` matches `\n`**. So by default a match can
+ * run past the end of its own line: `"#\nName ----"` and `"# Name\n----"` are each
+ * one section today. That is long-standing behaviour for `#`, `//` and `--`,
+ * harmless only while no two entries can claim the same line, and left alone here
+ * rather than changed underneath four comment styles at once — see #56.
+ *
+ * `singleLine` swaps all three for `[ \t]` classes, confining the entry to one
+ * physical line. An entry whose token overlaps another entry's territory has to
+ * set it; Mermaid's `%%` is the first that does. It does not affect CRLF, which
+ * works because `$` under `/m` treats `\r` as a line terminator, not because the
+ * trailing gap absorbs it.
  */
-const dashSource = (tokenPattern: string, nameGap: string = String.raw`\s*`): string =>
-  String.raw`^[ \t]*${tokenPattern}${nameGap}(.+?)\s+[-]{4,}\s*$`;
+const dashSource = (tokenPattern: string, singleLine = false): string => {
+  const nameGap = singleLine ? String.raw`[ \t]*` : String.raw`\s*`;
+  const dashGap = singleLine ? String.raw`[ \t]+` : String.raw`\s+`;
+  const tailGap = singleLine ? String.raw`[ \t]*` : String.raw`\s*`;
+  return String.raw`^[ \t]*${tokenPattern}${nameGap}(.+?)${dashGap}[-]{4,}${tailGap}$`;
+};
 
 const COMMENT_PATTERNS: PatternSpec[] = [
   // Hash comments: # Section Name ---- (Python, R, shell, etc.)
@@ -60,11 +70,10 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   // Mermaid comments: %% # Section Name ----
   // The one entry whose capture group 1 is not its comment token: depth comes from
   // the hashes, not the `%%`, so `symbolUnit` is 1. See ./CLAUDE.md for why.
-  // Both gaps are `[ \t]*` rather than the default `\s*`, because this is the first
-  // token that overlaps another entry's territory — with `\s*` a `%%`-and-hashes
-  // line binds to a `#` header below it, duplicating that header's section or
-  // swallowing it outright (#56).
-  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`, String.raw`[ \t]*`), symbolUnit: 1 },
+  // `singleLine` because this is the first token that overlaps another entry's
+  // territory — allowed to span lines, a `%%`-and-hashes line binds to a `#` header
+  // below it, duplicating that header's section or swallowing it outright (#56).
+  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`, true), symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [
