@@ -12,7 +12,7 @@ Triaged 2026-08-20. One row per open item, in the order to do them.
   - [x] Fable planning — `TODO__issue_43.md`
   - [ ] Dev
 - [ ] **#52** `getCurrentSection` EOF edge case
-  - [ ] Fable planning → `TODO__issue_52.md`
+  - [x] Fable planning — `TODO__issue_52.md`
   - [ ] Dev
 - [ ] **#50** reveal never fires on a refreshing sync pass
   - [ ] Fable planning → `TODO__issue_50.md`
@@ -50,8 +50,8 @@ set, which is why it could have run in parallel the whole time.
 | --- | --- | --- | --- | --- | --- | --- |
 | ~~1~~ | ~~[PR #49](https://github.com/ran-codes/code-organizer-vscode/pull/49) `refactor-3`~~ | Refactor | `.context/refactors/src-refactor-3.md` | — | — | **Done** — merged 2026-08-20. |
 | ~~2~~ | ~~[#44](https://github.com/ran-codes/code-organizer-vscode/issues/44) YAML front matter~~ | Bug | *deleted on merge* | — | — | **Done** — PR #53, merged 2026-08-20. Grew past the original spec: front matter and fence scans now respect each other, and an unterminated block excludes nothing. See `src/utils/CLAUDE.md`. |
-| 3 | [#43](https://github.com/ran-codes/code-organizer-vscode/issues/43) Mermaid `%%` | Feature | `TODO__issue_43.md` | **Dev** | — | One `COMMENT_PATTERNS` entry + one test suite. Purely additive, blast radius 2/10. Spec is ready to implement as written. |
-| 4 | [#52](https://github.com/ran-codes/code-organizer-vscode/issues/52) EOF edge case | Bug | *none* | **Fable plan** | — | Cheapest on the list: one comparison in a pure function, plus flip the assertion in `getCurrentSection.test.ts` that was written to be flipped. Independent of #50/#51. |
+| 3 | [#43](https://github.com/ran-codes/code-organizer-vscode/issues/43) Mermaid `%%` | Feature | `TODO__issue_43.md` | **Review** — [PR #55](https://github.com/ran-codes/code-organizer-vscode/pull/55) | — | Implemented as specced: one `COMMENT_PATTERNS` entry + `mermaid-comments.test.ts` (10 cases) + `assets/test-files/test.mmd`. 97 tests passing, `npm run compile` clean. **F5 pass still outstanding** — the only unticked acceptance box. |
+| 4 | [#52](https://github.com/ran-codes/code-organizer-vscode/issues/52) EOF edge case | Bug | `TODO__issue_52.md` | **Dev** | — | Cheapest on the list: one comparison in a pure function, plus flip the assertion in `getCurrentSection.test.ts` that was written to be flipped. Independent of #50/#51. |
 | 5 | [#50](https://github.com/ran-codes/code-organizer-vscode/issues/50) reveal never fires | Bug | *none* | **Fable plan** | — | Biggest real-world impact (sidebar stops following the cursor while typing) and the most design work: three candidate approaches, needs a perf check, and it is a **visible behavior change** → own manual F5 pass + CHANGELOG entry. |
 | 6 | [#51](https://github.com/ran-codes/code-organizer-vscode/issues/51) collapsed parents | Bug | *none* | **Fable plan** (after #50's) | **#50** | Same root cause as #50. #50's chosen approach may close it outright — verify before implementing. |
 | 7 | [#54](https://github.com/ran-codes/code-organizer-vscode/issues/54) wrong parent in mixed-syntax files | Bug | *none* | **Triage** | — | Untriaged. Found while reviewing the #43 spec; repro verified on `master`. A `.tsx` mixing `//` and `{/* // */}` nests a subsection under a heading that appears *after* it, because parents resolve during the pattern-ordered loop and the document-order sort happens last. Parser-wide blast radius — own PR, explicitly out of scope for #43. |
