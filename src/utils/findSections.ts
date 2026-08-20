@@ -45,6 +45,12 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   // JSX comments: {/* // Section Name ---- */} (React, JSX, TSX)
   // Hand-written — the wrapper makes its shape different from the dash family.
   { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
+
+  // Mermaid comments: %% # Section Name ---- (depth from the hashes, not the %%)
+  // Hand-written — a fixed `%%` prefix, then the same bounded hash ladder as the
+  // hash style. Mermaid does not nest by repeating `%%`, so depth cannot come
+  // from the token the way it does for `//` and `--` (#43).
+  { source: String.raw`^[ \t]*%%\s*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$`, symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [

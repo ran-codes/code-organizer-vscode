@@ -12,6 +12,7 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `double-slash-comments.test.ts` | `// Section ----` (JS/TS, C-family, Go, Rust, Swift) |
 | `sql-comments.test.ts` | `-- Section ----` |
 | `jsx-comments.test.ts` | `{/* // Section ---- */}` |
+| `mermaid-comments.test.ts` | `%% # Section ----` — depth from the hashes, `%%{init:…}%%` ignored |
 | `md-comments.test.ts` · `quarto-comments.test.ts` | Native `#` headers, fence exclusion |
 | `sectionTree.test.ts` | `buildChildrenMap()` / `childrenOf()` — not a syntax suite |
 | `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |

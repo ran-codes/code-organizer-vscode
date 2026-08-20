@@ -54,8 +54,9 @@ Transform your code files into organized, navigable documents with a table of co
 | JavaScript, TypeScript, C++, Java, Go, Rust | `// Section ----` | `////`, `//////`, `////////` |
 | React JSX, TSX | `{/* // Section ---- */}` | `{/* //// */}`, `{/* ////// */}` |
 | SQL, PostgreSQL | `-- Section ----` | `----`, `------`, `--------` |
+| Mermaid | `%% # Section ----` | `%% ##`, `%% ###`, `%% ####` |
 
-**Works with:** Python • JavaScript • TypeScript • **React/JSX** • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • and more...
+**Works with:** Python • JavaScript • TypeScript • **React/JSX** • Java • C# • C++ • Go • Rust • Swift • PHP • SQL • R • Shell • **Mermaid** • and more...
 
 ### Python Example
 
@@ -176,6 +177,26 @@ DELIMITER ;
 
 -- 2. Sample Data ----
 INSERT INTO users VALUES (1, 'John Doe', 'john@example.com');
+```
+
+### Mermaid Example
+
+Mermaid comments start with `%%`, so the depth comes from the hashes that follow it.
+`%%{init: ...}%%` directives are left alone.
+
+```
+%%{init: {'theme': 'default'}}%%
+flowchart TD
+
+%% # 1. Ingest ----
+    csv[CSV drop] --> load[Load raw]
+
+%% ## 1.1 Validation ----
+    load --> schema{Schema ok?}
+    schema -->|no| reject[Quarantine]
+
+%% # 2. Output ----
+    schema -->|yes| warehouse[(Warehouse)]
 ```
 
 ## Why Use This Extension?

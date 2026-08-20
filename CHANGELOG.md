@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Mermaid `%%` comment support**: `%% # Section Name ----` now creates sections,
+  with nesting from the hash count (`%% ##`, `%% ###`, `%% ####`) — so `.mmd`
+  diagrams get an outline in both the built-in Outline and the Activity Bar view.
+  Mermaid `%%{init: ...}%%` directives are ignored. Works with no language
+  extension installed, since `.mmd` files open as plain text (#43)
+
 ### Fixed
 
 - Sections that share a name with their parent section no longer disappear —
