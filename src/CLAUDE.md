@@ -42,6 +42,10 @@ Two shared helpers sit between the parser and its consumers:
   `reveal()` matches by object reference, so it silently fails against freshly
   constructed items — including anywhere up the `getParent()` chain, which reveal
   also walks. Keep that cache intact; `test/treeDataProvider.test.ts` locks it.
+  **Known broken today (#50):** `refresh()` clears the cache and only a later
+  `getChildren()` refills it, and `cursorSync` does not await in between — so
+  every pass that refreshes misses, and because an edit forces a refresh, the
+  reveal does not fire at all while the user is typing. Deterministic, not a race.
 - **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
   `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
   the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built

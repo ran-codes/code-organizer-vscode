@@ -81,12 +81,14 @@ suite('Tree Data Provider Tests (reveal identity)', () => {
 	});
 
 	test('Should hold no cached items between refresh and the first getChildren', async () => {
-		// Pins a pre-existing gap rather than endorsing it. `refresh()` clears the
+		// Pins a pre-existing bug rather than endorsing it. `refresh()` clears the
 		// cache and fires the change event, but only VS Code calling `getChildren()`
-		// refills it — so a cursor move that lands before the tree is rebuilt finds
-		// nothing to reveal. Previously an unverified reading of the code; it is
-		// real, it is out of scope for this refactor (no visible behavior change),
-		// and cursorSync now logs the miss instead of returning in silence.
+		// refills it. cursorSync does not await between the two, so this is not a
+		// race it might lose — every sync pass that refreshes finds nothing to
+		// reveal, and since an edit forces a refresh, the sidebar stops following
+		// the cursor for as long as the user is typing. Out of scope here (fixing
+		// it is a visible behavior change); tracked as #50, and cursorSync logs
+		// the miss instead of returning in silence.
 		const document = await refreshedWith('# Root ----\n');
 		const section = index.getSections(document)[0];
 

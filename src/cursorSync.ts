@@ -28,10 +28,9 @@ export function registerCursorSync(
   let lastDocument: vscode.TextDocument | undefined;
 
   //// 2.1 Sync Pass ----
-  async function updateHighlight(): Promise<void> {
+  async function syncPass(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      log('No active editor');
       return;
     }
 
@@ -44,18 +43,15 @@ export function registerCursorSync(
     // from. Reading version-keyed sections directly would let this pass run
     // ahead of the tree, miss the lookup, and silently stop revealing.
     if (document !== lastDocument) {
-      log(`Refreshing tree for document: ${document.fileName}`);
       treeDataProvider.refresh(document);
       lastDocument = document;
     }
 
-    const sections = treeDataProvider.getSections();
     const currentSection = getCurrentSection(
       document.offsetAt(editor.selection.active),
       document.getText().length,
-      sections
+      treeDataProvider.getSections()
     );
-    log(`${sections.length} sections; current: ${currentSection?.name ?? '(none)'}`);
 
     updateSectionHighlight(currentSection, editor, decoration);
 
@@ -63,15 +59,16 @@ export function registerCursorSync(
       return;
     }
 
-    //// 2.2 TreeView Reveal ----
+    ////// 2.1.1 TreeView Reveal ----
     const item = treeDataProvider.findTreeItemBySection(currentSection);
     if (!item) {
       // Logged rather than skipped in silence. `reveal()` needs the cached
       // TreeItem instance, and `refresh()` clears that cache while only
-      // `getChildren()` refills it — so a miss here means VS Code has not
-      // rebuilt the visible tree yet, or the section sits under a collapsed
-      // parent it never asked for. Both are pre-existing; this line is how we
-      // find out whether they bite in practice.
+      // `getChildren()` — which VS Code schedules asynchronously — refills it.
+      // Nothing above this awaits, so *every* pass that refreshed arrives here
+      // with an empty cache. Not a race it might lose: an edit resets
+      // `lastDocument` and forces a refresh, so the reveal does not fire at all
+      // while the user is typing. Pre-existing and deterministic — see #50.
       log(`No cached tree item for "${currentSection.name}" — reveal skipped`);
       return;
     }
@@ -80,6 +77,21 @@ export function registerCursorSync(
       await treeView.reveal(item, { select: true, focus: false, expand: 1 });
     } catch (error) {
       log(`Reveal failed for "${currentSection.name}": ${error}`);
+    }
+  }
+
+  //// 2.2 Rejection Boundary ----
+  /**
+   * Every caller of this is fire-and-forget — the debounce timer, the
+   * active-editor listener, and `activate()`'s initial kick all discard the
+   * promise. Nothing may escape as an unhandled rejection: that lands in the
+   * Extension Host console, which is exactly the sink `log()` exists to avoid.
+   */
+  async function updateHighlight(): Promise<void> {
+    try {
+      await syncPass();
+    } catch (error) {
+      log(`Cursor sync pass failed: ${error}`);
     }
   }
 
