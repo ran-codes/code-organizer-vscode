@@ -1,0 +1,41 @@
+---
+title: "harvard__pa_city_defined_nbhd_boundaries__v1"
+dataset-type: boundaries
+dataset-status: active
+# ccuh-metadata — repo SOT for the Notion tracking-page properties.
+# Quarto/Pandoc ignore unknown front-matter keys, so this block is render-safe.
+# Controlled fields (dataset-type, dataset-status, topic-tags, maintainers, project)
+# must draw from the vocab in templates/notion-dataset-page.md — do not free-type.
+ccuh-metadata:
+  version: 1.0.0
+  status: active
+  maintainers:
+    - ran-codes
+---
+
+# 1. Setup
+
+Load the libraries. None of the `#` lines in the front matter above should appear
+in the Outline or the Activity Bar TreeView — only the six numbered sections below.
+
+```{r}
+# This header inside a fence must stay ignored too
+## And this one
+library(ggplot2)
+```
+
+## 1.1 Dependencies
+
+Nested under Setup.
+
+# 2. Import
+
+Read the source data.
+
+# 3. Clean
+
+# 4. Transform
+
+# 5. Export
+
+# 6. Access

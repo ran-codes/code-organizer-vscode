@@ -1,8 +1,9 @@
 # Issue #44: YAML Front Matter Comments Parsed as Sections
 
-> **Status: TODO** — this is a ready-to-implement spec. An agent picking this up
-> should read `src/CLAUDE.md`, `src/utils/CLAUDE.md`, and `src/test/CLAUDE.md`
-> first, then follow the Plan below.
+> **Status: IMPLEMENTED** on `issue-44` — parser fix, 10 tests, and docs are in.
+> The only step left is the manual F5 check in Step 3 (scratch file already
+> written to `test-files/frontmatter.qmd`). Kept as the decision record for #44;
+> decisions 1–6 are what the code encodes.
 
 **Issue:** https://github.com/ran-codes/code-organizer-vscode/issues/44
 

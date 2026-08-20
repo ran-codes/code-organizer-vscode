@@ -71,10 +71,33 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
   // Check if this is a Markdown or Quarto file
   const isMarkdownOrQuarto = languageId && ['markdown', 'quarto', 'md', 'qmd', 'rmd'].includes(languageId.toLowerCase());
 
-  // For Markdown/Quarto files, find code block ranges to exclude from parsing
-  const codeBlocks: { start: number; end: number }[] = [];
+  // For Markdown/Quarto files, collect the line ranges to exclude from parsing:
+  // YAML front matter and ``` code blocks both land in this one list.
+  const excludedRanges: { start: number; end: number }[] = [];
   if (isMarkdownOrQuarto) {
     const lines = text.split('\n');
+
+    // YAML front matter: `---` as the very first line, closed by the next
+    // `---` or `...` line (Pandoc accepts both). trimEnd(), not trim() — an
+    // *indented* `---` is not a delimiter in YAML/Jekyll/Quarto.
+    //
+    // Unclosed => excluded as NOT front matter, deliberately unlike the fence
+    // handling below (which extends an unmatched fence to EOF): a lone top rule
+    // must not swallow every header in the file.
+    //
+    // Known limitation (#44): a line-1 `---` with a coincidental later `---` is
+    // taken as front matter even when both were meant as horizontal rules.
+    // Accepted on purpose — Pandoc/Quarto read the same file the same way, so
+    // the outline agrees with what the document renders as.
+    if (lines.length > 0 && lines[0].trimEnd() === '---') {
+      const closer = lines.findIndex(
+        (line, index) => index > 0 && ['---', '...'].includes(line.trimEnd())
+      );
+      if (closer !== -1) {
+        excludedRanges.push({ start: 0, end: closer });
+      }
+    }
+
     let inCodeBlock = false;
     let codeBlockStart = 0;
 
@@ -85,7 +108,7 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
           codeBlockStart = index;
         } else {
           inCodeBlock = false;
-          codeBlocks.push({
+          excludedRanges.push({
             start: codeBlockStart,
             end: index
           });
@@ -94,19 +117,19 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     });
     // Edge case: unmatched opening code block at end of file
     if (inCodeBlock) {
-      codeBlocks.push({ start: codeBlockStart, end: lines.length - 1 });
+      excludedRanges.push({ start: codeBlockStart, end: lines.length - 1 });
     }
   }
 
-  // Helper function to check if a match index is inside a code block
-  const isInCodeBlock = (matchIndex: number): boolean => {
+  // Helper function to check if a match index is inside an excluded range
+  const isExcluded = (matchIndex: number): boolean => {
     if (!isMarkdownOrQuarto) return false;
 
     const lines = text.substring(0, matchIndex).split('\n');
     const matchLineNumber = lines.length - 1;
 
-    return codeBlocks.some(block =>
-      matchLineNumber >= block.start && matchLineNumber <= block.end
+    return excludedRanges.some(range =>
+      matchLineNumber >= range.start && matchLineNumber <= range.end
     );
   };
 
@@ -128,8 +151,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
       ////// 3.2.1 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace
-      // Also skip if this match is inside a code block (for Markdown/Quarto)
-      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isInCodeBlock(match.index)) {
+      // Also skip if this match is inside an excluded range — a code block or
+      // YAML front matter (for Markdown/Quarto)
+      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isExcluded(match.index)) {
 
         ////// 3.2.2 Parent Resolution ----
         // Find parent: look backwards for a section with smaller depth

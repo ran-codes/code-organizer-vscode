@@ -63,4 +63,20 @@ Two things the table encodes deliberately:
   across documents. Keep construction inside `findSections`.
 
 Markdown/Quarto (`markdown`/`quarto`/`md`/`qmd`/`rmd`) take a **separate table**:
-native `#` headers match without `----`, and matches inside ``` fences are excluded.
+native `#` headers match without `----`, and matches inside ``` fences **or YAML
+front matter** are excluded — both feed the same `excludedRanges` list, so there
+is one exclusion check, not two.
+
+Front matter is `---` on the *very first* line, closed by the next line that is
+exactly `---` or `...` (Pandoc accepts both); `trimEnd()`, not `trim()`, because
+an indented `---` is not a delimiter. An **unclosed** opening `---` excludes
+nothing — deliberately unlike a fence, which extends to EOF, since a lone top
+rule must not swallow every header in the file (#44).
+
+**Known limitation, asserted on purpose:** a line-1 `---` with a coincidental
+later `---`/`...` is read as front matter even when both were meant as horizontal
+rules, so headers between them vanish. Accepted rather than heuristically
+patched — Pandoc/Quarto consume that same block as metadata, so the outline
+matches what the file renders as, and a gate on "contains a `key:` line" would
+both fork from Pandoc and stop excluding a comments-only block (the shape #44
+actually reported). `quarto-comments.test.ts` pins it; don't "fix" it.

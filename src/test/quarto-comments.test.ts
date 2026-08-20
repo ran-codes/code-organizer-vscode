@@ -91,3 +91,187 @@ Content here.
     assert.strictEqual(sections[2].name, 'Another Header');
   });
 });
+
+// YAML front matter exclusion (#44).
+//
+// The issue body abbreviated its front matter with `...` elision markers, but
+// `...` is a legal Pandoc closing delimiter — a fixture that keeps them closes
+// the block early and leaves the `#` comment lines outside the excluded range,
+// so it would fail against a *correct* parser. The repro below is the expanded,
+// real-YAML form; `...` gets its own tests instead.
+suite('Quarto YAML Front Matter Exclusion', () => {
+  test('should ignore # comment lines inside YAML front matter (issue #44 repro)', () => {
+    const text = `---
+title: "harvard__pa_city_defined_nbhd_boundaries__v1"
+dataset-type: boundaries
+# ccuh-metadata — repo SOT for the Notion tracking-page properties.
+# Quarto/Pandoc ignore unknown front-matter keys, so this block is render-safe.
+# Controlled fields (dataset-type, dataset-status, topic-tags, maintainers, project)
+# must draw from the vocab in templates/notion-dataset-page.md — do not free-type.
+ccuh-metadata:
+  version: 1.0.0
+  status: active
+---
+
+# 1. Setup
+Load the libraries.
+
+## 1.1 Sub
+A nested section.
+
+# 2. Import
+Read the source data.
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 3);
+    assert.strictEqual(sections[0].name, '1. Setup');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, '1.1 Sub');
+    assert.strictEqual(sections[1].depth, 2);
+    assert.strictEqual(sections[2].name, '2. Import');
+    assert.strictEqual(sections[2].depth, 1);
+  });
+
+  test('should treat `...` as a closing delimiter (Pandoc alternative)', () => {
+    const text = `---
+title: "My Document"
+# a YAML comment that must not become a section
+key: value
+...
+
+# 1. Setup
+
+## 1.1 Sub
+
+# 2. Import
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 3);
+    assert.strictEqual(sections[0].name, '1. Setup');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, '1.1 Sub');
+    assert.strictEqual(sections[1].depth, 2);
+    assert.strictEqual(sections[2].name, '2. Import');
+    assert.strictEqual(sections[2].depth, 1);
+  });
+
+  test('should close the block at the FIRST `...`, not a later delimiter', () => {
+    // The guard against the elided-repro trap: everything below the first
+    // closer is document body, headers included.
+    const text = `---
+title: "x"
+...
+# After The Closer
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'After The Closer');
+    assert.strictEqual(sections[0].depth, 1);
+  });
+
+  test('should NOT treat an unclosed leading `---` as front matter', () => {
+    // A lone top rule with no closer must not swallow the whole file — this
+    // deliberately differs from fence handling, which extends to EOF.
+    const text = `---
+
+# Real Header
+Body text.
+
+## Real Sub Header
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, 'Real Header');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, 'Real Sub Header');
+    assert.strictEqual(sections[1].depth, 2);
+  });
+
+  test('should not treat mid-file `---` rules as front matter delimiters', () => {
+    const text = `Some intro prose before anything else.
+
+---
+
+# Mid Doc Header
+Body text.
+
+---
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'Mid Doc Header');
+    assert.strictEqual(sections[0].depth, 1);
+  });
+
+  test('treats a line-1 horizontal rule as front matter (known limitation, #44)', () => {
+    // Deliberate, not a bug: a line-1 `---` with any later `---`/`...` is taken
+    // as front matter even when both were meant as rules, because Pandoc/Quarto
+    // read the same file the same way. Asserted so nobody "fixes" it.
+    const text = `---
+# Header A
+---
+# Header B
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'Header B');
+    assert.strictEqual(sections[0].depth, 1);
+  });
+
+  test('should yield zero sections for a front-matter-only file', () => {
+    const text = `---
+title: "Metadata Only"
+# a comment
+# another comment
+nested:
+  key: value
+---
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 0);
+  });
+
+  test('should exclude front matter and code fences together', () => {
+    const text = `---
+title: "Both Exclusions"
+# front matter comment, must be ignored
+---
+
+# 1. Real Header
+
+\`\`\`{r}
+# ignored inside the fence
+## also ignored
+library(ggplot2)
+\`\`\`
+
+## 1.1 Second Real Header
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, '1. Real Header');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, '1.1 Second Real Header');
+    assert.strictEqual(sections[1].depth, 2);
+  });
+
+  test('should not treat an indented `---` as a delimiter', () => {
+    // trimEnd(), not trim(): an indented `---` is not a YAML/Jekyll delimiter.
+    const text = `  ---
+# Real Header
+  ---
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'Real Header');
+  });
+});

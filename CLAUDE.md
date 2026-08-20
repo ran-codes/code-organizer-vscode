@@ -142,7 +142,8 @@ Key parser details:
   names addressable. Do not assume names are unique.
 - **Markdown/Quarto take a different code path.** For `markdown`/`quarto`/`md`/
   `qmd`/`rmd`, native headers (`# Header`) are matched *without* requiring `----`,
-  and matches inside ``` fences are excluded. Every other language uses the
+  and matches inside ``` fences **or YAML front matter** are excluded — both go
+  through one `excludedRanges` list (#44). Every other language uses the
   four dash-terminated comment regexes (`#`, `//`, `--`, JSX `{/* // ... ---- */}`).
 - **Comment styles are a table; regexes are built per call.** `COMMENT_PATTERNS`
   holds module-level *specs* (regex source + `symbolUnit`); `findSections`
