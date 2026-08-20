@@ -164,17 +164,21 @@ should light up both with zero provider edits).
 
 ## Acceptance Criteria
 
-- [ ] `%% # Name ----` → depth-1 section; `%% ## Name ----` → depth-2; through depth 4
-- [ ] `%% ##### Name ----` capped at depth 4, 5th `#` part of the name
-- [ ] `%%{init: ...}%%` directives and plain `%% comment` lines produce no sections
-- [ ] All pre-existing test suites pass unchanged
-- [ ] `npm run compile` clean (type-check + lint — the only automated gate)
+- [x] `%% # Name ----` → depth-1 section; `%% ## Name ----` → depth-2; through depth 4
+- [x] `%% ##### Name ----` capped at depth 4, 5th `#` part of the name
+- [x] `%%{init: ...}%%` directives and plain `%% comment` lines produce no sections
+- [x] All pre-existing test suites pass unchanged — 97 passing, 0 failing
+- [x] `npm run compile` clean (type-check + lint — the only automated gate)
 - [ ] Sections visible in Outline + TreeView for `assets/test-files/test.mmd` under F5
-- [ ] New suite `src/test/mermaid-comments.test.ts` covers all standard axes with name+depth assertions
-- [ ] `README.md` table + "Works with:" line mention Mermaid
-- [ ] `CHANGELOG.md` entry added under `## [Unreleased]` → `### Added`
-- [ ] Repo-root `CLAUDE.md` file count (14 → 15) and extension list updated for `test.mmd`
-- [ ] `src/test/CLAUDE.md` suite table has the new row
+      — **maintainer step, not yet done.** The parser was run over the committed
+      fixture directly as `plaintext` and produced the expected 7-section tree
+      (3 roots + nesting to depth 3, directive excluded), so this is a UI
+      confirmation rather than an open question about the parse.
+- [x] New suite `src/test/mermaid-comments.test.ts` covers all standard axes with name+depth assertions
+- [x] `README.md` table + "Works with:" line mention Mermaid
+- [x] `CHANGELOG.md` entry added under `## [Unreleased]` → `### Added`
+- [x] Repo-root `CLAUDE.md` file count (14 → 15) and extension list updated for `test.mmd`
+- [x] `src/test/CLAUDE.md` suite table has the new row
 
 ## Out of Scope
 
