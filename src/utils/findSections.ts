@@ -16,7 +16,7 @@ export interface SectionMatch {
 interface PatternSpec {
   /** Regex source with exactly two capture groups: (1) comment symbols, (2) section name. */
   source: string;
-  /** Characters of comment symbol per depth level (`#` = 1, `//` and `--` = 2). */
+  /** Characters of the depth-bearing symbol per level (`#` = 1, `//` and `--` = 2). */
   symbolUnit: number;
 }
 
@@ -46,11 +46,11 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   // Hand-written — the wrapper makes its shape different from the dash family.
   { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
 
-  // Mermaid comments: %% # Section Name ---- (depth from the hashes, not the %%)
-  // Hand-written — a fixed `%%` prefix, then the same bounded hash ladder as the
-  // hash style. Mermaid does not nest by repeating `%%`, so depth cannot come
-  // from the token the way it does for `//` and `--` (#43).
-  { source: String.raw`^[ \t]*%%\s*(#{1,4})\s*(.+?)\s+[-]{4,}\s*$`, symbolUnit: 1 },
+  // Mermaid comments: %% # Section Name ----
+  // Depth comes from the hashes, not the `%%`: Mermaid has no nested-comment form
+  // the way `//` and `--` do, so `symbolUnit` is 1 and the ladder is the same
+  // bounded `#{1,4}` as the hash style (#43).
+  { source: dashSource(String.raw`%%\s*(#{1,4})`), symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [
