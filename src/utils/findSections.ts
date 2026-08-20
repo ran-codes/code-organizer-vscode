@@ -71,42 +71,99 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
   // Check if this is a Markdown or Quarto file
   const isMarkdownOrQuarto = languageId && ['markdown', 'quarto', 'md', 'qmd', 'rmd'].includes(languageId.toLowerCase());
 
-  // For Markdown/Quarto files, find code block ranges to exclude from parsing
-  const codeBlocks: { start: number; end: number }[] = [];
+  // For Markdown/Quarto files, collect the line ranges to exclude from parsing:
+  // YAML front matter and ``` code blocks both land in this one list.
+  const excludedRanges: { start: number; end: number }[] = [];
   if (isMarkdownOrQuarto) {
     const lines = text.split('\n');
+
+    // YAML front matter: `---` as the very first line, closed by the next
+    // `---` or `...` line (Pandoc accepts both). trimEnd(), not trim() — an
+    // *indented* `---` is not a delimiter in YAML/Jekyll/Quarto. trimEnd() is
+    // also what strips the `\r` of a CRLF document, so every delimiter check
+    // here has to keep going through it; an exact `=== '---'` compare would
+    // break every CRLF file on Windows.
+    //
+    // The search stops at the first *unindented* ``` and reports no closer. A
+    // fence cannot open at column 0 inside real YAML front matter, so a `---`
+    // past that point belongs to a code block, not to metadata. Without the
+    // stop, a line-1 horizontal rule plus any `---` inside a fence would
+    // swallow every header in between.
+    //
+    // Unclosed => treated as NOT front matter, so nothing is excluded: a lone
+    // top rule must not swallow every header in the file. The fence scan below
+    // follows the same rule for the same reason — see the unmatched-fence note.
+    //
+    // Known limitation (#44): a line-1 `---` with a coincidental later `---` or
+    // `...` is taken as front matter even when both were meant as horizontal
+    // rules. Accepted on purpose — Pandoc/Quarto read the same file the same
+    // way, so the outline agrees with what the document renders as.
+    let frontMatterEnd = -1;
+    if (lines[0].trimEnd() === '---') {
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trimEnd();
+        if (line.startsWith('```')) {
+          break;
+        }
+        if (line === '---' || line === '...') {
+          frontMatterEnd = i;
+          excludedRanges.push({ start: 0, end: i });
+          break;
+        }
+      }
+    }
+
     let inCodeBlock = false;
     let codeBlockStart = 0;
 
-    lines.forEach((line, index) => {
+    // The scan starts past the front matter, which is metadata, not document
+    // body. A ``` inside a block scalar (`desc: >`) must not open a phantom
+    // fence: that would pair with the next real fence in the body and exclude
+    // every header in between — and leave every later fence an opener/closer
+    // out of phase. `frontMatterEnd === -1` (no front matter, or an unclosed
+    // one) starts the scan at line 0, so there is no special case.
+    for (let index = frontMatterEnd + 1; index < lines.length; index++) {
+      const line = lines[index];
+
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
           inCodeBlock = true;
           codeBlockStart = index;
         } else {
           inCodeBlock = false;
-          codeBlocks.push({
+          excludedRanges.push({
             start: codeBlockStart,
             end: index
           });
         }
       }
-    });
-    // Edge case: unmatched opening code block at end of file
-    if (inCodeBlock) {
-      codeBlocks.push({ start: codeBlockStart, end: lines.length - 1 });
     }
+    // An unmatched opening fence excludes NOTHING, the same call made for an
+    // unclosed `---` above. Extending it to EOF makes every header below the
+    // fence vanish, and the most common way to get an unmatched fence is a user
+    // part-way through typing one — the outline would blank out mid-edit and
+    // come back only on the closing ```. It is also what turns any single
+    // miscounted fence into a document-wide blackout: a stray ``` (an indented
+    // one, or a `---` misread as a front matter closer leaving the scan a half
+    // fence out of phase) silently empties the rest of the outline.
+    //
+    // The trade-off, stated plainly: headers below a genuinely unclosed fence
+    // are reported as sections even though Pandoc would render them as code.
+    // Showing a few sections that turn out to be code is strictly better than
+    // showing none at all.
   }
 
-  // Helper function to check if a match index is inside a code block
-  const isInCodeBlock = (matchIndex: number): boolean => {
-    if (!isMarkdownOrQuarto) return false;
+  // Helper function to check if a match index is inside an excluded range
+  const isExcluded = (matchIndex: number): boolean => {
+    if (!isMarkdownOrQuarto) {
+      return false;
+    }
 
     const lines = text.substring(0, matchIndex).split('\n');
     const matchLineNumber = lines.length - 1;
 
-    return codeBlocks.some(block =>
-      matchLineNumber >= block.start && matchLineNumber <= block.end
+    return excludedRanges.some(range =>
+      matchLineNumber >= range.start && matchLineNumber <= range.end
     );
   };
 
@@ -128,8 +185,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
       ////// 3.2.1 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace
-      // Also skip if this match is inside a code block (for Markdown/Quarto)
-      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isInCodeBlock(match.index)) {
+      // Also skip if this match is inside an excluded range — a code block or
+      // YAML front matter (for Markdown/Quarto)
+      if (sectionName && !sectionName.match(/^[-\s]*$/) && !isExcluded(match.index)) {
 
         ////// 3.2.2 Parent Resolution ----
         // Find parent: look backwards for a section with smaller depth

@@ -217,3 +217,45 @@ code
     assert.strictEqual(sections[11].depth, 2);
   });
 });
+
+// Front matter exclusion applies to plain markdown too, not just Quarto —
+// Jekyll/Hugo front matter in a `.md` is common. The full edge-case matrix
+// lives in quarto-comments.test.ts; these mirror the core cases.
+suite('Markdown YAML Front Matter Exclusion', () => {
+  test('should ignore # comment lines inside Jekyll-style front matter', () => {
+    const text = `---
+layout: post
+title: "My Post"
+# a comment about the layout choice
+# another comment
+tags:
+  - vscode
+---
+
+# 1. Introduction
+Body text.
+
+## 1.1 Details
+More body text.
+`;
+    const sections = findSections(text, 'markdown');
+
+    assert.strictEqual(sections.length, 2);
+    assert.strictEqual(sections[0].name, '1. Introduction');
+    assert.strictEqual(sections[0].depth, 1);
+    assert.strictEqual(sections[1].name, '1.1 Details');
+    assert.strictEqual(sections[1].depth, 2);
+  });
+
+  test('should NOT treat an unclosed leading `---` as front matter', () => {
+    const text = `---
+
+# Real Header
+Body text.
+`;
+    const sections = findSections(text, 'markdown');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'Real Header');
+  });
+});
