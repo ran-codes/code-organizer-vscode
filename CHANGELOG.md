@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sections that share a name with their parent section no longer disappear —
   together with their entire subtree — from the built-in Outline, breadcrumbs,
   and Go to Symbol (#47)
+- YAML front matter comments in Markdown and Quarto files are no longer parsed
+  as sections — `#` lines inside a leading `---` block no longer appear as bogus
+  top-level entries in the Outline or the Activity Bar view (#44)
+- An unclosed ``` fence in a Markdown or Quarto file no longer hides every
+  section below it. Typing an opening fence used to blank the rest of the
+  outline until the closing fence was typed. Found while fixing #44 and shipped
+  alongside it, but it applies to every Markdown and Quarto file, front matter
+  or not — it is not itself part of #44
 
 
 ## [0.1.0] - 2025-10-28
