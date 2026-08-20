@@ -14,7 +14,11 @@ export interface SectionMatch {
  * COMMENT_PATTERNS — no new regex loop and no new depth branch is needed.
  */
 interface PatternSpec {
-  /** Regex source with exactly two capture groups: (1) comment symbols, (2) section name. */
+  /**
+   * Regex source with exactly two capture groups: (1) the depth-bearing symbols,
+   * (2) the section name. Group 1 is usually the comment token itself, but not
+   * always — the Mermaid entry captures its hashes, not its `%%`.
+   */
   source: string;
   /** Characters of the depth-bearing symbol per level (`#` = 1, `//` and `--` = 2). */
   symbolUnit: number;
@@ -47,10 +51,16 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
 
   // Mermaid comments: %% # Section Name ----
-  // Depth comes from the hashes, not the `%%`: Mermaid has no nested-comment form
-  // the way `//` and `--` do, so `symbolUnit` is 1 and the ladder is the same
-  // bounded `#{1,4}` as the hash style (#43).
-  { source: dashSource(String.raw`%%\s*(#{1,4})`), symbolUnit: 1 },
+  // Depth comes from the hashes rather than from repeating `%%`. That is a house
+  // convention, not a language constraint — `%%%%` is as legal a Mermaid comment
+  // as `////` is a JS one — and it is the form #43 asked for: a fixed `%%` prefix
+  // over the same bounded `#{1,4}` ladder as the hash style. So `symbolUnit` is 1
+  // and counts hashes, which makes this the one entry whose capture group 1 is
+  // not its comment token.
+  // `[ \t]*`, never `\s*`: `\s` matches `\n`, which would let a bare `%%` line
+  // bind to a `#` header further down and emit a duplicate, newline-spanning
+  // section alongside the hash pattern's own match.
+  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`), symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [
@@ -60,14 +70,15 @@ const MARKDOWN_PATTERNS: PatternSpec[] = [
 
 const MAX_DEPTH = 4;
 
-/** Depth from the matched comment symbols. Covers every comment style. */
+/** Depth from the matched depth-bearing symbols. Covers every comment style. */
 const depthFor = (symbols: string, symbolUnit: number): number =>
   Math.min(Math.max(1, Math.floor(symbols.length / symbolUnit)), MAX_DEPTH);
 
 // 3. Main Section Parser ----
 /**
- * Find all section matches in text
- * Supports multiple comment syntaxes: #, //, --
+ * Find all section matches in text.
+ * `COMMENT_PATTERNS` is the list of supported comment syntaxes — read it there
+ * rather than duplicating it here, where it only drifts as the table grows.
  * Special handling for Markdown/Quarto: headers without ----
  */
 export function findSections(text: string, languageId?: string): SectionMatch[] {
@@ -185,9 +196,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     let match: RegExpExecArray | null;
 
     while ((match = pattern.regex.exec(text)) !== null) {
-      const commentSymbols = match[1];
+      const depthSymbols = match[1];
       const sectionName = match[2].trim();
-      const depth = depthFor(commentSymbols, pattern.symbolUnit);
+      const depth = depthFor(depthSymbols, pattern.symbolUnit);
 
       ////// 3.2.1 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace

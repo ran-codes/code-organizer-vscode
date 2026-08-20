@@ -98,6 +98,49 @@ flowchart TD
 		assert.strictEqual(sections[0].name, 'Valid Section');
 	});
 
+	test('Should not span lines between %% and the hashes', () => {
+		// The gap is `[ \t]*`, not `\s*`, because `\s` matches `\n`. With `\s*` this
+		// bare `%%` binds to the header two lines down and emits a second,
+		// newline-spanning section beside the hash pattern's own match for it —
+		// duplicate outline entries whose index points at the `%%`, not the header.
+		// Reachable well outside Mermaid, since the table is deliberately not
+		// language-gated: `%%` is an Octave/MATLAB cell divider, and Octave also
+		// takes `#` comments.
+		const text = `%%
+
+# Load data ----
+x = 1
+`;
+		const sections = findSections(text, 'plaintext');
+
+		assert.strictEqual(sections.length, 1);
+		assert.strictEqual(sections[0].name, 'Load data');
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[0].index, text.indexOf('# Load data'));
+		assert.ok(
+			!sections[0].fullText.startsWith('%%'),
+			'the match must not reach back to the bare %% line'
+		);
+	});
+
+	test('Should still allow spaces, tabs, or nothing between %% and the hashes', () => {
+		// The guard against `\s*` above must not over-narrow: every same-line gap
+		// stays legal.
+		const text = [
+			'%% # Spaced ----',
+			'%%\t## Tabbed ----',
+			'%%### Tight ----',
+			'%%  \t #### Mixed ----',
+		].join('\n');
+		const sections = findSections(text, 'mermaid');
+
+		assert.strictEqual(sections.length, 4);
+		assert.deepStrictEqual(
+			sections.map(s => [s.name, s.depth]),
+			[['Spaced', 1], ['Tabbed', 2], ['Tight', 3], ['Mixed', 4]]
+		);
+	});
+
 	test('Should not match mermaid init directives', () => {
 		const text = `
 %%{init: {'theme':'dark'}}%%

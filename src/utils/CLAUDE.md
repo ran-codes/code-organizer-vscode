@@ -48,16 +48,28 @@ Returns a **flat, document-ordered** `SectionMatch[]` — not a tree:
 ## Adding a comment style
 
 Add **one entry** to `COMMENT_PATTERNS`: a regex `source` with exactly two capture
-groups — (1) the comment symbols, (2) the section name — and a `symbolUnit` (symbol
-characters per depth level). Depth comes from one shared formula; there is no
-per-style branch to extend.
+groups — (1) the **depth-bearing** symbols, (2) the section name — and a
+`symbolUnit` (symbol characters per depth level). Depth comes from one shared
+formula; there is no per-style branch to extend.
 
-Two things the table encodes deliberately:
+Three things the table encodes deliberately:
 
+- **Group 1 is the symbol that carries depth, which is not always the comment
+  token.** For `#`, `//`, `--` and JSX it is the token, repeated. For **Mermaid it
+  is the hashes, not the `%%`** — `%% ## Name ----` is depth 2 with `symbolUnit: 1`.
+  That is a house convention, not a language constraint (`%%%%` is a legal Mermaid
+  comment, exactly as `////` is a legal JS one); the form comes from #43. Writing
+  `(%%+)` with `symbolUnit: 2` instead compiles fine and yields depth 1 forever.
 - **Token quantifiers differ and are spelled out per entry.** `#` is bounded
   (`#{1,4}`), `//` and `--` are not. Generating `(#+)` would consume the 5th `#` of
   `##### Level 5 ----`, changing the parsed name — `hash-comments.test.ts` asserts
-  that name to lock it in.
+  that name to lock it in. The Mermaid entry's hash ladder is bounded the same way
+  and for the same reason; `mermaid-comments.test.ts` asserts its 5th-hash name too.
+- **Intra-line whitespace inside an entry is `[ \t]*`, never `\s*`.** `\s` matches
+  `\n`, so a `\s*` between two parts of a token lets the pattern span lines: a bare
+  `%%` line would bind to a `#` header further down and emit a duplicate,
+  newline-spanning section next to the hash pattern's own match for that header.
+  `dashSource` already uses `[ \t]*` for its leading indent; match it.
 - **The specs are module-level data; the `RegExp` objects are built per call.** The
   `/gm` regexes carry `lastIndex`, so hoisting the compiled objects would leak state
   across documents. Keep construction inside `findSections`.
