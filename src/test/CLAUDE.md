@@ -14,7 +14,10 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `jsx-comments.test.ts` | `{/* // Section ---- */}` |
 | `md-comments.test.ts` · `quarto-comments.test.ts` | Native `#` headers, fence exclusion |
 | `sectionTree.test.ts` | `buildChildrenMap()` / `childrenOf()` — not a syntax suite |
+| `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |
+| `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
 | `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
+| `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant |
 
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
@@ -24,6 +27,28 @@ mixed).
 parentless sections never become map keys (`parentId === undefined` is not a root
 marker), and sibling order within a bucket is document order — which holds only
 because `findSections` sorts by index before returning.
+
+`getCurrentSection.test.ts` is the pure-logic suite: no `vscode` import, no
+documents, just offsets and a section list. It differs from the syntax suites in
+what it covers rather than how it runs — those assert what the *parser* produces,
+this asserts which section a *cursor* lands in. It also pins the EOF quirk
+(`offset === textLength` → `undefined`) so nobody quietly "fixes" it mid-refactor.
+
+## Identity assertions — use `strictEqual`, never `deepStrictEqual`
+
+`treeDataProvider.test.ts` and `sectionIndex.test.ts` both assert **object
+identity**, and for both the bug class *is* identity. `TreeView.reveal()` matches
+elements by object reference, so a rebuilt TreeItem with identical field values is
+exactly the failure mode — `deepStrictEqual` would pass against a broken refactor
+and give false confidence. Same for the parse cache: two structurally-equal arrays
+are what a *missing* cache produces, so only `strictEqual` proves one parse
+happened. Neither needs a spy or a module mock as a result.
+
+Both invariants used to live only in prose. The general rule, worth applying past
+these two: **an invariant that had to be written in prose because the type system
+cannot enforce it needs a test.** TypeScript type-checks `new SectionTreeItem(...)`
+identically to a cached lookup, so the compiler will never catch this class of
+regression.
 
 ## Running
 

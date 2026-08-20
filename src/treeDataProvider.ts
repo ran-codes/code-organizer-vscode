@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { SectionMatch, findSections } from './utils/findSections';
-import { buildChildrenMap, childrenOf } from './utils/sectionTree';
+import { SectionMatch } from './utils/findSections';
+import { childrenOf } from './utils/sectionTree';
+import { SectionIndex } from './sectionIndex';
 
 export class SectionTreeItem extends vscode.TreeItem {
   constructor(
     public readonly section: SectionMatch,
-    childrenByParentId: Map<string, SectionMatch[]>,
+    childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
     public readonly document: vscode.TextDocument
   ) {
     const hasChildren = childrenByParentId.has(section.uniqueId);
@@ -40,15 +41,17 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   private _onDidChangeTreeData = new vscode.EventEmitter<SectionTreeItem | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private sections: SectionMatch[] = [];
-  private childrenByParentId: Map<string, SectionMatch[]> = new Map();
+  private sections: readonly SectionMatch[] = [];
+  private childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]> = new Map();
   private currentDocument?: vscode.TextDocument;
   private treeItemCache: Map<string, SectionTreeItem> = new Map();
 
+  constructor(private readonly sectionIndex: SectionIndex) { }
+
   refresh(document: vscode.TextDocument): void {
     this.currentDocument = document;
-    this.sections = findSections(document.getText(), document.languageId);
-    this.childrenByParentId = buildChildrenMap(this.sections);
+    this.sections = this.sectionIndex.getSections(document);
+    this.childrenByParentId = this.sectionIndex.getChildrenMap(document);
     this.treeItemCache.clear();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -96,11 +99,12 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     return this.treeItemCache.get(section.uniqueId);
   }
 
-  getSections(): SectionMatch[] {
+  /**
+   * The snapshot the visible tree was last built from — the same one
+   * `treeItemCache` is keyed against, which is why `cursorSync` resolves the
+   * cursor through here rather than querying `SectionIndex` directly.
+   */
+  getSections(): readonly SectionMatch[] {
     return this.sections;
-  }
-
-  getCurrentDocument(): vscode.TextDocument | undefined {
-    return this.currentDocument;
   }
 }

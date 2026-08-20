@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
-import { findSections, SectionMatch } from './utils/findSections';
-import { buildChildrenMap, childrenOf } from './utils/sectionTree';
+import { SectionMatch } from './utils/findSections';
+import { childrenOf } from './utils/sectionTree';
 import { sectionRange } from './utils/vscodeHelpers';
+import { SectionIndex } from './sectionIndex';
 
 // 1. Document Symbol Provider Class ----
 /**
@@ -9,6 +10,8 @@ import { sectionRange } from './utils/vscodeHelpers';
  * Detects comment sections with pattern: # Section Name ----
  */
 export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+
+  constructor(private readonly sectionIndex: SectionIndex) { }
 
   //// 1.1 Child Symbol Processing ----
   /**
@@ -21,7 +24,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   private addChildSymbols(
     parentSymbol: vscode.DocumentSymbol,
     parentMatch: SectionMatch,
-    childrenByParentId: Map<string, SectionMatch[]>,
+    childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
     document: vscode.TextDocument
   ): void {
 
@@ -57,10 +60,8 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   ): vscode.DocumentSymbol[] {
 
     ////// 1.2.1 Document Processing ----
-    const text = document.getText();
-    const languageId = document.languageId;
-    const all_matches: SectionMatch[] = findSections(text, languageId);
-    const childrenByParentId = buildChildrenMap(all_matches);
+    const all_matches: readonly SectionMatch[] = this.sectionIndex.getSections(document);
+    const childrenByParentId = this.sectionIndex.getChildrenMap(document);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
 
     ////// 1.2.2 Symbol Generation ----

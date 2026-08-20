@@ -15,7 +15,7 @@ import { SectionMatch } from './findSections';
  *
  * This module is intentionally vscode-free so it stays unit-testable.
  */
-export function buildChildrenMap(sections: SectionMatch[]): Map<string, SectionMatch[]> {
+export function buildChildrenMap(sections: readonly SectionMatch[]): Map<string, SectionMatch[]> {
   const childrenByParentId = new Map<string, SectionMatch[]>();
 
   for (const section of sections) {
@@ -35,8 +35,8 @@ export function buildChildrenMap(sections: SectionMatch[]): Map<string, SectionM
 
 /** Children of `uniqueId` in document order; empty array when there are none. */
 export function childrenOf(
-  childrenByParentId: Map<string, SectionMatch[]>,
+  childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
   uniqueId: string
-): SectionMatch[] {
+): readonly SectionMatch[] {
   return childrenByParentId.get(uniqueId) ?? [];
 }

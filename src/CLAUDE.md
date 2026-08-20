@@ -8,19 +8,30 @@ the extension. A file not reachable from `extension.ts` does not exist at runtim
 
 | Path | Role |
 | --- | --- |
-| `extension.ts` | `activate()` / `deactivate()`. Registers the symbol provider, creates the Activity Bar TreeView, owns the cursor→outline sync. |
+| `extension.ts` | `activate()` / `deactivate()`. **Wiring only** — read config, register providers/commands/TreeView, delegate. No sync logic. |
+| `cursorSync.ts` | The cursor→outline sync: 150 ms debounce, highlight, TreeView reveal, and the three editor listeners. Owns its disposables. |
+| `sectionIndex.ts` | One `findSections` call per (document URI, `document.version`, `document.languageId`), shared by both providers. |
 | `documentSymbolProvider.ts` | Feeds VS Code's built-in Outline, breadcrumbs, and Go to Symbol. |
 | `treeDataProvider.ts` | Backs the custom Activity Bar TreeView (`codeOrganizerOutlineActivity`). |
 | `decorations.ts` | The current-section editor highlight (`TextEditorDecorationType`). |
-| `utils/` | The parser and the shared helpers. See `utils/CLAUDE.md`. |
-| `test/` | Mocha suites — one per comment syntax, plus one per non-parser util. See `test/CLAUDE.md`. |
+| `log.ts` | `log()` → the "Code Organizer" Output Channel. |
+| `utils/` | The parser and the pure helpers. See `utils/CLAUDE.md`. |
+| `test/` | Mocha suites — one per comment syntax, plus one per non-parser module. See `test/CLAUDE.md`. |
+
+Flow: `extension.ts` → `cursorSync.ts` → `sectionIndex.ts` → providers → `utils/`.
 
 ## The one invariant
 
 **Everything flows from a single parser.** `utils/findSections.ts` exports
-`findSections(text, languageId)`; the symbol provider and the tree provider each
-call it independently and share no state. A parser change therefore propagates to
-the whole extension at once — which is the point, and the thing to be careful about.
+`findSections(text, languageId)`; the symbol provider and the tree provider both
+read it through `sectionIndex.ts`, which parses once per document version *and*
+language. The index is a memo, not a second source of truth — a parser change
+still propagates to the whole extension at once, which is the point and the thing
+to be careful about.
+
+The index hands out `readonly SectionMatch[]` / `ReadonlyMap`, so the shared
+snapshot cannot be mutated out from under the other consumer. Keep it that way;
+the sharing is only safe because nobody can write to it.
 
 Two shared helpers sit between the parser and its consumers:
 
@@ -33,7 +44,21 @@ Two shared helpers sit between the parser and its consumers:
 
 - **`TreeView.reveal()` requires cached TreeItem instances.**
   `CodeOrganizerTreeDataProvider` keeps `treeItemCache` (`uniqueId` → `SectionTreeItem`);
-  `reveal()` silently fails against freshly constructed items. Keep that cache intact.
+  `reveal()` matches by object reference, so it silently fails against freshly
+  constructed items — including anywhere up the `getParent()` chain, which reveal
+  also walks. Keep that cache intact; `test/treeDataProvider.test.ts` locks it.
+  **Known broken today (#50):** `refresh()` clears the cache and only a later
+  `getChildren()` refills it, and `cursorSync` does not await in between — so
+  every pass that refreshes misses, and because an edit forces a refresh, the
+  reveal does not fire at all while the user is typing. Deterministic, not a race.
+- **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
+  `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
+  the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built
+  from. Reading the version-keyed index instead would let the sync sit a version
+  ahead of the tree and quietly stop revealing.
+- **Diagnostics go through `log()`, not `console.log`.** The Output Channel is
+  readable by users in the field; the devtools console is not. The cache-miss
+  branch in `cursorSync` logs deliberately rather than returning in silence.
 - **Roots are `depth === 1`, not "no parent."** A file opening with `### Foo ----`
   produces a depth-3 section with no parent that is deliberately *not* a root.
 - **Section identity is `uniqueId`, never `name`.** Duplicate names are legal and
