@@ -6,7 +6,7 @@ import { SectionIndex } from './sectionIndex';
 export class SectionTreeItem extends vscode.TreeItem {
   constructor(
     public readonly section: SectionMatch,
-    childrenByParentId: Map<string, SectionMatch[]>,
+    childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
     public readonly document: vscode.TextDocument
   ) {
     const hasChildren = childrenByParentId.has(section.uniqueId);
@@ -41,8 +41,8 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   private _onDidChangeTreeData = new vscode.EventEmitter<SectionTreeItem | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private sections: SectionMatch[] = [];
-  private childrenByParentId: Map<string, SectionMatch[]> = new Map();
+  private sections: readonly SectionMatch[] = [];
+  private childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]> = new Map();
   private currentDocument?: vscode.TextDocument;
   private treeItemCache: Map<string, SectionTreeItem> = new Map();
 
@@ -104,7 +104,7 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
    * `treeItemCache` is keyed against, which is why `cursorSync` resolves the
    * cursor through here rather than querying `SectionIndex` directly.
    */
-  getSections(): SectionMatch[] {
+  getSections(): readonly SectionMatch[] {
     return this.sections;
   }
 }

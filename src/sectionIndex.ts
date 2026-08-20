@@ -6,13 +6,23 @@ import { buildChildrenMap } from './utils/sectionTree';
 interface CacheEntry {
   /** The `document.version` this entry was parsed from. */
   version: number;
-  sections: SectionMatch[];
-  childrenByParentId: Map<string, SectionMatch[]>;
+  /**
+   * The `document.languageId` this entry was parsed under. Part of the validity
+   * check, not decoration: `findSections` branches on it — markdown/quarto match
+   * `# Header` with no `----`, every other language requires one — and switching
+   * a file's language mode mutates `languageId` on the *same document object*
+   * **without bumping `version`**. Keying on version alone would serve sections
+   * parsed under the old grammar forever.
+   */
+  languageId: string;
+  sections: readonly SectionMatch[];
+  childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>;
 }
 
 // 2. Section Index ----
 /**
- * One parse per (document URI, `document.version`), shared by both consumers.
+ * One parse per (document URI, `document.version`, `document.languageId`),
+ * shared by both consumers.
  *
  * The symbol provider and the tree provider each used to call `findSections` on
  * the same text, so every document was parsed twice. They now both read through
@@ -21,15 +31,17 @@ interface CacheEntry {
  * at once.
  *
  * **A Map, not a single entry:** split editors alternate between documents, and
- * a one-slot cache would re-parse on every alternation. **Evicted on close, not
- * unbounded:** entries for closed documents would otherwise accumulate for the
- * lifetime of the window.
+ * a one-slot cache would re-parse on every alternation. **Evicted on close:**
+ * entries for closed documents would otherwise accumulate for the lifetime of
+ * the window. That listener is a memory bound only — correctness across a
+ * language switch is carried by `languageId` being part of the key, not by the
+ * close event that happens to fire first.
  *
- * `getSections` returns the **cached array itself, not a copy** — callers must
- * treat it as read-only. Reference identity is what lets a test prove that no
- * re-parse happened (see `sectionIndex.test.ts`), and it matches
- * `CodeOrganizerTreeDataProvider.getSections()`, which has always handed back
- * its own array.
+ * `getSections` returns the **cached array itself, not a copy**, typed
+ * `readonly` so the compiler holds callers to it. Reference identity is what
+ * lets a test prove that no re-parse happened (see `sectionIndex.test.ts`), and
+ * it matches `CodeOrganizerTreeDataProvider.getSections()`, which has always
+ * handed back its own array.
  */
 export class SectionIndex implements vscode.Disposable {
   private readonly cache = new Map<string, CacheEntry>();
@@ -41,11 +53,11 @@ export class SectionIndex implements vscode.Disposable {
     });
   }
 
-  getSections(document: vscode.TextDocument): SectionMatch[] {
+  getSections(document: vscode.TextDocument): readonly SectionMatch[] {
     return this.entryFor(document).sections;
   }
 
-  getChildrenMap(document: vscode.TextDocument): Map<string, SectionMatch[]> {
+  getChildrenMap(document: vscode.TextDocument): ReadonlyMap<string, readonly SectionMatch[]> {
     return this.entryFor(document).childrenByParentId;
   }
 
@@ -57,13 +69,18 @@ export class SectionIndex implements vscode.Disposable {
   private entryFor(document: vscode.TextDocument): CacheEntry {
     const key = document.uri.toString();
     const cached = this.cache.get(key);
-    if (cached && cached.version === document.version) {
+    if (
+      cached &&
+      cached.version === document.version &&
+      cached.languageId === document.languageId
+    ) {
       return cached;
     }
 
     const sections = findSections(document.getText(), document.languageId);
     const entry: CacheEntry = {
       version: document.version,
+      languageId: document.languageId,
       sections,
       childrenByParentId: buildChildrenMap(sections)
     };

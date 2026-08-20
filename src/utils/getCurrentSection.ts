@@ -29,7 +29,7 @@ import { SectionMatch } from './findSections';
 export function getCurrentSection(
   offset: number,
   textLength: number,
-  sections: SectionMatch[]
+  sections: readonly SectionMatch[]
 ): SectionMatch | undefined {
   if (offset >= textLength) {
     return undefined;

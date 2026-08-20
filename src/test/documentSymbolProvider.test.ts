@@ -7,7 +7,21 @@ import { SectionIndex } from '../sectionIndex';
 // that feeds the built-in Outline, not the vscode-free parser underneath it.
 suite('Document Symbol Provider Tests', () => {
 
-	const provider = new CodeOrganizerDocumentSymbolProvider(new SectionIndex());
+	// Built per test and disposed after, like the other two provider suites: the
+	// index registers an `onDidCloseTextDocument` listener, so a suite-scoped
+	// instance would leak it — and every document these tests open — for the rest
+	// of the run.
+	let index: SectionIndex;
+	let provider: CodeOrganizerDocumentSymbolProvider;
+
+	setup(() => {
+		index = new SectionIndex();
+		provider = new CodeOrganizerDocumentSymbolProvider(index);
+	});
+
+	teardown(() => {
+		index.dispose();
+	});
 
 	async function symbolsFor(content: string, language = 'python') {
 		const document = await vscode.workspace.openTextDocument({ content, language });

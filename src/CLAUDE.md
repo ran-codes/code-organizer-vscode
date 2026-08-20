@@ -10,7 +10,7 @@ the extension. A file not reachable from `extension.ts` does not exist at runtim
 | --- | --- |
 | `extension.ts` | `activate()` / `deactivate()`. **Wiring only** — read config, register providers/commands/TreeView, delegate. No sync logic. |
 | `cursorSync.ts` | The cursor→outline sync: 150 ms debounce, highlight, TreeView reveal, and the three editor listeners. Owns its disposables. |
-| `sectionIndex.ts` | One `findSections` call per (document URI, `document.version`), shared by both providers. |
+| `sectionIndex.ts` | One `findSections` call per (document URI, `document.version`, `document.languageId`), shared by both providers. |
 | `documentSymbolProvider.ts` | Feeds VS Code's built-in Outline, breadcrumbs, and Go to Symbol. |
 | `treeDataProvider.ts` | Backs the custom Activity Bar TreeView (`codeOrganizerOutlineActivity`). |
 | `decorations.ts` | The current-section editor highlight (`TextEditorDecorationType`). |
@@ -24,9 +24,14 @@ Flow: `extension.ts` → `cursorSync.ts` → `sectionIndex.ts` → providers →
 
 **Everything flows from a single parser.** `utils/findSections.ts` exports
 `findSections(text, languageId)`; the symbol provider and the tree provider both
-read it through `sectionIndex.ts`, which parses once per document version. The
-index is a memo, not a second source of truth — a parser change still propagates
-to the whole extension at once, which is the point and the thing to be careful about.
+read it through `sectionIndex.ts`, which parses once per document version *and*
+language. The index is a memo, not a second source of truth — a parser change
+still propagates to the whole extension at once, which is the point and the thing
+to be careful about.
+
+The index hands out `readonly SectionMatch[]` / `ReadonlyMap`, so the shared
+snapshot cannot be mutated out from under the other consumer. Keep it that way;
+the sharing is only safe because nobody can write to it.
 
 Two shared helpers sit between the parser and its consumers:
 

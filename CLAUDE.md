@@ -109,7 +109,8 @@ both need the tests compiled to `out/` first (`npm run compile-tests`), since
 Everything flows from a single parser. `src/utils/findSections.ts` exports
 `findSections(text, languageId)`, which returns a flat, document-ordered
 `SectionMatch[]`. Both consumers read through `src/sectionIndex.ts`, which parses
-each document **once per `document.version`** and hands the same result to both.
+each document **once per (`document.version`, `document.languageId`)** and hands
+the same result to both.
 The parser is still the single source of truth — the index is only a memo over
 it — so a parser change still propagates to the whole extension at once:
 
@@ -118,10 +119,16 @@ it — so a parser change still propagates to the whole extension at once:
 - **`src/treeDataProvider.ts`** — backs the custom Activity Bar TreeView
   (`codeOrganizerOutlineActivity`).
 
-`SectionIndex` keys on `document.uri.toString()`, invalidates on a version
-change, and evicts on `onDidCloseTextDocument`. It returns its **cached array,
-not a copy** — callers treat it as read-only, and `sectionIndex.test.ts` proves
-the caching by asserting reference identity across calls.
+`SectionIndex` keys on `document.uri.toString()` and invalidates when either
+`document.version` or `document.languageId` differs. **`languageId` is part of
+the key on purpose:** switching a file's language mode mutates it on the same
+document object *without* bumping the version, so a version-only key would serve
+sections parsed under the old grammar forever. `onDidCloseTextDocument` eviction
+is a memory bound only — do not treat it as what makes a language switch correct.
+
+It returns its **cached array, not a copy**, typed `readonly` so the compiler
+holds callers to it. `sectionIndex.test.ts` proves the caching by asserting
+reference identity across calls.
 
 Key parser details:
 

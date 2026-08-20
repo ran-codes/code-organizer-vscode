@@ -24,7 +24,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   private addChildSymbols(
     parentSymbol: vscode.DocumentSymbol,
     parentMatch: SectionMatch,
-    childrenByParentId: Map<string, SectionMatch[]>,
+    childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
     document: vscode.TextDocument
   ): void {
 
@@ -60,7 +60,7 @@ export class CodeOrganizerDocumentSymbolProvider implements vscode.DocumentSymbo
   ): vscode.DocumentSymbol[] {
 
     ////// 1.2.1 Document Processing ----
-    const all_matches: SectionMatch[] = this.sectionIndex.getSections(document);
+    const all_matches: readonly SectionMatch[] = this.sectionIndex.getSections(document);
     const childrenByParentId = this.sectionIndex.getChildrenMap(document);
     const matches = all_matches.filter((item: SectionMatch) => item.depth === 1);
 

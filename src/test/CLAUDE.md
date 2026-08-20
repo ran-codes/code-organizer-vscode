@@ -15,7 +15,7 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `md-comments.test.ts` · `quarto-comments.test.ts` | Native `#` headers, fence exclusion |
 | `sectionTree.test.ts` | `buildChildrenMap()` / `childrenOf()` — not a syntax suite |
 | `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |
-| `sectionIndex.test.ts` | The shared parse cache: one parse per document version |
+| `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
 | `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
 | `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant |
 

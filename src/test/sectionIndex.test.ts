@@ -22,6 +22,25 @@ suite('Section Index Tests (shared parse cache)', () => {
 		return vscode.workspace.openTextDocument({ content, language: 'python' });
 	}
 
+	/**
+	 * The four fields `SectionIndex` actually reads. A stub, not a real document,
+	 * so a test can hold uri and version fixed while varying languageId — which
+	 * `workspace.openTextDocument` cannot do.
+	 */
+	function stubDocument(
+		uri: string,
+		version: number,
+		languageId: string,
+		text: string
+	): vscode.TextDocument {
+		return {
+			uri: vscode.Uri.parse(uri),
+			version,
+			languageId,
+			getText: () => text
+		} as unknown as vscode.TextDocument;
+	}
+
 	test('Should parse a document once per version', async () => {
 		const doc = await pythonDoc('# Root ----\n## Child ----\n');
 
@@ -93,6 +112,29 @@ suite('Section Index Tests (shared parse cache)', () => {
 
 		assert.notStrictEqual(index.getSections(doc), before);
 		assert.deepStrictEqual(index.getSections(doc).map(s => s.name), ['Root']);
+	});
+
+	test('Should key the cache on languageId as well as version', () => {
+		// `findSections` branches on languageId — under `plaintext` these lines
+		// need a `----` terminator and match nothing, under `markdown` they are
+		// headers — and `setTextDocumentLanguage` mutates languageId on the *same
+		// document object* without bumping `document.version`. A version-only key
+		// would serve the plaintext parse forever.
+		//
+		// Deliberately a stub rather than a real `setTextDocumentLanguage` call:
+		// that fires `onDidCloseTextDocument`, whose eviction would refresh the
+		// entry and make this pass against a version-only key too. Testing the key
+		// in isolation is the only way to assert the key.
+		const text = '# Header\n## Sub\n';
+		const asPlaintext = stubDocument('untitled:lang-switch', 1, 'plaintext', text);
+		const asMarkdown = stubDocument('untitled:lang-switch', 1, 'markdown', text);
+
+		assert.deepStrictEqual(index.getSections(asPlaintext), []);
+		assert.deepStrictEqual(
+			index.getSections(asMarkdown).map(s => s.name),
+			['Header', 'Sub'],
+			'stale plaintext parse served after a language switch'
+		);
 	});
 
 	test('Should parse markdown documents by their own rules', async () => {
