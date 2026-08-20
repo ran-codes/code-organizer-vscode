@@ -90,9 +90,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     // stop, a line-1 horizontal rule plus any `---` inside a fence would
     // swallow every header in between.
     //
-    // Unclosed => excluded as NOT front matter: a lone top rule must not
-    // swallow every header in the file. The fence scan below follows the same
-    // rule for the same reason — see the unmatched-fence note there.
+    // Unclosed => treated as NOT front matter, so nothing is excluded: a lone
+    // top rule must not swallow every header in the file. The fence scan below
+    // follows the same rule for the same reason — see the unmatched-fence note.
     //
     // Known limitation (#44): a line-1 `---` with a coincidental later `---` or
     // `...` is taken as front matter even when both were meant as horizontal
@@ -102,7 +102,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     if (lines[0].trimEnd() === '---') {
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trimEnd();
-        if (line.startsWith('```')) break;
+        if (line.startsWith('```')) {
+          break;
+        }
         if (line === '---' || line === '...') {
           frontMatterEnd = i;
           excludedRanges.push({ start: 0, end: i });
@@ -114,12 +116,14 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     let inCodeBlock = false;
     let codeBlockStart = 0;
 
-    lines.forEach((line, index) => {
-      // Front matter is metadata, not document body. A ``` inside a block
-      // scalar (`desc: >`) must not open a phantom fence, which would pair with
-      // the next real fence in the body and exclude every header in between —
-      // and leave every later fence an opener/closer out of phase.
-      if (index <= frontMatterEnd) return;
+    // The scan starts past the front matter, which is metadata, not document
+    // body. A ``` inside a block scalar (`desc: >`) must not open a phantom
+    // fence: that would pair with the next real fence in the body and exclude
+    // every header in between — and leave every later fence an opener/closer
+    // out of phase. `frontMatterEnd === -1` (no front matter, or an unclosed
+    // one) starts the scan at line 0, so there is no special case.
+    for (let index = frontMatterEnd + 1; index < lines.length; index++) {
+      const line = lines[index];
 
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
@@ -133,7 +137,7 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
           });
         }
       }
-    });
+    }
     // An unmatched opening fence excludes NOTHING, the same call made for an
     // unclosed `---` above. Extending it to EOF makes every header below the
     // fence vanish, and the most common way to get an unmatched fence is a user
@@ -151,7 +155,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
   // Helper function to check if a match index is inside an excluded range
   const isExcluded = (matchIndex: number): boolean => {
-    if (!isMarkdownOrQuarto) return false;
+    if (!isMarkdownOrQuarto) {
+      return false;
+    }
 
     const lines = text.substring(0, matchIndex).split('\n');
     const matchLineNumber = lines.length - 1;

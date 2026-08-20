@@ -60,27 +60,32 @@ block, exactly the way it already excludes matches inside ``` code fences.
 
 ### Acceptance Criteria
 
-- [ ] The repro above (as `qmd`) yields **zero** sections from the front matter;
+- [x] The repro above (as `qmd`) yields **zero** sections from the front matter;
       headers after the closing `---` parse normally with unchanged names/depths
-- [ ] Front matter closed with `...` (Pandoc alternative) is also excluded
-- [ ] **Unclosed** `---` on line 1 with no closing delimiter → treated as *not*
+      — `quarto-comments.test.ts:103`
+- [x] Front matter closed with `...` (Pandoc alternative) is also excluded
+      — `quarto-comments.test.ts:136`, `:160`
+- [x] **Unclosed** `---` on line 1 with no closing delimiter → treated as *not*
       front matter; all headers in the file still parse (no whole-file swallowing)
-- [ ] `---` lines *not* starting at line 1 (horizontal rules, setext underlines)
-      do not create an excluded range
-- [ ] A front-matter-only file yields zero sections
-- [ ] Front matter and ``` fence exclusions coexist — a fence *after* the front
-      matter still hides its `#` lines
-- [ ] A line-1 `---` with a coincidental later `---` **is** treated as front
+      — `quarto-comments.test.ts:175`, `md-comments.test.ts:250`
+- [x] `---` lines *not* starting at line 1 (horizontal rules, setext underlines)
+      do not create an excluded range — `quarto-comments.test.ts:194`, `:266`
+- [x] A front-matter-only file yields zero sections — `quarto-comments.test.ts:227`
+- [x] Front matter and ``` fence exclusions coexist — a fence *after* the front
+      matter still hides its `#` lines — `quarto-comments.test.ts:241`, `:346`
+- [x] A line-1 `---` with a coincidental later `---` **is** treated as front
       matter and its headers **are** suppressed — asserted deliberately, per
-      decision 6
-- [ ] Both existing md/quarto suites pass unchanged — including the quarto fixture
+      decision 6 — `quarto-comments.test.ts:211`
+- [x] Both existing md/quarto suites pass unchanged — including the quarto fixture
       that already opens with front matter (no `#` lines inside it, so it must
-      still yield its 7 sections)
-- [ ] All non-markdown syntax suites pass unchanged
-- [ ] `npm run compile` clean (type-check + lint — the only automated gate)
-- [ ] Under F5, the repro file shows only real sections in **both** the Outline
+      still yield its 7 sections) — `quarto-comments.test.ts:5`, `md-comments.test.ts:5`
+- [x] All non-markdown syntax suites pass unchanged — full suite green, 87 passing
+- [x] `npm run compile` clean (type-check + lint — the only automated gate) —
+      zero errors and zero lint warnings
+- [x] Under F5, the repro file shows only real sections in **both** the Outline
       and the Activity Bar TreeView (both consumers call `findSections`; a
-      parser-only fix must light up both with zero provider edits)
+      parser-only fix must light up both with zero provider edits) — manual F5
+      pass recorded against the "User Test" item in PR #53
 
 ### Out of Scope
 
@@ -249,8 +254,10 @@ lands on the real sections.
 
 ## Workflow Notes (for the implementing agent)
 
-- Branch: `feature/44-frontmatter-exclusion` off `master` (pattern:
-  `feature/[issue]-[description]`). `master` is clean and current as of
+- Branch: implemented on `issue-44` off `master`. This doc originally prescribed
+  `feature/44-frontmatter-exclusion` to match the `feature/[issue]-[description]`
+  pattern in root `CLAUDE.md` §4; the branch actually cut was `issue-44`, and it
+  is recorded here rather than silently left wrong. `master` is clean and current as of
   `0e24658` (the `refactor-3` merge, PR #49) — branch straight off it. An
   earlier draft of this doc warned about `refactor-3` being in flight; that
   work has since merged and the branch is gone.

@@ -16,7 +16,8 @@ ccuh-metadata:
 # 1. Setup
 
 Load the libraries. None of the `#` lines in the front matter above should appear
-in the Outline or the Activity Bar TreeView — only the six numbered sections below.
+in the Outline or the Activity Bar TreeView — only the seven numbered sections
+below: the six top-level ones plus `## 1.1 Dependencies` nested under this one.
 
 ```{r}
 # This header inside a fence must stay ignored too
