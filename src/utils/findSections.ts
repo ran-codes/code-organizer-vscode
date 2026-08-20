@@ -14,9 +14,13 @@ export interface SectionMatch {
  * COMMENT_PATTERNS — no new regex loop and no new depth branch is needed.
  */
 interface PatternSpec {
-  /** Regex source with exactly two capture groups: (1) comment symbols, (2) section name. */
+  /**
+   * Regex source with exactly two capture groups: (1) the depth-bearing symbols,
+   * (2) the section name. Group 1 is usually the comment token itself, but not
+   * always — the Mermaid entry captures its hashes, not its `%%`.
+   */
   source: string;
-  /** Characters of comment symbol per depth level (`#` = 1, `//` and `--` = 2). */
+  /** Characters of the depth-bearing symbol per level (`#` = 1, `//` and `--` = 2). */
   symbolUnit: number;
 }
 
@@ -28,9 +32,26 @@ interface PatternSpec {
  * quantifiers genuinely differ: `#` is bounded at 4 while `//` and `--` are
  * unbounded. Generating `(#+)` instead of `(#{1,4})` would change parsed names
  * — on `##### Level 5 ----` the 5th `#` is currently part of the name.
+ *
+ * Three of the gaps in this shape are `\s` classes — before the name, before the
+ * dash run, and after it — and **`\s` matches `\n`**. So by default a match can
+ * run past the end of its own line: `"#\nName ----"` and `"# Name\n----"` are each
+ * one section today. That is long-standing behaviour for `#`, `//` and `--`,
+ * harmless only while no two entries can claim the same line, and left alone here
+ * rather than changed underneath four comment styles at once — see #56.
+ *
+ * `singleLine` swaps all three for `[ \t]` classes, confining the entry to one
+ * physical line. An entry whose token overlaps another entry's territory has to
+ * set it; Mermaid's `%%` is the first that does. It does not affect CRLF, which
+ * works because `$` under `/m` treats `\r` as a line terminator, not because the
+ * trailing gap absorbs it.
  */
-const dashSource = (tokenPattern: string): string =>
-  String.raw`^[ \t]*${tokenPattern}\s*(.+?)\s+[-]{4,}\s*$`;
+const dashSource = (tokenPattern: string, singleLine = false): string => {
+  const nameGap = singleLine ? String.raw`[ \t]*` : String.raw`\s*`;
+  const dashGap = singleLine ? String.raw`[ \t]+` : String.raw`\s+`;
+  const tailGap = singleLine ? String.raw`[ \t]*` : String.raw`\s*`;
+  return String.raw`^[ \t]*${tokenPattern}${nameGap}(.+?)${dashGap}[-]{4,}${tailGap}$`;
+};
 
 const COMMENT_PATTERNS: PatternSpec[] = [
   // Hash comments: # Section Name ---- (Python, R, shell, etc.)
@@ -45,6 +66,14 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   // JSX comments: {/* // Section Name ---- */} (React, JSX, TSX)
   // Hand-written — the wrapper makes its shape different from the dash family.
   { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
+
+  // Mermaid comments: %% # Section Name ----
+  // The one entry whose capture group 1 is not its comment token: depth comes from
+  // the hashes, not the `%%`, so `symbolUnit` is 1. See ./CLAUDE.md for why.
+  // `singleLine` because this is the first token that overlaps another entry's
+  // territory — allowed to span lines, a `%%`-and-hashes line binds to a `#` header
+  // below it, duplicating that header's section or swallowing it outright (#56).
+  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`, true), symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [
@@ -54,14 +83,15 @@ const MARKDOWN_PATTERNS: PatternSpec[] = [
 
 const MAX_DEPTH = 4;
 
-/** Depth from the matched comment symbols. Covers every comment style. */
+/** Depth from the matched depth-bearing symbols. Covers every comment style. */
 const depthFor = (symbols: string, symbolUnit: number): number =>
   Math.min(Math.max(1, Math.floor(symbols.length / symbolUnit)), MAX_DEPTH);
 
 // 3. Main Section Parser ----
 /**
- * Find all section matches in text
- * Supports multiple comment syntaxes: #, //, --
+ * Find all section matches in text.
+ * `COMMENT_PATTERNS` is the list of supported comment syntaxes — read it there
+ * rather than duplicating it here, where it only drifts as the table grows.
  * Special handling for Markdown/Quarto: headers without ----
  */
 export function findSections(text: string, languageId?: string): SectionMatch[] {
@@ -179,9 +209,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     let match: RegExpExecArray | null;
 
     while ((match = pattern.regex.exec(text)) !== null) {
-      const commentSymbols = match[1];
+      const depthSymbols = match[1];
       const sectionName = match[2].trim();
-      const depth = depthFor(commentSymbols, pattern.symbolUnit);
+      const depth = depthFor(depthSymbols, pattern.symbolUnit);
 
       ////// 3.2.1 Section Validation ----
       // Skip if section name is empty or just dashes/whitespace

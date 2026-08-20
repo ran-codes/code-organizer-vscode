@@ -1,0 +1,83 @@
+%%{init: {'theme': 'default'}}%%
+flowchart TD
+
+%% # 1. Ingest ----
+    csv[CSV drop] --> load[Load raw]
+    api[Partner API] --> load
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% ## 1.1 Validation ----
+    load --> schema{Schema ok?}
+    schema -->|no| reject[Quarantine]
+    schema -->|yes| stage[(Staging)]
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% ### 1.1.1 Quarantine Handling ----
+    reject --> alert[Notify owner]
+    alert --> csv
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% # 2. Transform ----
+    stage --> clean[Drop nulls]
+    clean --> dedupe[Deduplicate]
+    dedupe --> enrich[Join reference data]
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% ## 2.1 Aggregation ----
+    enrich --> daily[Daily rollup]
+    enrich --> monthly[Monthly rollup]
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% # 3. Output ----
+    daily --> warehouse[(Warehouse)]
+    monthly --> warehouse
+    warehouse --> dash[Dashboard]
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+%% code
+
+%% # 4. Styling ----
+    classDef source fill:#dae8fc,stroke:#6c8ebf
+    classDef sink fill:#d5e8d4,stroke:#82b366
+    class csv,api source
+    class warehouse,dash sink
