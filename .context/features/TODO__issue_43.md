@@ -95,7 +95,8 @@ quantifier change slip through):
   `%% ##### Level 5 ----` → depth 4 with name `# Level 5` (the 5th hash joins
   the name — this locks in the `#{1,4}` bound; verify the exact expected name
   against `hash-comments.test.ts`'s equivalent assertion).
-- **`uniqueId` / `parentId`** — child's `parentId === parent.uniqueId`.
+- **`uniqueId` / `parentId`** — child's `parentId === parent.uniqueId`. Assert this
+  only in a **`%%`-only fixture** — see the mixed-fixture warning below.
 - **Invalid patterns ignored** — `%% # Too Short --` (only 2 dashes),
   `%% # ----` (no name), `%% Name ----` (no hashes — out of scope, must NOT
   match), `# Plain hash ----` still matches via the existing hash pattern
@@ -107,6 +108,21 @@ quantifier change slip through):
 
 Note the existing hash pattern also matches lines like `# Foo ----` in the same
 file — fine and expected; write fixtures so each assertion targets the `%%` form.
+
+> **Do not assert `parentId` in a fixture that mixes `%%` with another comment
+> style.** Parent resolution runs *inside* the per-pattern loop
+> (`findSections.ts:195-200`), against a `matches` array that is pattern-ordered;
+> the sort into document order happens only at the end (`:222`). The Mermaid entry
+> is appended last, so a `%%` section whose nearest shallower neighbor is a `#`
+> section resolves to the **last-pushed** hash match — which can sit later in the
+> document. In the mixed fixture, assert count, names, and depths only.
+>
+> This is a **pre-existing bug, not something #43 introduces** — it is already live
+> for `.tsx` files mixing `// Section ----` with `{/* // Section ---- */}`, and is
+> tracked as [#54](https://github.com/ran-codes/code-organizer-vscode/issues/54).
+> Out of scope here: fixing it changes parent resolution for
+> every language at once, which is far outside this change's 2/10 blast radius.
+> Leave it alone.
 
 ### Step 3: Add the committed sample file
 
@@ -134,9 +150,15 @@ should light up both with zero provider edits).
 
 - `src/utils/CLAUDE.md` — no structural change needed, but if the "Adding a
   comment style" section's claims still hold (they should), leave it alone.
-- `README.md` — add Mermaid to the supported-syntax list/table if one exists.
-- `CHANGELOG.md` — entry under the next version (version bump happens at
-  release time per `.context/workflow.md`, not necessarily in this PR).
+- `README.md` — add a Mermaid row to the "Language Support & Examples" table
+  (`README.md:51-56`) and add Mermaid to the **Works with:** line (`:58`).
+- `CHANGELOG.md` — add the entry under the existing `## [Unreleased]` heading
+  (`CHANGELOG.md:9`) as `### Added`. Do **not** bump the version; that happens at
+  release time per `.context/workflow.md`.
+- Repo-root `CLAUDE.md` — `assets/test-files/` is described twice and both go
+  stale when `test.mmd` lands: the folder tree says "(14 files)" → 15, and the
+  table row enumerates the extensions `(c, cpp, ... swift, txt)` → add `mmd`.
+- `src/test/CLAUDE.md` — add a `mermaid-comments.test.ts` row to the suite table.
 
 ---
 
@@ -149,6 +171,10 @@ should light up both with zero provider edits).
 - [ ] `npm run compile` clean (type-check + lint — the only automated gate)
 - [ ] Sections visible in Outline + TreeView for `assets/test-files/test.mmd` under F5
 - [ ] New suite `src/test/mermaid-comments.test.ts` covers all standard axes with name+depth assertions
+- [ ] `README.md` table + "Works with:" line mention Mermaid
+- [ ] `CHANGELOG.md` entry added under `## [Unreleased]` → `### Added`
+- [ ] Repo-root `CLAUDE.md` file count (14 → 15) and extension list updated for `test.mmd`
+- [ ] `src/test/CLAUDE.md` suite table has the new row
 
 ## Out of Scope
 
