@@ -90,9 +90,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
     // stop, a line-1 horizontal rule plus any `---` inside a fence would
     // swallow every header in between.
     //
-    // Unclosed => excluded as NOT front matter, deliberately unlike the fence
-    // handling below (which extends an unmatched fence to EOF): a lone top rule
-    // must not swallow every header in the file.
+    // Unclosed => excluded as NOT front matter: a lone top rule must not
+    // swallow every header in the file. The fence scan below follows the same
+    // rule for the same reason — see the unmatched-fence note there.
     //
     // Known limitation (#44): a line-1 `---` with a coincidental later `---` or
     // `...` is taken as front matter even when both were meant as horizontal
@@ -116,8 +116,9 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
     lines.forEach((line, index) => {
       // Front matter is metadata, not document body. A ``` inside a block
-      // scalar (`desc: >`) must not open a phantom fence that then runs to EOF
-      // and blanks the entire outline.
+      // scalar (`desc: >`) must not open a phantom fence, which would pair with
+      // the next real fence in the body and exclude every header in between —
+      // and leave every later fence an opener/closer out of phase.
       if (index <= frontMatterEnd) return;
 
       if (line.trim().startsWith('```')) {
@@ -133,10 +134,19 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
         }
       }
     });
-    // Edge case: unmatched opening code block at end of file
-    if (inCodeBlock) {
-      excludedRanges.push({ start: codeBlockStart, end: lines.length - 1 });
-    }
+    // An unmatched opening fence excludes NOTHING, the same call made for an
+    // unclosed `---` above. Extending it to EOF makes every header below the
+    // fence vanish, and the most common way to get an unmatched fence is a user
+    // part-way through typing one — the outline would blank out mid-edit and
+    // come back only on the closing ```. It is also what turns any single
+    // miscounted fence into a document-wide blackout: a stray ``` (an indented
+    // one, or a `---` misread as a front matter closer leaving the scan a half
+    // fence out of phase) silently empties the rest of the outline.
+    //
+    // The trade-off, stated plainly: headers below a genuinely unclosed fence
+    // are reported as sections even though Pandoc would render them as code.
+    // Showing a few sections that turn out to be code is strictly better than
+    // showing none at all.
   }
 
   // Helper function to check if a match index is inside an excluded range

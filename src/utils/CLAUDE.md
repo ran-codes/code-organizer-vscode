@@ -70,19 +70,29 @@ is one exclusion check, not two.
 Front matter is `---` on the *very first* line, closed by the next line that is
 exactly `---` or `...` (Pandoc accepts both); `trimEnd()`, not `trim()`, because
 an indented `---` is not a delimiter — and because `trimEnd()` is also what
-strips the `\r` of a CRLF document. An **unclosed** opening `---` excludes
-nothing — deliberately unlike a fence, which extends to EOF, since a lone top
-rule must not swallow every header in the file (#44).
+strips the `\r` of a CRLF document.
+
+**An unterminated block — `---` or ``` — excludes nothing.** Both scans make the
+same call, and it is the rule that keeps a single miscounted delimiter from
+emptying the outline: a lone top rule must not swallow every header in the file
+(#44), and an unmatched fence must not swallow every header below it. The most
+common unmatched fence is a user part-way through typing one, so extending it to
+EOF blanks the outline mid-edit until the closing ``` lands. The trade-off is
+accepted knowingly — headers below a genuinely unclosed fence show up as
+sections even though Pandoc renders them as code, which beats showing nothing.
 
 The two scans are ordered and each respects the other's territory:
 
 - The closer search **stops at the first unindented ```** and reports no closer.
   A fence cannot open at column 0 inside real YAML, so a `---` past that point
   belongs to a code block. Without the stop, a line-1 horizontal rule plus any
-  `---` inside a fence swallows every header in between.
+  `---` inside a fence swallows every header in between. The stop is *only* at
+  column 0, so a fence indented 1–3 spaces still slips a `---` through; the
+  unterminated-block rule above is what bounds the damage to the known
+  limitation instead of blanking the rest of the document.
 - The fence scan **skips the front-matter range**. A ``` inside a block scalar
-  (`desc: >`) is metadata; treating it as a fence opener leaves an unmatched
-  fence running to EOF and blanks the entire outline.
+  (`desc: >`) is metadata; treating it as a fence opener pairs it with the next
+  real fence in the body and excludes every header in between.
 
 **Known limitation, asserted on purpose:** a line-1 `---` with a coincidental
 later `---`/`...` is read as front matter even when both were meant as horizontal

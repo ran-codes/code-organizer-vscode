@@ -296,6 +296,53 @@ library(ggplot2)
     assert.strictEqual(sections[1].name, 'Header B');
   });
 
+  test('should not let an indented fence bypass the closer-search stop', () => {
+    // The stop only fires on a column-0 ```, so a fence indented 1-3 spaces
+    // (still a valid CommonMark fence) lets the `---` inside it be taken as the
+    // closer. `Header A` is then lost to the known limitation above — but the
+    // fence scan must not *also* resume half a fence out of phase and swallow
+    // `Header B`, which sits outside the block entirely.
+    const text = `---
+
+# Header A
+
+  \`\`\`r
+---
+  \`\`\`
+
+# Header B
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 1);
+    assert.strictEqual(sections[0].name, 'Header B');
+  });
+
+  test('should not let an unmatched fence swallow the headers below it', () => {
+    // The ordinary editing loop: the user has typed an opening fence and has
+    // not closed it yet. Extending it to EOF blanks the rest of the outline on
+    // every keystroke until the closing ``` lands.
+    const text = `---
+title: "x"
+---
+
+# 1. Setup
+
+\`\`\`r
+library(dplyr)
+
+# 2. Analysis
+
+# 3. Export
+`;
+    const sections = findSections(text, 'qmd');
+
+    assert.strictEqual(sections.length, 3);
+    assert.strictEqual(sections[0].name, '1. Setup');
+    assert.strictEqual(sections[1].name, '2. Analysis');
+    assert.strictEqual(sections[2].name, '3. Export');
+  });
+
   test('should not let a ``` inside front matter open a phantom fence', () => {
     // A fence marker in a YAML block scalar is metadata, not a fence opener.
     // Scanning it as one leaves an unmatched fence that runs to EOF and blanks
