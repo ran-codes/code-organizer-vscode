@@ -15,18 +15,20 @@ Triaged 2026-08-20. One row per open item, in the order to do them.
   - [x] Fable planning — `TODO__issue_52.md`
   - [ ] Dev
 - [ ] **#50** reveal never fires on a refreshing sync pass
-  - [ ] Fable planning → `TODO__issue_50.md`
+  - [x] Fable planning — `TODO__issue_50.md`
   - [ ] Dev
 - [ ] **#51** sections under a collapsed parent never cached
-  - [ ] Fable planning → `TODO__issue_51.md` *(may be folded into #50 — plan #50 first)*
-  - [ ] Dev
+  - [x] Fable planning — **folded into `TODO__issue_50.md`**; same root cause, expected
+        to close with no extra code. Reproduce on `master` first, then verify.
+  - [ ] Dev *(no separate PR — only if it survives #50's fix)*
 - [ ] **#54** wrong parent in files that mix comment styles
-  - [ ] Triage / Fable planning → `TODO__issue_54.md`
-  - [ ] Dev
+  - [x] Triage / Fable planning — `TODO__issue_54.md`
+  - [ ] Dev *(land after #43 / PR #55 — less churn, not a hard dependency)*
 
 Every open item takes two passes: **Fable planning** produces the
-`TODO__issue_xx.md` spec, then **dev** implements it. #43 is the only one already
-planned, so it is the only one that can go straight to dev.
+`TODO__issue_xx.md` spec, then **dev** implements it. **Planning is done for
+everything on the list** — every remaining box is dev. #51 rides along with #50,
+so what is left is four PRs: #43 (in review), #52, #50+#51, #54.
 
 Convention: a shipped item's `TODO__issue_xx.md` is deleted once the PR merges
 (`TODO__issue_44.md` went with #53), so a plan doc on disk means planned-but-unshipped
@@ -41,8 +43,9 @@ merged. **That is now resolved; all three are unblocked.**
 #43 is entirely inside `src/utils/findSections.ts` and never overlapped the bug
 set, which is why it could have run in parallel the whole time.
 
-**The only mandatory ordering left is #50 → #51** (shared root cause). #52 and
-#43 float anywhere.
+**#50 and #51 are now one piece of work**, not an ordering — planning #50 found
+that the same six-line change covers both, so they ship in one PR. #52 and #43
+float anywhere.
 
 ## Order
 
@@ -52,9 +55,9 @@ set, which is why it could have run in parallel the whole time.
 | ~~2~~ | ~~[#44](https://github.com/ran-codes/code-organizer-vscode/issues/44) YAML front matter~~ | Bug | *deleted on merge* | — | — | **Done** — PR #53, merged 2026-08-20. Grew past the original spec: front matter and fence scans now respect each other, and an unterminated block excludes nothing. See `src/utils/CLAUDE.md`. |
 | 3 | [#43](https://github.com/ran-codes/code-organizer-vscode/issues/43) Mermaid `%%` | Feature | `TODO__issue_43.md` | **Review** — [PR #55](https://github.com/ran-codes/code-organizer-vscode/pull/55) | — | Implemented as specced: one `COMMENT_PATTERNS` entry + `mermaid-comments.test.ts` (10 cases) + `assets/test-files/test.mmd`. 97 tests passing, `npm run compile` clean. **F5 pass still outstanding** — the only unticked acceptance box. |
 | 4 | [#52](https://github.com/ran-codes/code-organizer-vscode/issues/52) EOF edge case | Bug | `TODO__issue_52.md` | **Dev** | — | Cheapest on the list: one comparison in a pure function, plus flip the assertion in `getCurrentSection.test.ts` that was written to be flipped. Independent of #50/#51. |
-| 5 | [#50](https://github.com/ran-codes/code-organizer-vscode/issues/50) reveal never fires | Bug | *none* | **Fable plan** | — | Biggest real-world impact (sidebar stops following the cursor while typing) and the most design work: three candidate approaches, needs a perf check, and it is a **visible behavior change** → own manual F5 pass + CHANGELOG entry. |
-| 6 | [#51](https://github.com/ran-codes/code-organizer-vscode/issues/51) collapsed parents | Bug | *none* | **Fable plan** (after #50's) | **#50** | Same root cause as #50. #50's chosen approach may close it outright — verify before implementing. |
-| 7 | [#54](https://github.com/ran-codes/code-organizer-vscode/issues/54) wrong parent in mixed-syntax files | Bug | *none* | **Triage** | — | Untriaged. Found while reviewing the #43 spec; repro verified on `master`. A `.tsx` mixing `//` and `{/* // */}` nests a subsection under a heading that appears *after* it, because parents resolve during the pattern-ordered loop and the document-order sort happens last. Parser-wide blast radius — own PR, explicitly out of scope for #43. |
+| 5 | [#50](https://github.com/ran-codes/code-organizer-vscode/issues/50) reveal never fires | Bug | `TODO__issue_50.md` | **Dev** | — | Biggest real-world impact (sidebar stops following the cursor while typing). Fix is ~6 lines — route the public lookup through the existing memoizing factory so items are built on miss — but it is a **visible behavior change** turning on a path that has never run, so the weight is in the 5-check F5 pass + CHANGELOG entry. No perf gate; see plan Decision 6. |
+| 6 | [#51](https://github.com/ran-codes/code-organizer-vscode/issues/51) collapsed parents | Bug | *in* `TODO__issue_50.md` | **Dev with #50** | **#50** | Same root cause, other side of it: VS Code never calls `getChildren()` on a collapsed parent, so descendants are never cached. Create-on-miss covers it with no extra code. Never reproduced — repro on `master` first, then close in #50's PR, or close as not-a-bug. Own doc only if it survives the fix. |
+| 7 | [#54](https://github.com/ran-codes/code-organizer-vscode/issues/54) wrong parent in mixed-syntax files | Bug | `TODO__issue_54.md` | **Dev** (after #43) | — | A `.tsx` mixing `//` and `{/* // */}` nests a subsection under a heading that appears *after* it — parents resolve inside the pattern-ordered loop, and the document-order sort happens last. Planning also found a **second, worse symptom**: reverse the styles and the child resolves to no parent at all, which makes it neither a root nor anyone's child — it disappears from the outline. Fix is to sort before resolving; single-syntax files are provably unaffected. Still unlabeled on GitHub — add `bug`. |
 
 ## Deliberately not on the list
 
