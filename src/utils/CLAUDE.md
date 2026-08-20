@@ -52,7 +52,7 @@ groups — (1) the **depth-bearing** symbols, (2) the section name — and a
 `symbolUnit` (symbol characters per depth level). Depth comes from one shared
 formula; there is no per-style branch to extend.
 
-Three things the table encodes deliberately:
+Four things the table encodes deliberately:
 
 - **Group 1 is the symbol that carries depth, which is not always the comment
   token.** For `#`, `//`, `--` and JSX it is the token, repeated. For **Mermaid it
@@ -65,11 +65,20 @@ Three things the table encodes deliberately:
   `##### Level 5 ----`, changing the parsed name — `hash-comments.test.ts` asserts
   that name to lock it in. The Mermaid entry's hash ladder is bounded the same way
   and for the same reason; `mermaid-comments.test.ts` asserts its 5th-hash name too.
-- **Intra-line whitespace inside an entry is `[ \t]*`, never `\s*`.** `\s` matches
-  `\n`, so a `\s*` between two parts of a token lets the pattern span lines: a bare
-  `%%` line would bind to a `#` header further down and emit a duplicate,
-  newline-spanning section next to the hash pattern's own match for that header.
-  `dashSource` already uses `[ \t]*` for its leading indent; match it.
+- **`\s*` inside an entry spans lines — know which gaps use it.** `\s` matches
+  `\n`, so a `\s*` between two parts of a pattern lets a match run past the end of
+  its line. `"#\nName ----"` is one section today, and has been since before the
+  table existed. Two gaps are involved and they are **not** in the same state:
+  - `dashSource`'s **`nameGap`** (token → name) still defaults to `\s*`, so `#`,
+    `//`, `--` and JSX all still span lines. Harmless only while no two entries can
+    claim the same line, which stopped being true when Mermaid landed — **#56**
+    tracks the class, with reproductions and the options.
+  - **Inside a token pattern, use `[ \t]*`.** The Mermaid entry does, and it also
+    opts its `nameGap` out of the default, because `%%` is the first token that
+    overlaps another entry's territory: with `\s*` a `%%`-and-hashes line binds to
+    a `#` header below it and either duplicates that header's section or swallows
+    it. `mermaid-comments.test.ts` pins both directions, including the one case
+    #56 leaves open (a bare `#` line above a `%%` section).
 - **The specs are module-level data; the `RegExp` objects are built per call.** The
   `/gm` regexes carry `lastIndex`, so hoisting the compiled objects would leak state
   across documents. Keep construction inside `findSections`.

@@ -123,6 +123,51 @@ x = 1
 		);
 	});
 
+	test('Should not span lines when the %% line carries hashes', () => {
+		// The shape a buffer is in the instant someone has typed `%% # ` and not yet
+		// the name. The extension reparses per document.version, so with a `\s*`
+		// name gap this fires live while typing: the pattern reaches the *next*
+		// line, and because /g leaves lastIndex past it, the real section on that
+		// line never matches at all — it vanishes from the outline rather than
+		// merely gaining a duplicate.
+		const typing = '%% # \n%% # 1. Ingest ----\n';
+		let sections = findSections(typing, 'plaintext');
+		assert.strictEqual(sections.length, 1);
+		assert.strictEqual(sections[0].name, '1. Ingest');
+		assert.strictEqual(sections[0].depth, 1);
+		assert.strictEqual(sections[0].index, typing.indexOf('%% # 1. Ingest'));
+
+		// Same shape as a leftover divider line, and at depth 4 the bogus match
+		// also reported the wrong depth.
+		const divider = '%% ####\n%% # Setup ----\n';
+		sections = findSections(divider, 'plaintext');
+		assert.strictEqual(sections.length, 1);
+		assert.strictEqual(sections[0].name, 'Setup');
+		assert.strictEqual(sections[0].depth, 1);
+
+		// And the duplicate direction: a `%% #` line above a plain hash header.
+		const mixed = '%% #\n## Load data ----\nx = 1\n';
+		sections = findSections(mixed, 'plaintext');
+		assert.strictEqual(sections.length, 1);
+		assert.strictEqual(sections[0].name, 'Load data');
+		assert.strictEqual(sections[0].depth, 2);
+	});
+
+	test('Known limitation (#56): a bare # line above a %% section still duplicates', () => {
+		// Asserted on purpose, not aspirationally. This one is the *hash* pattern
+		// reaching across the newline to grab the `%%` line below it, so tightening
+		// the Mermaid entry cannot close it — only changing dashSource's default
+		// name gap can, which would alter parsing for #, //, -- and JSX at once.
+		// Deliberately out of scope for #43; #56 carries the reproductions.
+		// If #56 is fixed, this test should flip to a single `Setup` section.
+		const text = '#\n%% # Setup ----\n';
+		const sections = findSections(text, 'plaintext');
+
+		assert.strictEqual(sections.length, 2);
+		assert.strictEqual(sections[0].name, '%% # Setup');   // the hash pattern's cross-line reach
+		assert.strictEqual(sections[1].name, 'Setup');        // the correct Mermaid match
+	});
+
 	test('Should still allow spaces, tabs, or nothing between %% and the hashes', () => {
 		// The guard against `\s*` above must not over-narrow: every same-line gap
 		// stays legal.

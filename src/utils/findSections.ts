@@ -32,9 +32,16 @@ interface PatternSpec {
  * quantifiers genuinely differ: `#` is bounded at 4 while `//` and `--` are
  * unbounded. Generating `(#+)` instead of `(#{1,4})` would change parsed names
  * — on `##### Level 5 ----` the 5th `#` is currently part of the name.
+ *
+ * `nameGap` is the whitespace between the token and the section name. It defaults
+ * to `\s*`, which **matches `\n`** and so lets a match run past the end of its
+ * line: `"#\nName ----"` is one section today. That is long-standing behaviour for
+ * `#`, `//` and `--`, harmless while no two entries can claim the same line, and
+ * left alone here rather than changed underneath four comment styles at once —
+ * see #56. An entry that cannot afford it passes `[ \t]*` instead.
  */
-const dashSource = (tokenPattern: string): string =>
-  String.raw`^[ \t]*${tokenPattern}\s*(.+?)\s+[-]{4,}\s*$`;
+const dashSource = (tokenPattern: string, nameGap: string = String.raw`\s*`): string =>
+  String.raw`^[ \t]*${tokenPattern}${nameGap}(.+?)\s+[-]{4,}\s*$`;
 
 const COMMENT_PATTERNS: PatternSpec[] = [
   // Hash comments: # Section Name ---- (Python, R, shell, etc.)
@@ -51,16 +58,13 @@ const COMMENT_PATTERNS: PatternSpec[] = [
   { source: String.raw`^[ \t]*\{\/\*\s*(\/\/+)\s*(.+?)\s+[-]{4,}\s*\*\/\s*\}`, symbolUnit: 2 },
 
   // Mermaid comments: %% # Section Name ----
-  // Depth comes from the hashes rather than from repeating `%%`. That is a house
-  // convention, not a language constraint — `%%%%` is as legal a Mermaid comment
-  // as `////` is a JS one — and it is the form #43 asked for: a fixed `%%` prefix
-  // over the same bounded `#{1,4}` ladder as the hash style. So `symbolUnit` is 1
-  // and counts hashes, which makes this the one entry whose capture group 1 is
-  // not its comment token.
-  // `[ \t]*`, never `\s*`: `\s` matches `\n`, which would let a bare `%%` line
-  // bind to a `#` header further down and emit a duplicate, newline-spanning
-  // section alongside the hash pattern's own match.
-  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`), symbolUnit: 1 },
+  // The one entry whose capture group 1 is not its comment token: depth comes from
+  // the hashes, not the `%%`, so `symbolUnit` is 1. See ./CLAUDE.md for why.
+  // Both gaps are `[ \t]*` rather than the default `\s*`, because this is the first
+  // token that overlaps another entry's territory — with `\s*` a `%%`-and-hashes
+  // line binds to a `#` header below it, duplicating that header's section or
+  // swallowing it outright (#56).
+  { source: dashSource(String.raw`%%[ \t]*(#{1,4})`, String.raw`[ \t]*`), symbolUnit: 1 },
 ];
 
 const MARKDOWN_PATTERNS: PatternSpec[] = [
