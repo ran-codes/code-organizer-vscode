@@ -22,11 +22,11 @@ suite('Current Section Tests (getCurrentSection)', () => {
 	const at = (needle: string) => text.indexOf(needle);
 
 	test('Should return undefined before the first section', () => {
-		assert.strictEqual(getCurrentSection(at('preamble'), text.length, sections), undefined);
+		assert.strictEqual(getCurrentSection(at('preamble'), sections), undefined);
 	});
 
 	test('Should return the containing depth-1 section', () => {
-		const current = getCurrentSection(at('root body'), text.length, sections);
+		const current = getCurrentSection(at('root body'), sections);
 		assert.strictEqual(current?.name, 'Root');
 		assert.strictEqual(current?.depth, 1);
 	});
@@ -34,7 +34,7 @@ suite('Current Section Tests (getCurrentSection)', () => {
 	test('Should return the deepest containing section, not its parent', () => {
 		// The cursor is inside Nested, which is inside Root. Both contain the
 		// offset; the deeper one wins.
-		const current = getCurrentSection(at('nested body'), text.length, sections);
+		const current = getCurrentSection(at('nested body'), sections);
 		assert.strictEqual(current?.name, 'Nested');
 		assert.strictEqual(current?.depth, 2);
 	});
@@ -42,7 +42,7 @@ suite('Current Section Tests (getCurrentSection)', () => {
 	test('Should return the last section for content after it', () => {
 		// `Second` is depth 1, so it terminates `Nested` as well as `Root`, and
 		// runs to the end of the text.
-		const current = getCurrentSection(at('tail line'), text.length, sections);
+		const current = getCurrentSection(at('tail line'), sections);
 		assert.strictEqual(current?.name, 'Second');
 	});
 
@@ -50,31 +50,50 @@ suite('Current Section Tests (getCurrentSection)', () => {
 		// The start offset is inclusive: the cursor parked on `## Nested ----`
 		// itself resolves to Nested.
 		const nested = sections.find(s => s.name === 'Nested')!;
-		assert.strictEqual(getCurrentSection(nested.index, text.length, sections), nested);
+		assert.strictEqual(getCurrentSection(nested.index, sections), nested);
 	});
 
-	test('Should return undefined at the very end of the text', () => {
-		// PRE-EXISTING QUIRK, asserted deliberately rather than fixed: a section
-		// ends *before* its terminator, and the final section's terminator is the
-		// end of the text, so `offset === textLength` is inside nothing. Moving
-		// the cursor to the last position in a file drops the highlight. Tracked
-		// as its own issue; src-refactor-3 is a no-visible-behavior-change refactor.
-		assert.strictEqual(getCurrentSection(text.length, text.length, sections), undefined);
+	test('Should return the last section at the very end of the text', () => {
+		// The last section runs to the end of the text, so the last position in
+		// the file is inside it — the highlight stays on there rather than
+		// dropping (#52).
+		assert.strictEqual(getCurrentSection(text.length, sections)?.name, 'Second');
 
-		// One character earlier is still the last section — this is the EOF edge
-		// alone, not a broken final section.
-		assert.strictEqual(
-			getCurrentSection(text.length - 1, text.length, sections)?.name,
-			'Second'
-		);
+		// One character earlier agrees, so the EOF position is not a special case
+		// bolted onto an otherwise different answer.
+		assert.strictEqual(getCurrentSection(text.length - 1, sections)?.name, 'Second');
 	});
 
 	test('Should return undefined when there are no sections', () => {
 		const plain = 'x = 1\n# just a comment\n';
+		assert.strictEqual(getCurrentSection(3, findSections(plain, 'python')), undefined);
+	});
+
+	test('Should return undefined at EOF when there are no sections', () => {
+		// One of the cases the removed EOF guard used to short-circuit: with
+		// nothing to scan there is no last section to fall back to.
+		const plain = 'x = 1\n# just a comment\n';
 		assert.strictEqual(
-			getCurrentSection(3, plain.length, findSections(plain, 'python')),
+			getCurrentSection(plain.length, findSections(plain, 'python')),
 			undefined
 		);
+	});
+
+	test('Should return the only section at EOF when it starts at offset 0', () => {
+		// The degenerate one-section document: the whole file is that section,
+		// including its final position.
+		const single = '# Only ----\nbody\n';
+		assert.strictEqual(
+			getCurrentSection(single.length, findSections(single, 'python'))?.name,
+			'Only'
+		);
+	});
+
+	test('Should return undefined for an empty document', () => {
+		// No text means no sections, so offset 0 is both the start and the end of
+		// the document and resolves to nothing. Falls out of the scan for free —
+		// asserted so it stays that way.
+		assert.strictEqual(getCurrentSection(0, findSections('', 'python')), undefined);
 	});
 
 	test('Should resolve every offset to the same section the boundary rule implies', () => {
@@ -83,11 +102,17 @@ suite('Current Section Tests (getCurrentSection)', () => {
 		// section at the same or smaller depth (or the end of the text), and the
 		// deepest match wins. Guards the "last section at or before the offset"
 		// shortcut across every position in the fixture.
-		for (let offset = 0; offset < text.length; offset++) {
+		//
+		// The loop and the final section's `end` both run one past `text.length`
+		// so that EOF is covered: the last section is inclusive of the end of the
+		// text (#52). Narrowing either back makes this oracle disagree with the
+		// implementation at EOF — that disagreement is the old behavior, not a
+		// bug in the fixture.
+		for (let offset = 0; offset <= text.length; offset++) {
 			let expected: typeof sections[number] | undefined;
 			for (const section of sections) {
 				const next = sections.find(s => s.index > section.index && s.depth <= section.depth);
-				const end = next ? next.index : text.length;
+				const end = next ? next.index : text.length + 1;
 				if (offset >= section.index && offset < end) {
 					if (!expected || section.depth > expected.depth) {
 						expected = section;
@@ -95,7 +120,7 @@ suite('Current Section Tests (getCurrentSection)', () => {
 				}
 			}
 			assert.strictEqual(
-				getCurrentSection(offset, text.length, sections),
+				getCurrentSection(offset, sections),
 				expected,
 				`offset ${offset}`
 			);

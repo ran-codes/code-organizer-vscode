@@ -32,8 +32,12 @@ because `findSections` sorts by index before returning.
 `getCurrentSection.test.ts` is the pure-logic suite: no `vscode` import, no
 documents, just offsets and a section list. It differs from the syntax suites in
 what it covers rather than how it runs — those assert what the *parser* produces,
-this asserts which section a *cursor* lands in. It also pins the EOF quirk
-(`offset === textLength` → `undefined`) so nobody quietly "fixes" it mid-refactor.
+this asserts which section a *cursor* lands in. It pins the EOF rule
+(`offset === textLength` → the **last section**, since that section runs to the end
+of the text) from both directions: a dedicated test, and the brute-force oracle in
+the last test, whose loop bound and final `end` both run one past `text.length` to
+cover it. Narrow either back and the oracle disagrees with the implementation at
+EOF — that is the pre-#52 behavior resurfacing, not a broken fixture.
 
 ## Identity assertions — use `strictEqual`, never `deepStrictEqual`
 
