@@ -47,18 +47,25 @@ Two shared helpers sit between the parser and its consumers:
   `reveal()` matches by object reference, so it silently fails against freshly
   constructed items — including anywhere up the `getParent()` chain, which reveal
   also walks. Keep that cache intact; `test/treeDataProvider.test.ts` locks it.
-  **Known broken today (#50):** `refresh()` clears the cache and only a later
-  `getChildren()` refills it, and `cursorSync` does not await in between — so
-  every pass that refreshes misses, and because an edit forces a refresh, the
-  reveal does not fire at all while the user is typing. Deterministic, not a race.
+  The provider therefore **builds items on demand**: `getTreeItemForSection()`
+  routes through the same memoizing factory `getChildren()` and `getParent()` use,
+  so an item built before VS Code has asked for it *is* the object it will later
+  hand back. That is what makes the reveal fire on a pass that refreshed (#50) and
+  into a collapsed parent VS Code never expanded (#51). A miss now means the
+  section is not in the provider's current snapshot — a real inconsistency, not
+  routine. Do not turn that method back into a bare `Map.get`.
 - **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
   `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
   the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built
   from. Reading the version-keyed index instead would let the sync sit a version
   ahead of the tree and quietly stop revealing.
 - **Diagnostics go through `log()`, not `console.log`.** The Output Channel is
-  readable by users in the field; the devtools console is not. The cache-miss
+  readable by users in the field; the devtools console is not. The tree-item-miss
   branch in `cursorSync` logs deliberately rather than returning in silence.
+- **`cursorSync` skips the reveal while the TreeView is hidden.** There is nothing
+  to scroll, and `reveal()` is documented to show the view if it is not already
+  visible — which would yank the sidebar off whatever the user has open. A
+  `treeView.onDidChangeVisibility` listener re-syncs when it comes back (#50).
 - **Roots are `depth === 1`, not "no parent."** A file opening with `### Foo ----`
   produces a depth-3 section with no parent that is deliberately *not* a root.
 - **Section identity is `uniqueId`, never `name`.** Duplicate names are legal and

@@ -95,8 +95,24 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     return item;
   }
 
-  findTreeItemBySection(section: SectionMatch): SectionTreeItem | undefined {
-    return this.treeItemCache.get(section.uniqueId);
+  /**
+   * The TreeItem for `section`, built and cached now if VS Code has not asked
+   * for it yet. `section` must come from `getSections()` — the snapshot this
+   * provider was last refreshed with.
+   *
+   * **Creating on miss is what makes `reveal()` work at all.** `refresh()` clears
+   * the cache and only a later `getChildren()` refills it, so a lookup-only
+   * version returned `undefined` on every pass that refreshed (#50) and for every
+   * section under a collapsed parent VS Code never expanded (#51). Identity is
+   * not at risk: `getOrCreateTreeItem` is the single source of instances, so the
+   * item returned here is the same object a later `getChildren()` hands back —
+   * which is what `reveal()` compares against by reference.
+   */
+  getTreeItemForSection(section: SectionMatch): SectionTreeItem | undefined {
+    if (!this.currentDocument) {
+      return undefined;
+    }
+    return this.getOrCreateTreeItem(section);
   }
 
   /**

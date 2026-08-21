@@ -1,12 +1,69 @@
 # Issue #50: Reveal never fires on any sync pass that refreshes
 
-> **Status: TODO** — this is a ready-to-implement spec. An agent picking this up
-> should read `src/CLAUDE.md` (the `reveal()` gotcha), `src/test/CLAUDE.md` (the
-> identity-assertion rule), and `src/treeDataProvider.ts` first, then follow the
-> Implementation Steps below.
+> **Status: CODE DONE — awaiting the F5 pass.** Steps 1-3 and 5 are implemented on
+> branch `issue-50`: 109 tests passing, `npm run compile` clean. What is left is
+> **Step 4**, which needs a human at the Extension Development Host — it is written
+> out as the [User Checklist](#-user-checklist--the-manual-steps) below. The
+> original spec is kept below unchanged as the record of what was decided.
 
 **Issue:** https://github.com/ran-codes/code-organizer-vscode/issues/50
 **Also closes (expected):** https://github.com/ran-codes/code-organizer-vscode/issues/51 — see [Issue #51](#issue-51-collapsed-parents) below. **Do not open a second PR for #51 until this one is verified.**
+
+---
+
+## 👤 User Checklist — the manual steps
+
+Everything else in this doc is automatable. These are not: they need the Extension
+Development Host (`F5`), which only the maintainer can drive. **Two rounds**, and the
+first one has to happen on `master` *before* judging the fix.
+
+### Round 1 — on `master`, before the fix: reproduce #51
+
+Why first: #51 has never been reproduced — it is a reading of the code. If it does
+not reproduce, it gets closed as not-a-bug rather than quietly folded into this PR
+(plan §"Issue #51", step 1).
+
+1. `git checkout master`, then `F5`.
+2. In the dev host, open `assets/test-files/test.py`.
+3. **Establish the baseline first.** Without typing anything, click the cursor into a
+   top-level section. The Activity Bar outline **should** follow it. (This is the
+   no-refresh path — it is the only path that works on `master`.)
+4. Now collapse a depth-1 section that has subsections, and — still without typing —
+   click into one of those subsections in the editor.
+5. Open **Output → "Code Organizer"** and look for
+   `No cached tree item for "…" — reveal skipped`.
+
+| What you see | Verdict |
+| --- | --- |
+| Step 3 revealed fine, step 4 logged a skip and the tree did not scroll | **#51 reproduced** — tell me, it gets fixed and closed in this PR |
+| Both revealed fine | **Not a bug** — tell me, I close #51 as not-a-bug and drop it from the PR |
+| Even step 3 logged a skip | You typed, or the doc refreshed — that is #50 masking #51. Reopen the file and retry without touching the keyboard |
+
+6. `git checkout issue-50` when done.
+
+### Round 2 — on `issue-50`, after the fix: the five acceptance checks
+
+Same as Step 4 below. **I will tell you when the code is committed and ready.**
+
+1. **The actual bug (#50).** Open `assets/test-files/test.py`, type continuously for
+   ~10 s, watch the outline track the cursor. Output Channel: **no** `reveal skipped` lines.
+2. **Sidebar hijack (Decision 4)** — *the one that settles an open question*. Switch the
+   sidebar to **Explorer**, then move the cursor around a sectioned file. **The Explorer
+   must stay put.** Record what you saw either way; it goes in the PR body.
+3. **#51.** Collapse a depth-1 section, click into one of its subsections, confirm the
+   tree expands and scrolls to it.
+4. **Auto-expand feel — your call to make.** `reveal()` now runs with `expand: 1`, which
+   has never had an observable effect before. If it feels like it is fighting you
+   (sections popping open as you move), say so and I will switch it to `expand: false`
+   **in this PR** plus a CHANGELOG note. Decide now, not later.
+5. **Large file.** Open the biggest sectioned file you have; confirm no typing lag.
+
+### What to report back
+
+- Round 1 verdict (#51 reproduced / not-a-bug).
+- Check 2: did the Explorer stay put? **Yes/no — this is going in the PR body verbatim.**
+- Check 4: keep `expand: 1`, or switch to `expand: false`?
+- Anything from 1, 3, 5 that looked wrong.
 
 ---
 
@@ -285,17 +342,17 @@ Unlike #50, #51 was never reproduced — it was a reading of the code. So:
 
 ## Acceptance Criteria
 
-- [ ] `getTreeItemForSection` builds on miss; `findTreeItemBySection` is gone
+- [x] `getTreeItemForSection` builds on miss; `findTreeItemBySection` is gone
 - [ ] Reveal fires on a pass that refreshed — no `reveal skipped` lines while typing
-- [ ] Test proves an on-demand item is `strictEqual` to what `getChildren()` later returns
-- [ ] Test covers the collapsed-parent chain (child instance **and** `getParent`)
-- [ ] `getTreeItemForSection` returns `undefined` before any refresh
-- [ ] `treeView.visible` guard in place; visibility-change re-sync registered
-- [ ] All pre-existing suites pass; `strictEqual` used throughout the identity suite
-- [ ] `npm run compile` clean (type-check + lint — the only automated gate)
+- [x] Test proves an on-demand item is `strictEqual` to what `getChildren()` later returns
+- [x] Test covers the collapsed-parent chain (child instance **and** `getParent`)
+- [x] `getTreeItemForSection` returns `undefined` before any refresh
+- [x] `treeView.visible` guard in place; visibility-change re-sync registered
+- [x] All pre-existing suites pass; `strictEqual` used throughout the identity suite
+- [x] `npm run compile` clean (type-check + lint — the only automated gate)
 - [ ] F5: all five checks in Step 4 done, **including** the Explorer-stays-put result recorded in the PR
-- [ ] `src/CLAUDE.md` no longer says the reveal is known broken
-- [ ] `CHANGELOG.md` entry under `## [Unreleased]` → `### Fixed`, citing #50 and #51
+- [x] `src/CLAUDE.md` no longer says the reveal is known broken
+- [x] `CHANGELOG.md` entry under `## [Unreleased]` → `### Fixed`, citing #50 and #51
 - [ ] #51 reproduced on `master`, then verified fixed (or closed as not-a-bug)
 
 ## Out of Scope

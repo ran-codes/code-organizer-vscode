@@ -18,7 +18,7 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |
 | `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
 | `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
-| `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant |
+| `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant, including items built on demand (#50/#51) |
 
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
@@ -49,7 +49,11 @@ case it was widened for. The dedicated test is the backstop for that one.
 identity**, and for both the bug class *is* identity. `TreeView.reveal()` matches
 elements by object reference, so a rebuilt TreeItem with identical field values is
 exactly the failure mode — `deepStrictEqual` would pass against a broken refactor
-and give false confidence. Same for the parse cache: two structurally-equal arrays
+and give false confidence. That is load-bearing twice over now: the provider builds
+TreeItems on demand rather than waiting for `getChildren()` to refill the cache, and
+the only thing making that safe is that the cache is the **single source** of
+instances. The test asserting an on-demand item is `strictEqual` to what
+`getChildren()` later returns is what pins it. Same for the parse cache: two structurally-equal arrays
 are what a *missing* cache produces, so only `strictEqual` proves one parse
 happened. Neither needs a spy or a module mock as a result.
 
