@@ -300,7 +300,8 @@ Unlike #50, #51 was never reproduced — it was a reading of the code. So:
 
 ## Out of Scope
 
-- **#52** (EOF edge case) — different file, different cause; see `TODO__issue_52.md`.
+- **#52** (EOF edge case) — different file, different cause. Shipped separately;
+  its plan doc is gone per the delete-on-merge convention.
 - **#54** (wrong parent in mixed-syntax files) — parser-side, unrelated.
 - Reworking the `lastDocument` / refresh-on-edit flow (Decision 5).
 - Any `uniqueId → SectionMatch` index, unless Step 4 check 5 shows real lag.

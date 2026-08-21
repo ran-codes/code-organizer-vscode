@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The current-section highlight no longer disappears when the cursor is at the
+  very end of a file. The last section runs to the end of the text, so the final
+  cursor position now resolves to it instead of to no section at all (#52)
 - Sections that share a name with their parent section no longer disappear —
   together with their entire subtree — from the built-in Outline, breadcrumbs,
   and Go to Symbol (#47)

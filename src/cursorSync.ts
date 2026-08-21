@@ -49,7 +49,6 @@ export function registerCursorSync(
 
     const currentSection = getCurrentSection(
       document.offsetAt(editor.selection.active),
-      document.getText().length,
       treeDataProvider.getSections()
     );
 

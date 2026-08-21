@@ -5,9 +5,9 @@ import { SectionMatch } from './findSections';
  * The deepest section containing `offset`, or undefined when the cursor sits
  * outside every section.
  *
- * Takes an offset and a length rather than a `vscode.Position`/`TextDocument` so
- * this module stays vscode-free and directly unit-testable; callers pass
- * `document.offsetAt(cursorPos)` and `document.getText().length`.
+ * Takes a plain offset rather than a `vscode.Position`/`TextDocument` so this
+ * module stays vscode-free and directly unit-testable; callers pass
+ * `document.offsetAt(cursorPos)`.
  *
  * `sections` must be in document order, as `findSections` returns it.
  *
@@ -20,21 +20,16 @@ import { SectionMatch } from './findSections';
  * cursor, so S is strictly deeper than every other containing section. One scan
  * therefore replaces the per-section boundary search this used to do.
  *
- * **EOF returns undefined**, because a section ends *before* its terminator and
- * the final section's terminator is the end of the text. A cursor at
- * `offset === textLength` is in no section at all. That is a pre-existing quirk
- * — visible as the highlight dropping when the cursor is at the very end of a
- * file — deliberately preserved here and tracked separately, not fixed in passing.
+ * **EOF resolves to the last section.** The final section runs to the end of the
+ * text, so a cursor at `offset === textLength` — the last position in the file —
+ * is inside it, and the scan below already says so without a special case. This
+ * needs no bounds check of its own: an offset past the end still resolves to the
+ * last section, which is a harmless answer rather than a crash (#52).
  */
 export function getCurrentSection(
   offset: number,
-  textLength: number,
   sections: readonly SectionMatch[]
 ): SectionMatch | undefined {
-  if (offset >= textLength) {
-    return undefined;
-  }
-
   let deepest: SectionMatch | undefined;
   for (const section of sections) {
     if (section.index > offset) {

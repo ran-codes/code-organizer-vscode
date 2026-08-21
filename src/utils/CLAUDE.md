@@ -19,9 +19,9 @@ functions over data, and caches keyed on a `TextDocument` belong in
 
 ## `getCurrentSection` contract
 
-`getCurrentSection(offset, textLength, sections)` takes plain numbers rather than
-a `Position`/`TextDocument` precisely to stay on the vscode-free side of that
-rule; callers pass `document.offsetAt(cursorPos)` and `document.getText().length`.
+`getCurrentSection(offset, sections)` takes a plain number rather than a
+`Position`/`TextDocument` precisely to stay on the vscode-free side of that rule;
+callers pass `document.offsetAt(cursorPos)`.
 
 Two things it encodes:
 
@@ -30,10 +30,15 @@ Two things it encodes:
   cursor, and any shallower section would have terminated it before the cursor.
   That equivalence is what lets one scan replace a per-section boundary search;
   `getCurrentSection.test.ts` cross-checks it at every offset in a fixture.
-- **A cursor at `offset === textLength` returns `undefined`**, because a section
-  ends *before* its terminator and the last section's terminator is the end of the
-  text. A known quirk (the highlight drops at the very end of a file), asserted on
-  purpose. Do not "fix" it here without an issue and a changelog entry.
+- **A cursor at `offset === textLength` returns the last section**, which runs to
+  the end of the text and so contains the file's final position. This falls out of
+  the scan with no special case, and the function deliberately carries **no bounds
+  check** — callers pass `document.offsetAt(...)`, which VS Code already clamps, and
+  an out-of-range offset resolving to the last section is a harmless answer rather
+  than a crash. A negative offset resolves to `undefined` for the same reason: the
+  scan breaks on the first section rather than throwing. Both directions are pinned
+  in `getCurrentSection.test.ts`. It used to return `undefined` here, which dropped
+  the highlight at the very end of a file; fixed in #52.
 
 ## `findSections` contract
 
