@@ -35,8 +35,10 @@ Two things it encodes:
   the scan with no special case, and the function deliberately carries **no bounds
   check** — callers pass `document.offsetAt(...)`, which VS Code already clamps, and
   an out-of-range offset resolving to the last section is a harmless answer rather
-  than a crash. It used to return `undefined` here, which dropped the highlight at
-  the very end of a file; fixed in #52.
+  than a crash. A negative offset resolves to `undefined` for the same reason: the
+  scan breaks on the first section rather than throwing. Both directions are pinned
+  in `getCurrentSection.test.ts`. It used to return `undefined` here, which dropped
+  the highlight at the very end of a file; fixed in #52.
 
 ## `findSections` contract
 
