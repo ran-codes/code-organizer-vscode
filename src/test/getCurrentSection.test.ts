@@ -64,6 +64,22 @@ suite('Current Section Tests (getCurrentSection)', () => {
 		assert.strictEqual(getCurrentSection(text.length - 1, sections)?.name, 'Second');
 	});
 
+	test('Should resolve an out-of-range offset rather than guard against it', () => {
+		// The function deliberately carries no bounds check: callers pass
+		// `document.offsetAt(...)`, which VS Code already clamps, so an offset past
+		// the end is unreachable in practice and resolving it to the last section
+		// is a harmless answer rather than a crash (#52). Pinned because that is a
+		// prose contract the type system cannot hold anyone to — `offset: number`
+		// accepts `text.length + 50` exactly as readily as `3`, so a future
+		// defensive guard would type-check clean and would resurrect #52 for any
+		// caller that is not `offsetAt`-clamped.
+		assert.strictEqual(getCurrentSection(text.length + 50, sections)?.name, 'Second');
+
+		// The other end of the same claim: a negative offset resolves to nothing
+		// instead of throwing.
+		assert.strictEqual(getCurrentSection(-1, sections), undefined);
+	});
+
 	test('Should return undefined when there are no sections', () => {
 		const plain = 'x = 1\n# just a comment\n';
 		assert.strictEqual(getCurrentSection(3, findSections(plain, 'python')), undefined);
@@ -105,9 +121,18 @@ suite('Current Section Tests (getCurrentSection)', () => {
 		//
 		// The loop and the final section's `end` both run one past `text.length`
 		// so that EOF is covered: the last section is inclusive of the end of the
-		// text (#52). Narrowing either back makes this oracle disagree with the
-		// implementation at EOF — that disagreement is the old behavior, not a
-		// bug in the fixture.
+		// text (#52). The two bounds fail differently if narrowed back, which is
+		// worth knowing before touching either.
+		//
+		// Narrowing `end` to `text.length` is self-enforcing: the oracle then
+		// computes `undefined` at EOF while the implementation returns `Second`,
+		// so this test fails loudly and says why.
+		//
+		// Narrowing the loop bound to `offset < text.length` is SILENT: the EOF
+		// assertion simply stops running, and the oracle still passes having
+		// quietly dropped the one case it was widened for. The dedicated `Should
+		// return the last section at the very end of the text` test above is the
+		// backstop for that one — which is why the EOF rule is pinned twice.
 		for (let offset = 0; offset <= text.length; offset++) {
 			let expected: typeof sections[number] | undefined;
 			for (const section of sections) {

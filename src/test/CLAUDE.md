@@ -36,8 +36,12 @@ this asserts which section a *cursor* lands in. It pins the EOF rule
 (`offset === textLength` → the **last section**, since that section runs to the end
 of the text) from both directions: a dedicated test, and the brute-force oracle in
 the last test, whose loop bound and final `end` both run one past `text.length` to
-cover it. Narrow either back and the oracle disagrees with the implementation at
-EOF — that is the pre-#52 behavior resurfacing, not a broken fixture.
+cover it. Those two bounds fail differently, and the difference is why the rule is
+pinned twice. Narrowing the final `end` back to `text.length` is self-enforcing:
+the oracle then disagrees with the implementation at EOF and the test fails loudly.
+Narrowing the loop bound back to `offset < text.length` is **silent** — the EOF
+assertion stops running and the oracle still passes, having quietly dropped the one
+case it was widened for. The dedicated test is the backstop for that one.
 
 ## Identity assertions — use `strictEqual`, never `deepStrictEqual`
 
