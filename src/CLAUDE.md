@@ -50,10 +50,23 @@ Two shared helpers sit between the parser and its consumers:
   The provider therefore **builds items on demand**: `getTreeItemForSection()`
   routes through the same memoizing factory `getChildren()` and `getParent()` use,
   so an item built before VS Code has asked for it *is* the object it will later
-  hand back. That is what makes the reveal fire on a pass that refreshed (#50) and
-  into a collapsed parent VS Code never expanded (#51). A miss now means the
-  section is not in the provider's current snapshot — a real inconsistency, not
-  routine. Do not turn that method back into a bare `Map.get`.
+  hand back. That is what makes the reveal fire on a pass that refreshed (#50).
+  It returns `undefined` for a section outside the current snapshot, and that
+  guard is load-bearing: this is the one public entry point that *writes* to the
+  cache, `uniqueId` is unique only within a snapshot, and a colliding stale id
+  would cache an item carrying a stale section and document. Do not turn the
+  method back into a bare `Map.get`, and do not drop the snapshot check.
+- **Collapsing a section does not evict anything — items default to `Expanded`.**
+  `SectionTreeItem`'s constructor sets `TreeItemCollapsibleState.Expanded` for
+  every section that has children, so VS Code fetches those children at render
+  time and caches them before the user can collapse anything; collapsing clears
+  neither VS Code's node map nor `treeItemCache`. This is almost certainly why
+  #51 ("sections under a collapsed parent are never cached") never reproduced —
+  the premise does not hold for this provider. Do not restate that premise as
+  fact anywhere: it was written into three files during #50 and none of it was
+  true. Note the flip side, which *is* real — `refresh()` clears the cache and
+  fires the change event, so every edit rebuilds items as `Expanded` and the
+  user's collapse state is destroyed on every keystroke that changes sections.
 - **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
   `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
   the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built

@@ -97,19 +97,31 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
 
   /**
    * The TreeItem for `section`, built and cached now if VS Code has not asked
-   * for it yet. `section` must come from `getSections()` — the snapshot this
-   * provider was last refreshed with.
+   * for it yet. Returns `undefined` for anything outside `getSections()` — the
+   * snapshot this provider was last refreshed with.
    *
    * **Creating on miss is what makes `reveal()` work at all.** `refresh()` clears
    * the cache and only a later `getChildren()` refills it, so a lookup-only
-   * version returned `undefined` on every pass that refreshed (#50) and for every
-   * section under a collapsed parent VS Code never expanded (#51). Identity is
+   * version returned `undefined` on every pass that refreshed (#50). Identity is
    * not at risk: `getOrCreateTreeItem` is the single source of instances, so the
    * item returned here is the same object a later `getChildren()` hands back —
    * which is what `reveal()` compares against by reference.
+   *
+   * **The snapshot check is what keeps creating-on-miss safe.** This is the one
+   * public entry point that *writes* to `treeItemCache`, and the cache is keyed
+   * on `uniqueId` (`` `${name}_${index}` ``), which is unique only *within* one
+   * snapshot. A stale or foreign `SectionMatch` whose id collided with a live one
+   * would otherwise cache an item holding that stale section and document in its
+   * `command.arguments`, and `getChildren()` would hand the poisoned instance to
+   * VS Code — a click then jumps using stale offsets.
    */
   getTreeItemForSection(section: SectionMatch): SectionTreeItem | undefined {
     if (!this.currentDocument) {
+      return undefined;
+    }
+    // Identity, not equality: only a section from the live snapshot may mint a
+    // cache entry keyed on its uniqueId.
+    if (!this.sections.includes(section)) {
       return undefined;
     }
     return this.getOrCreateTreeItem(section);

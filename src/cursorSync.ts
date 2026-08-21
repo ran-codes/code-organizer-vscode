@@ -67,9 +67,12 @@ export function registerCursorSync(
 
     const item = treeDataProvider.getTreeItemForSection(currentSection);
     if (!item) {
-      // The provider builds items on demand now, so a miss is no longer routine:
-      // it means `currentSection` is not in the snapshot the provider was last
-      // refreshed with — a real inconsistency, worth the log line.
+      // A miss means the provider did not recognise `currentSection` as part of
+      // its current snapshot. It cannot happen from *here* — `currentSection`
+      // came out of `getSections()` a few lines up, so the snapshot exists and
+      // contains it. The branch stays because the alternative to a guarded
+      // lookup is an unguarded one, and a silent miss is exactly what #50 was:
+      // the highlight kept working while the sidebar quietly stopped scrolling.
       log(`No tree item for "${currentSection.name}" — reveal skipped`);
       return;
     }

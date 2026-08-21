@@ -2,9 +2,12 @@
 
 Mocha suites — **one file per comment syntax**, plus one per non-parser module. The
 syntax and util suites call `src/utils/` directly, which is possible only because
-those modules never import `vscode`. The provider suite is the exception: it imports
-`vscode` and builds documents with `workspace.openTextDocument`, which works because
-`vscode-test` runs everything inside the extension host.
+those modules never import `vscode`. `treeDataProvider.test.ts` and
+`cursorSync.test.ts` are the exceptions: they import `vscode` and build documents
+with `workspace.openTextDocument`, which works because `vscode-test` runs
+everything inside the extension host. `cursorSync.test.ts` also shows a real
+editor (`window.showTextDocument`) — the sync pass reads
+`window.activeTextEditor` — and closes it again in teardown.
 
 | File | Covers |
 | --- | --- |
@@ -18,7 +21,8 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |
 | `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
 | `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
-| `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant, including items built on demand (#50/#51) |
+| `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant, including items built on demand and the snapshot check that keeps that safe (#50) |
+| `cursorSync.test.ts` | The `treeView.visible` reveal guard and the `onDidChangeVisibility` catch-up (#50) — a stub TreeView injected through `registerCursorSync` |
 
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
@@ -62,6 +66,14 @@ these two: **an invariant that had to be written in prose because the type syste
 cannot enforce it needs a test.** TypeScript type-checks `new SectionTreeItem(...)`
 identically to a cached lookup, so the compiler will never catch this class of
 regression.
+
+`cursorSync.test.ts` exists because of that rule. The reveal-while-hidden guard
+and the visibility catch-up are both prose-only invariants — the compiler cannot
+tell a reveal against a hidden view from one against a visible view — and the
+seam to test them was already there: `registerCursorSync` takes the `TreeView` by
+injection, so a stub with a settable `visible` and a recording `reveal` needs no
+module mocking. Same for the snapshot check in `getTreeItemForSection`: a section
+from a stale snapshot is type-identical to a live one, so only a test can pin it.
 
 ## Running
 

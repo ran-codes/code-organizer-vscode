@@ -213,7 +213,7 @@ async function focusOnSection(section: SectionMatch) {
   await vscode.commands.executeCommand('codeOrganizerOutlineActivity.focus');
 
   // Then reveal the specific item
-  const item = treeDataProvider.findTreeItemBySection(section);
+  const item = treeDataProvider.getTreeItemForSection(section);
   if (item) {
     await treeView.reveal(item, {
       focus: false,   // Already focused above
