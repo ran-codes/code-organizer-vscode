@@ -52,9 +52,12 @@ Two shared helpers sit between the parser and its consumers:
   so an item built before VS Code has asked for it *is* the object it will later
   hand back. That is what makes the reveal fire on a pass that refreshed (#50).
   It returns `undefined` for a section outside the current snapshot, and that
-  guard is load-bearing: this is the one public entry point that *writes* to the
-  cache, `uniqueId` is unique only within a snapshot, and a colliding stale id
-  would cache an item carrying a stale section and document. Do not turn the
+  guard is load-bearing: it is the only entry point that would key a cache write
+  on a section the **caller** supplied rather than one the provider read out of
+  its own `sections` / `childrenByParentId` (`getChildren()` and `getParent()`
+  write to the cache too — they just cannot be handed a foreign section).
+  `uniqueId` is unique only within a snapshot, so a colliding stale id would
+  otherwise cache an item carrying a stale section and document. Do not turn the
   method back into a bare `Map.get`, and do not drop the snapshot check.
 - **Collapsing a section does not evict anything — items default to `Expanded`.**
   `SectionTreeItem`'s constructor sets `TreeItemCollapsibleState.Expanded` for
@@ -64,9 +67,16 @@ Two shared helpers sit between the parser and its consumers:
   #51 ("sections under a collapsed parent are never cached") never reproduced —
   the premise does not hold for this provider. Do not restate that premise as
   fact anywhere: it was written into three files during #50 and none of it was
-  true. Note the flip side, which *is* real — `refresh()` clears the cache and
-  fires the change event, so every edit rebuilds items as `Expanded` and the
-  user's collapse state is destroyed on every keystroke that changes sections.
+  true. **What `refresh()` does to the user's collapse state is unverified — do
+  not assert it either way without watching it in the Extension Development
+  Host.** It clears the cache and fires the change event, so items are rebuilt as
+  `Expanded`; but `SectionTreeItem` never sets `TreeItem.id`, and VS Code then
+  derives an id from the label (`section.name`) and uses it "to preserve the
+  selection and expansion state" — stable across a refresh that does not rename
+  anything. So the plausible outcome is the opposite: collapse state survives an
+  ordinary edit and breaks only when a section is renamed. Note also that the
+  refresh is per *edit*, not per section change — `cursorSync` clears
+  `lastDocument` on any `onDidChangeTextDocument`.
 - **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
   `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
   the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built

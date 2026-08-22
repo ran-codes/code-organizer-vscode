@@ -107,13 +107,15 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
    * item returned here is the same object a later `getChildren()` hands back —
    * which is what `reveal()` compares against by reference.
    *
-   * **The snapshot check is what keeps creating-on-miss safe.** This is the one
-   * public entry point that *writes* to `treeItemCache`, and the cache is keyed
-   * on `uniqueId` (`` `${name}_${index}` ``), which is unique only *within* one
-   * snapshot. A stale or foreign `SectionMatch` whose id collided with a live one
-   * would otherwise cache an item holding that stale section and document in its
-   * `command.arguments`, and `getChildren()` would hand the poisoned instance to
-   * VS Code — a click then jumps using stale offsets.
+   * **The snapshot check is what keeps creating-on-miss safe.** `getChildren()`
+   * and `getParent()` write to `treeItemCache` too, but only ever with sections
+   * they read out of `sections` / `childrenByParentId`. This is the only entry
+   * point that would key a write on a section the *caller* supplied — and the
+   * cache is keyed on `uniqueId` (`` `${name}_${index}` ``), which is unique only
+   * *within* one snapshot. A stale or foreign `SectionMatch` whose id collided
+   * with a live one would otherwise cache an item holding that stale section and
+   * document in its `command.arguments`, and `getChildren()` would hand the
+   * poisoned instance to VS Code — a click then jumps using stale offsets.
    */
   getTreeItemForSection(section: SectionMatch): SectionTreeItem | undefined {
     if (!this.currentDocument) {

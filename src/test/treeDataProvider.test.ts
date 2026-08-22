@@ -15,8 +15,10 @@ import { SectionIndex } from '../sectionIndex';
 // item *is* the object a later `getChildren()` hands back. The test asserting
 // exactly that is the load-bearing one in this file.
 //
-// The second half of that safety is the snapshot check. `getTreeItemForSection`
-// is the one public method that *writes* to the cache, and the cache is keyed on
+// The second half of that safety is the snapshot check. `getChildren()` and
+// `getParent()` write to the cache too, but only with sections they read out of
+// the provider's own state; `getTreeItemForSection` is the only entry point that
+// would key a write on a section the **caller** supplied. The cache is keyed on
 // `uniqueId`, which is unique only within a single snapshot — so a section from
 // a stale or foreign snapshot must be refused rather than allowed to mint an
 // entry under a colliding key.
@@ -152,10 +154,10 @@ suite('Tree Data Provider Tests (reveal identity)', () => {
 	});
 
 	test('Should refuse a section from a document it was not refreshed with', async () => {
-		// getTreeItemForSection is the only public method that *writes* to the
-		// cache. A section it does not recognise must not reach getOrCreateTreeItem,
-		// which would happily key it on uniqueId and pair it with the *current*
-		// document.
+		// getTreeItemForSection is the only entry point that keys a cache write on a
+		// caller-supplied section. One it does not recognise must not reach
+		// getOrCreateTreeItem, which would happily key it on uniqueId and pair it
+		// with the *current* document.
 		await refreshedWith('# Root ----\n');
 
 		const foreign = await vscode.workspace.openTextDocument({

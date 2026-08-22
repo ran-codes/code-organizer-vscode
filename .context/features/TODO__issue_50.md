@@ -20,44 +20,23 @@ what was expected, **not** as a description of how the code behaves.
 ## 👤 User Checklist — the manual steps
 
 Everything else in this doc is automatable. These are not: they need the Extension
-Development Host (`F5`), which only the maintainer can drive. **Two rounds**, and the
-first one has to happen on `master` *before* judging the fix.
+Development Host (`F5`), which only the maintainer can drive.
 
-### Round 1 — on `master`, before the fix: reproduce #51
+> **There used to be a Round 1 here — reproduce #51 on `master` first.** It is gone:
+> #51 closed `NOT_PLANNED`, so there is nothing to reproduce and the round was pure
+> dead work. What was Round 2 is now the whole checklist.
 
-Why first: #51 has never been reproduced — it is a reading of the code. If it does
-not reproduce, it gets closed as not-a-bug rather than quietly folded into this PR
-(plan §"Issue #51", step 1).
-
-1. `git checkout master`, then `F5`.
-2. In the dev host, open `assets/test-files/test.py`.
-3. **Establish the baseline first.** Without typing anything, click the cursor into a
-   top-level section. The Activity Bar outline **should** follow it. (This is the
-   no-refresh path — it is the only path that works on `master`.)
-4. Now collapse a depth-1 section that has subsections, and — still without typing —
-   click into one of those subsections in the editor.
-5. Open **Output → "Code Organizer"** and look for
-   `No cached tree item for "…" — reveal skipped`.
-
-| What you see | Verdict |
-| --- | --- |
-| Step 3 revealed fine, step 4 logged a skip and the tree did not scroll | **#51 reproduced** — tell me, it gets fixed and closed in this PR |
-| Both revealed fine | **Not a bug** — tell me, I close #51 as not-a-bug and drop it from the PR |
-| Even step 3 logged a skip | You typed, or the doc refreshed — that is #50 masking #51. Reopen the file and retry without touching the keyboard |
-
-6. `git checkout issue-50` when done.
-
-### Round 2 — on `issue-50`, after the fix: the five acceptance checks
-
-Same as Step 4 below. **I will tell you when the code is committed and ready.**
+### The five acceptance checks — on `issue-50`, after the fix
 
 1. **The actual bug (#50).** Open `assets/test-files/test.py`, type continuously for
    ~10 s, watch the outline track the cursor. Output Channel: **no** `reveal skipped` lines.
 2. **Sidebar hijack (Decision 4)** — *the one that settles an open question*. Switch the
    sidebar to **Explorer**, then move the cursor around a sectioned file. **The Explorer
    must stay put.** Record what you saw either way; it goes in the PR body.
-3. **#51.** Collapse a depth-1 section, click into one of its subsections, confirm the
-   tree expands and scrolls to it.
+3. **Collapsed-parent reveal.** Collapse a depth-1 section, click into one of its
+   subsections, confirm the tree expands and scrolls to it. (This was filed as #51
+   and closed as not-a-bug — it is kept as a contract check on the reveal path, not
+   as a bug repro. `treeDataProvider.test.ts` pins the same contract in code.)
 4. **Auto-expand feel — your call to make.** `reveal()` now runs with `expand: 1`, which
    has never had an observable effect before. If it feels like it is fighting you
    (sections popping open as you move), say so and I will switch it to `expand: false`
@@ -66,10 +45,14 @@ Same as Step 4 below. **I will tell you when the code is committed and ready.**
 
 ### What to report back
 
-- Round 1 verdict (#51 reproduced / not-a-bug).
 - Check 2: did the Explorer stay put? **Yes/no — this is going in the PR body verbatim.**
 - Check 4: keep `expand: 1`, or switch to `expand: false`?
 - Anything from 1, 3, 5 that looked wrong.
+- **Bonus, while you are in there:** collapse a section, then type inside a *different*
+  section without renaming anything. Does the collapsed one stay collapsed? `refresh()`
+  rebuilds every item as `Expanded`, but `TreeItem.id` is unset so VS Code derives ids
+  from labels and is documented to preserve expansion state when they do not change.
+  Nobody has watched this. Whatever you see settles the open note in `src/CLAUDE.md`.
 
 ---
 

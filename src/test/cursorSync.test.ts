@@ -117,14 +117,27 @@ suite('Cursor Sync Tests (TreeView visibility guard)', () => {
 		assert.strictEqual(revealed[0].section.name, 'Child');
 	});
 
-	test('Should stay quiet when the view reports becoming hidden', async () => {
+	test('Should not re-sync on a becoming-hidden event', async () => {
+		// The listener's own `if (event.visible)` guard, isolated from the reveal
+		// guard at the top of the pass. The view stays **visible** throughout, which
+		// is the whole point: with `viewVisible = false` an unguarded listener is
+		// absorbed by `!treeView.visible` and reveals nothing anyway, so the test
+		// passes with the guard deleted outright — vacuous, and it read as coverage.
 		await openWithCursorInChild();
-		viewVisible = false;
+		viewVisible = true;
+		const sync = register();
 
-		await register()();
 		visibilityEmitter.fire({ visible: false });
-		await new Promise(resolve => setTimeout(resolve, 50));
 
+		// No sleep. The stub records synchronously and the pass runs synchronously
+		// up to the `reveal()` call, so an unguarded listener has already pushed by
+		// the time `fire()` returns — a timer would only add flake. The awaited pass
+		// below is the control that keeps this negative honest: it proves this stub
+		// does reveal in exactly this state, so the zero above is the guard working
+		// rather than a fixture that could never have revealed.
 		assert.strictEqual(revealed.length, 0, 'a hidden-visibility event must not re-sync');
+
+		await sync();
+		assert.strictEqual(revealed.length, 1, 'control: the same state reveals when synced');
 	});
 });
