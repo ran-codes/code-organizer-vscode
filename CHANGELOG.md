@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The outline in the Activity Bar now follows the cursor **while you are typing**.
+  It previously stopped tracking as soon as you edited the file and only caught up
+  once you stopped and moved the cursor in an untouched document (#50)
 - The current-section highlight no longer disappears when the cursor is at the
   very end of a file. The last section runs to the end of the text, so the final
   cursor position now resolves to it instead of to no section at all (#52)

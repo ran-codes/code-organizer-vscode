@@ -1,12 +1,58 @@
 # Issue #50: Reveal never fires on any sync pass that refreshes
 
-> **Status: TODO** — this is a ready-to-implement spec. An agent picking this up
-> should read `src/CLAUDE.md` (the `reveal()` gotcha), `src/test/CLAUDE.md` (the
-> identity-assertion rule), and `src/treeDataProvider.ts` first, then follow the
-> Implementation Steps below.
+> **Status: CODE DONE — awaiting the F5 pass.** Steps 1-3 and 5 are implemented on
+> branch `issue-50`: 115 tests passing, `npm run compile` clean. What is left is
+> **Step 4**, which needs a human at the Extension Development Host — it is written
+> out as the [User Checklist](#-user-checklist--the-manual-steps) below. The
+> original spec is kept below unchanged as the record of what was decided.
 
 **Issue:** https://github.com/ran-codes/code-organizer-vscode/issues/50
-**Also closes (expected):** https://github.com/ran-codes/code-organizer-vscode/issues/51 — see [Issue #51](#issue-51-collapsed-parents) below. **Do not open a second PR for #51 until this one is verified.**
+**#51 — settled, closes nothing:** https://github.com/ran-codes/code-organizer-vscode/issues/51
+was closed `NOT_PLANNED` on 2026-08-21. It never reproduced, and PR #59's review
+found why: `SectionTreeItem` sets `Expanded` for every section with children, so
+VS Code fetches those children at render time — the "collapsed parent VS Code
+never expanded" state the issue assumed does not exist in this provider. The
+[Issue #51](#issue-51-collapsed-parents) section below is kept as the record of
+what was expected, **not** as a description of how the code behaves.
+
+---
+
+## 👤 User Checklist — the manual steps
+
+Everything else in this doc is automatable. These are not: they need the Extension
+Development Host (`F5`), which only the maintainer can drive.
+
+> **There used to be a Round 1 here — reproduce #51 on `master` first.** It is gone:
+> #51 closed `NOT_PLANNED`, so there is nothing to reproduce and the round was pure
+> dead work. What was Round 2 is now the whole checklist.
+
+### The five acceptance checks — on `issue-50`, after the fix
+
+1. **The actual bug (#50).** Open `assets/test-files/test.py`, type continuously for
+   ~10 s, watch the outline track the cursor. Output Channel: **no** `reveal skipped` lines.
+2. **Sidebar hijack (Decision 4)** — *the one that settles an open question*. Switch the
+   sidebar to **Explorer**, then move the cursor around a sectioned file. **The Explorer
+   must stay put.** Record what you saw either way; it goes in the PR body.
+3. **Collapsed-parent reveal.** Collapse a depth-1 section, click into one of its
+   subsections, confirm the tree expands and scrolls to it. (This was filed as #51
+   and closed as not-a-bug — it is kept as a contract check on the reveal path, not
+   as a bug repro. `treeDataProvider.test.ts` pins the same contract in code.)
+4. **Auto-expand feel — your call to make.** `reveal()` now runs with `expand: 1`, which
+   has never had an observable effect before. If it feels like it is fighting you
+   (sections popping open as you move), say so and I will switch it to `expand: false`
+   **in this PR** plus a CHANGELOG note. Decide now, not later.
+5. **Large file.** Open the biggest sectioned file you have; confirm no typing lag.
+
+### What to report back
+
+- Check 2: did the Explorer stay put? **Yes/no — this is going in the PR body verbatim.**
+- Check 4: keep `expand: 1`, or switch to `expand: false`?
+- Anything from 1, 3, 5 that looked wrong.
+- **Bonus, while you are in there:** collapse a section, then type inside a *different*
+  section without renaming anything. Does the collapsed one stay collapsed? `refresh()`
+  rebuilds every item as `Expanded`, but `TreeItem.id` is unset so VS Code derives ids
+  from labels and is documented to preserve expansion state when they do not change.
+  Nobody has watched this. Whatever you see settles the open note in `src/CLAUDE.md`.
 
 ---
 
@@ -255,9 +301,9 @@ gate cannot cover:
   "Identity assertions" section. The rule is unchanged; adjust only if the prose
   implies the cache is refilled solely by `getChildren()`.
 - **`CHANGELOG.md`** — under `## [Unreleased]` → `### Fixed` (heading exists,
-  `:19`). Write it for users: the outline now follows the cursor while typing and
-  into collapsed sections. Mention #50 and #51. **Do not bump the version** — that
-  happens at release time per `.context/workflow.md`.
+  `:19`). Write it for users: the outline now follows the cursor while typing.
+  Mention #50 only — #51 closed as not-a-bug and must not be claimed. **Do not
+  bump the version** — that happens at release time per `.context/workflow.md`.
 - **`.context/features/_TODO.md`** — tick #50's Dev box; resolve #51 per below.
 - Do **not** look for `.context/refactors/src-refactor-3.md`. That folder was
   deleted in `5582bad`; `_TODO.md` row 1 still links to it and is stale.
@@ -285,18 +331,20 @@ Unlike #50, #51 was never reproduced — it was a reading of the code. So:
 
 ## Acceptance Criteria
 
-- [ ] `getTreeItemForSection` builds on miss; `findTreeItemBySection` is gone
+- [x] `getTreeItemForSection` builds on miss; `findTreeItemBySection` is gone
 - [ ] Reveal fires on a pass that refreshed — no `reveal skipped` lines while typing
-- [ ] Test proves an on-demand item is `strictEqual` to what `getChildren()` later returns
-- [ ] Test covers the collapsed-parent chain (child instance **and** `getParent`)
-- [ ] `getTreeItemForSection` returns `undefined` before any refresh
-- [ ] `treeView.visible` guard in place; visibility-change re-sync registered
-- [ ] All pre-existing suites pass; `strictEqual` used throughout the identity suite
-- [ ] `npm run compile` clean (type-check + lint — the only automated gate)
+- [x] Test proves an on-demand item is `strictEqual` to what `getChildren()` later returns
+- [x] Test covers the collapsed-parent chain (child instance **and** `getParent`)
+- [x] `getTreeItemForSection` returns `undefined` before any refresh
+- [x] `treeView.visible` guard in place; visibility-change re-sync registered
+- [x] All pre-existing suites pass; `strictEqual` used throughout the identity suite
+- [x] `npm run compile` clean (type-check + lint — the only automated gate)
 - [ ] F5: all five checks in Step 4 done, **including** the Explorer-stays-put result recorded in the PR
-- [ ] `src/CLAUDE.md` no longer says the reveal is known broken
-- [ ] `CHANGELOG.md` entry under `## [Unreleased]` → `### Fixed`, citing #50 and #51
-- [ ] #51 reproduced on `master`, then verified fixed (or closed as not-a-bug)
+- [x] `src/CLAUDE.md` no longer says the reveal is known broken
+- [x] `CHANGELOG.md` entry under `## [Unreleased]` → `### Fixed`, citing #50 only
+- [x] #51 resolved — **closed as not-a-bug** (`NOT_PLANNED`, 2026-08-21); never
+      reproduced, and the premise does not hold for this provider. Nothing in the
+      CHANGELOG or the PR claims it.
 
 ## Out of Scope
 
@@ -313,7 +361,7 @@ Unlike #50, #51 was never reproduced — it was a reading of the code. So:
 
 - Branch: `feature/50-reveal-on-refresh` (pattern from `CLAUDE.md` §4 —
   `feature/[issue-number]-[description]`).
-- Reference #50 **and** #51 in the commit/PR.
+- Reference #50 in the commit/PR. **Not** #51 — it closed as not-a-bug.
 - Code-only change; release/publish steps follow `.context/workflow.md` — do not
   bump the version or publish from this task unless explicitly asked.
 - On merge, delete this file (repo convention — a `TODO__issue_xx.md` on disk means

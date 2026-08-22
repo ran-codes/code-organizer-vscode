@@ -95,8 +95,38 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     return item;
   }
 
-  findTreeItemBySection(section: SectionMatch): SectionTreeItem | undefined {
-    return this.treeItemCache.get(section.uniqueId);
+  /**
+   * The TreeItem for `section`, built and cached now if VS Code has not asked
+   * for it yet. Returns `undefined` for anything outside `getSections()` — the
+   * snapshot this provider was last refreshed with.
+   *
+   * **Creating on miss is what makes `reveal()` work at all.** `refresh()` clears
+   * the cache and only a later `getChildren()` refills it, so a lookup-only
+   * version returned `undefined` on every pass that refreshed (#50). Identity is
+   * not at risk: `getOrCreateTreeItem` is the single source of instances, so the
+   * item returned here is the same object a later `getChildren()` hands back —
+   * which is what `reveal()` compares against by reference.
+   *
+   * **The snapshot check is what keeps creating-on-miss safe.** `getChildren()`
+   * and `getParent()` write to `treeItemCache` too, but only ever with sections
+   * they read out of `sections` / `childrenByParentId`. This is the only entry
+   * point that would key a write on a section the *caller* supplied — and the
+   * cache is keyed on `uniqueId` (`` `${name}_${index}` ``), which is unique only
+   * *within* one snapshot. A stale or foreign `SectionMatch` whose id collided
+   * with a live one would otherwise cache an item holding that stale section and
+   * document in its `command.arguments`, and `getChildren()` would hand the
+   * poisoned instance to VS Code — a click then jumps using stale offsets.
+   */
+  getTreeItemForSection(section: SectionMatch): SectionTreeItem | undefined {
+    if (!this.currentDocument) {
+      return undefined;
+    }
+    // Identity, not equality: only a section from the live snapshot may mint a
+    // cache entry keyed on its uniqueId.
+    if (!this.sections.includes(section)) {
+      return undefined;
+    }
+    return this.getOrCreateTreeItem(section);
   }
 
   /**

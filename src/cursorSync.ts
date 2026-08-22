@@ -59,16 +59,21 @@ export function registerCursorSync(
     }
 
     ////// 2.1.1 TreeView Reveal ----
-    const item = treeDataProvider.findTreeItemBySection(currentSection);
+    // Nothing to scroll if the view is hidden — and this keeps reveal from
+    // pulling the sidebar away from whatever the user has open. See #50.
+    if (!treeView.visible) {
+      return;
+    }
+
+    const item = treeDataProvider.getTreeItemForSection(currentSection);
     if (!item) {
-      // Logged rather than skipped in silence. `reveal()` needs the cached
-      // TreeItem instance, and `refresh()` clears that cache while only
-      // `getChildren()` — which VS Code schedules asynchronously — refills it.
-      // Nothing above this awaits, so *every* pass that refreshed arrives here
-      // with an empty cache. Not a race it might lose: an edit resets
-      // `lastDocument` and forces a refresh, so the reveal does not fire at all
-      // while the user is typing. Pre-existing and deterministic — see #50.
-      log(`No cached tree item for "${currentSection.name}" — reveal skipped`);
+      // A miss means the provider did not recognise `currentSection` as part of
+      // its current snapshot. It cannot happen from *here* — `currentSection`
+      // came out of `getSections()` a few lines up, so the snapshot exists and
+      // contains it. The branch stays because the alternative to a guarded
+      // lookup is an unguarded one, and a silent miss is exactly what #50 was:
+      // the highlight kept working while the sidebar quietly stopped scrolling.
+      log(`No tree item for "${currentSection.name}" — reveal skipped`);
       return;
     }
 
@@ -107,6 +112,14 @@ export function registerCursorSync(
     // Switched editors — re-sync immediately.
     vscode.window.onDidChangeActiveTextEditor(() => {
       updateHighlight();
+    }),
+
+    // View came back into sight — the reveal guard above skipped every pass
+    // while it was hidden, so catch it up to where the cursor actually is.
+    treeView.onDidChangeVisibility(event => {
+      if (event.visible) {
+        updateHighlight();
+      }
     }),
 
     // Document edited — force the next pass to refresh the tree.

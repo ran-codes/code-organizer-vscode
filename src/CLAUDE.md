@@ -47,18 +47,48 @@ Two shared helpers sit between the parser and its consumers:
   `reveal()` matches by object reference, so it silently fails against freshly
   constructed items — including anywhere up the `getParent()` chain, which reveal
   also walks. Keep that cache intact; `test/treeDataProvider.test.ts` locks it.
-  **Known broken today (#50):** `refresh()` clears the cache and only a later
-  `getChildren()` refills it, and `cursorSync` does not await in between — so
-  every pass that refreshes misses, and because an edit forces a refresh, the
-  reveal does not fire at all while the user is typing. Deterministic, not a race.
+  The provider therefore **builds items on demand**: `getTreeItemForSection()`
+  routes through the same memoizing factory `getChildren()` and `getParent()` use,
+  so an item built before VS Code has asked for it *is* the object it will later
+  hand back. That is what makes the reveal fire on a pass that refreshed (#50).
+  It returns `undefined` for a section outside the current snapshot, and that
+  guard is load-bearing: it is the only entry point that would key a cache write
+  on a section the **caller** supplied rather than one the provider read out of
+  its own `sections` / `childrenByParentId` (`getChildren()` and `getParent()`
+  write to the cache too — they just cannot be handed a foreign section).
+  `uniqueId` is unique only within a snapshot, so a colliding stale id would
+  otherwise cache an item carrying a stale section and document. Do not turn the
+  method back into a bare `Map.get`, and do not drop the snapshot check.
+- **Collapsing a section does not evict anything — items default to `Expanded`.**
+  `SectionTreeItem`'s constructor sets `TreeItemCollapsibleState.Expanded` for
+  every section that has children, so VS Code fetches those children at render
+  time and caches them before the user can collapse anything; collapsing clears
+  neither VS Code's node map nor `treeItemCache`. This is almost certainly why
+  #51 ("sections under a collapsed parent are never cached") never reproduced —
+  the premise does not hold for this provider. Do not restate that premise as
+  fact anywhere: it was written into three files during #50 and none of it was
+  true. **What `refresh()` does to the user's collapse state is unverified — do
+  not assert it either way without watching it in the Extension Development
+  Host.** It clears the cache and fires the change event, so items are rebuilt as
+  `Expanded`; but `SectionTreeItem` never sets `TreeItem.id`, and VS Code then
+  derives an id from the label (`section.name`) and uses it "to preserve the
+  selection and expansion state" — stable across a refresh that does not rename
+  anything. So the plausible outcome is the opposite: collapse state survives an
+  ordinary edit and breaks only when a section is renamed. Note also that the
+  refresh is per *edit*, not per section change — `cursorSync` clears
+  `lastDocument` on any `onDidChangeTextDocument`.
 - **`cursorSync` resolves sections through `treeDataProvider.getSections()`, never
   `SectionIndex` directly.** It refreshes the tree and then reads back from it, so
   the `uniqueId`s it looks up belong to the same snapshot `treeItemCache` was built
   from. Reading the version-keyed index instead would let the sync sit a version
   ahead of the tree and quietly stop revealing.
 - **Diagnostics go through `log()`, not `console.log`.** The Output Channel is
-  readable by users in the field; the devtools console is not. The cache-miss
+  readable by users in the field; the devtools console is not. The tree-item-miss
   branch in `cursorSync` logs deliberately rather than returning in silence.
+- **`cursorSync` skips the reveal while the TreeView is hidden.** There is nothing
+  to scroll, and `reveal()` is documented to show the view if it is not already
+  visible — which would yank the sidebar off whatever the user has open. A
+  `treeView.onDidChangeVisibility` listener re-syncs when it comes back (#50).
 - **Roots are `depth === 1`, not "no parent."** A file opening with `### Foo ----`
   produces a depth-3 section with no parent that is deliberately *not* a root.
 - **Section identity is `uniqueId`, never `name`.** Duplicate names are legal and
