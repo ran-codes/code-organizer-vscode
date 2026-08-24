@@ -3,3 +3,4 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+.context/.tmp/.review-loop-active
