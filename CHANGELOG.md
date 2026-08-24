@@ -24,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Text selection is visible again on section comment lines. The current-section
+  highlight painted a solid band over the line, and VS Code draws extension
+  decorations on top of the selection — so on any theme with an opaque
+  `editor.lineHighlightBackground` (Monokai, Solarized, Abyss, Quiet Light, One
+  Dark Pro and others) selecting text on a section line looked like nothing
+  happened. The text was selected the whole time; only the highlight was hidden.
+  The band now uses a translucent color of the extension's own,
+  `codeOrganizer.currentSectionBackground`, which you can restyle through
+  `workbench.colorCustomizations` (#40)
 - Sections no longer nest under the wrong parent in files that mix two comment
   styles. A `{/* //// Sub ---- */}` sitting between two `// Section ----`
   headings filed itself under the heading *below* it, so the outline reshuffled

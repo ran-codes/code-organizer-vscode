@@ -151,6 +151,18 @@
         "title": "Show Code Organizer",
         "category": "Code Organizer"
       }
+    ],
+    "colors": [
+      {
+        "id": "codeOrganizer.currentSectionBackground",
+        "description": "Background of the line holding the section your cursor is in. Must not be opaque — VS Code paints extension decorations on top of the text selection, so a solid color here hides selections made on that line.",
+        "defaults": {
+          "dark": "#ffffff0f",
+          "light": "#0000000a",
+          "highContrast": "#00000000",
+          "highContrastLight": "#00000000"
+        }
+      }
     ]
   },
   "scripts": {
