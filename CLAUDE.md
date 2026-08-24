@@ -13,7 +13,6 @@ code-organizer-vscode/
 ├── .claude/                     # Claude Code settings: settings.json (shared, committed)
 │                                #   + settings.local.json (per-machine)
 ├── .context/                    # Long-form notes — the docs the glossary points at
-│   ├── features/                # Per-issue decision records (issue-22, -29, -31)
 │   ├── refactors/               # Refactor plans (src-refactor-1, -2, -3)
 │   ├── vs-code-api/             # VS Code API research for the outline-sync work
 │   └── workflow.md              # Canonical release checklist (see §5)
@@ -64,7 +63,7 @@ code-organizer-vscode/
 | `assets/test-files/` | One `test.<ext>` per supported language (c, cpp, cs, go, java, js, md, mmd, php, py, R, rs, sql, swift, txt). Reference fixtures for what the parser must handle. | ✅ |
 | `resources/` | The Activity Bar SVG referenced by `package.json`. | ✅ |
 | `test-files/` | Ad-hoc scratch files (`demo.py`, `test.jsx`) for eyeballing behavior in the Extension Development Host. | ❌ |
-| `.context/` | Design docs and the release checklist. **`workflow.md` is canonical for releases**; `features/` holds decision records keyed to issue numbers; `refactors/` holds the multi-PR refactor plans. | ❌ |
+| `.context/` | Design docs and the release checklist. **`workflow.md` is canonical for releases**; `refactors/` holds the multi-PR refactor plans; `vs-code-api/` holds the API research behind the outline-sync work. Per-issue planning docs are not kept here — the decision record for an issue is its PR and commit messages. | ❌ |
 | `.github/` | Only `ISSUE_TEMPLATE/release.md`. No Actions — there is no CI/CD (see §4). | ❌ |
 | `.vscode/` | `launch.json` (F5 → Extension Development Host), `tasks.json`, workspace settings. | ❌ |
 | `.claude/` | Claude Code settings — `settings.json` is committed and shared; `settings.local.json` is per-machine. Not part of the extension. | ❌ |

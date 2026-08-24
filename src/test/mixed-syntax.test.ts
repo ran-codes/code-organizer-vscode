@@ -108,39 +108,41 @@ value = 3
         assert.strictEqual(childThree.parentId, rootThree.uniqueId);
     });
 
-    test('Resolution takes the nearest smaller depth, skipping a same-depth sibling', () => {
-        // `Child B` sits directly after `Grandchild` (depth 3) and after
-        // `Child A` (its own depth). It must bind to `Root`, two matches back
-        // and from the *other* pattern — so this fails both for an inline scan
-        // and for any "nearest preceding match regardless of depth" shortcut.
+    test('Resolution skips past both a deeper section and a same-depth sibling', () => {
+        // `Child B` follows `Grandchild` (deeper) and `Child A` (its equal), and
+        // has to skip both to reach `Root One` — three matches back and from the
+        // *other* pattern. That shape fails for an inline scan and also for any
+        // "nearest preceding match regardless of depth" shortcut.
         const text = `// Root One ----
 {/* //// Child A ---- */}
-{/* express////// Grandchild ---- */}
+{/* ////// Grandchild ---- */}
 {/* //// Child B ---- */}
 
 // Root Two ----
 `;
         const sections = findSections(text, 'jsx');
 
-        // The `express//////` line has no `//` immediately after `{/*`, so the
-        // JSX pattern cannot claim it. Asserted, not assumed — the depth-3 slot
-        // below depends on it being absent.
-        assert.strictEqual(sections.length, 4);
-        assert.strictEqual(sections.some(section => section.name === 'Grandchild'), false);
+        assert.strictEqual(sections.length, 5);
 
-        const [rootOne, childA, childB, rootTwo] = sections;
+        const [rootOne, childA, grandchild, childB, rootTwo] = sections;
 
         assert.strictEqual(rootOne.name, 'Root One');
         assert.strictEqual(childA.name, 'Child A');
+        assert.strictEqual(grandchild.name, 'Grandchild');
         assert.strictEqual(childB.name, 'Child B');
         assert.strictEqual(rootTwo.name, 'Root Two');
 
+        assert.strictEqual(rootOne.depth, 1);
         assert.strictEqual(childA.depth, 2);
+        assert.strictEqual(grandchild.depth, 3);
         assert.strictEqual(childB.depth, 2);
 
-        // Both children bind to Root One — childB skips past childA, its equal.
+        // Grandchild takes the section directly above it. childB skips over
+        // Grandchild (deeper) and childA (equal) to land on Root One.
+        assert.strictEqual(grandchild.parentId, childA.uniqueId);
         assert.strictEqual(childA.parentId, rootOne.uniqueId);
         assert.strictEqual(childB.parentId, rootOne.uniqueId);
+        assert.notStrictEqual(childB.parentId, grandchild.uniqueId);
         assert.notStrictEqual(childB.parentId, childA.uniqueId);
         assert.notStrictEqual(childB.parentId, rootTwo.uniqueId);
     });

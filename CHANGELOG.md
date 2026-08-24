@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Sections no longer nest under the wrong parent in files that mix two comment
+  styles. A `{/* //// Sub ---- */}` sitting between two `// Section ----`
+  headings filed itself under the heading *below* it, so the outline reshuffled
+  as sections were added further down the file. Single-syntax files were never
+  affected (#54)
 - The current-section highlight no longer disappears when the cursor is at the
   very end of a file. The last section runs to the end of the text, so the final
   cursor position now resolves to it instead of to no section at all (#52)
