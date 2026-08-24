@@ -219,26 +219,18 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
       // YAML front matter (for Markdown/Quarto)
       if (sectionName && !sectionName.match(/^[-\s]*$/) && !isExcluded(match.index)) {
 
-        ////// 3.2.2 Parent Resolution ----
-        // Find parent: look backwards for a section with smaller depth
-        let parentUniqueId: string | undefined = undefined;
-        for (let i = matches.length - 1; i >= 0; i--) {
-          if (matches[i].depth < depth) {
-            parentUniqueId = matches[i].uniqueId;
-            break;
-          }
-        }
-
-        ////// 3.2.3 Match Storage ----
+        ////// 3.2.2 Match Storage ----
         // Create unique ID by combining name and index
         const uniqueId = `${sectionName}_${match.index}`;
 
+        // `parentId` is deliberately left undefined here and resolved in 3.4,
+        // after the sort. Resolving it inline would read a pattern-ordered array.
         matches.push({
           name: sectionName,
           index: match.index,
           fullText: match[0],
           depth: depth,
-          parentId: parentUniqueId,
+          parentId: undefined,
           uniqueId: uniqueId
         });
       }
@@ -249,5 +241,25 @@ export function findSections(text: string, languageId?: string): SectionMatch[] 
 
   //// 3.3 Result Sorting ----
   // Sort matches by index to maintain document order
-  return matches.sort((a, b) => a.index - b.index);
+  matches.sort((a, b) => a.index - b.index);
+
+  //// 3.4 Parent Resolution ----
+  // Nearest strictly smaller depth, scanning backwards. This runs here and NOT
+  // inside the match loop: 3.2 walks one pattern at a time over the whole text,
+  // so `matches` is pattern-ordered until 3.3 sorts it. A backwards scan before
+  // that finds the last-*pushed* shallower section, not the nearest *preceding*
+  // one — and in a file mixing two comment styles those differ. The JSX pattern
+  // runs after `//`, so `{/* //// Sub ---- */}` between `// A ----` and
+  // `// B ----` resolved to B, a section starting further down the document
+  // (#54). Keep resolution downstream of the sort.
+  for (let i = 0; i < matches.length; i++) {
+    for (let j = i - 1; j >= 0; j--) {
+      if (matches[j].depth < matches[i].depth) {
+        matches[i].parentId = matches[j].uniqueId;
+        break;
+      }
+    }
+  }
+
+  return matches;
 }

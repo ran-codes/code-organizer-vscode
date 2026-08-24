@@ -149,6 +149,13 @@ function Component() {
         assert.strictEqual(sections[2].name, 'JSX Subsection');
         assert.strictEqual(sections[2].depth, 2);
         assert.strictEqual(sections[2].parentId, sections[1].uniqueId);
+        // Both roots parentless. Note this fixture cannot detect the #54
+        // ordering bug on its own: the correct parent here is also the
+        // last-pushed one, so it passed either way. The fixture that does
+        // discriminate lives in `mixed-syntax.test.ts` — put ordering
+        // regressions there, not here.
+        assert.strictEqual(sections[0].parentId, undefined);
+        assert.strictEqual(sections[1].parentId, undefined);
     });
 
     test('Should handle JSX comments in TSX files', () => {
