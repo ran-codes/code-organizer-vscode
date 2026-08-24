@@ -14,6 +14,7 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `jsx-comments.test.ts` | `{/* // Section ---- */}` |
 | `mermaid-comments.test.ts` | `%% # Section ----` — depth from the hashes, `%%{init:…}%%` ignored |
 | `md-comments.test.ts` · `quarto-comments.test.ts` | Native `#` headers, fence exclusion |
+| `mixed-syntax.test.ts` | Files using **two** comment styles — parent resolution across patterns (#54) |
 | `sectionTree.test.ts` | `buildChildrenMap()` / `childrenOf()` — not a syntax suite |
 | `getCurrentSection.test.ts` | Cursor offset → deepest containing section — pure logic, no host needed |
 | `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
@@ -23,6 +24,17 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
 mixed).
+
+`mixed-syntax.test.ts` is the one **cross-cutting** parser suite, and it exists
+because the per-syntax layout has a structural blind spot: within a single pattern
+pass the matches are already in document order, so no one-syntax fixture can catch
+a parent resolved against a pattern-ordered array (#54). Every fixture there puts
+the correct parent somewhere other than last in *push* order — the shape that
+discriminates. `jsx-comments.test.ts` does have a two-style fixture, but the right
+parent in it happens to be last-pushed, so it passed throughout the bug; a comment
+there now says so. **Put ordering regressions in the mixed suite, not the syntax
+suites** — and when adding a `COMMENT_PATTERNS` entry, add a mixed fixture pairing
+it with an entry listed *before* it.
 
 `sectionTree.test.ts` locks the two invariants the consumers depend on silently:
 parentless sections never become map keys (`parentId === undefined` is not a root

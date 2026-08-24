@@ -47,6 +47,15 @@ Returns a **flat, document-ordered** `SectionMatch[]` — not a tree:
 - `depth` — 1–4, capped.
 - `parentId` — the parent's **`uniqueId`**. Resolved by scanning backwards for the
   nearest *strictly smaller* depth; `undefined` when none exists.
+  **That scan runs in its own pass, after the sort — never inside the match loop.**
+  The loop walks one `COMMENT_PATTERNS` entry across the whole text before starting
+  the next, so until the sort the array is *pattern*-ordered, not document-ordered.
+  A backwards scan over it finds the last-**pushed** shallower section rather than
+  the nearest **preceding** one, which in a file mixing two comment styles is a
+  parent that starts further *down* the document (#54). Single-syntax files hide
+  this — within one pattern pass the pushes are already in document order, which is
+  why every per-syntax suite passed while the bug was live. `mixed-syntax.test.ts`
+  is the suite that discriminates; keep resolution downstream of the sort.
 - `uniqueId` — `` `${name}_${index}` ``. This is what makes duplicate section names
   addressable; **do not assume names are unique.**
 

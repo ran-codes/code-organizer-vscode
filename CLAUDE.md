@@ -134,7 +134,10 @@ Key parser details:
 
 - **Flat list, not a tree.** Hierarchy is expressed via `depth` (1–4, capped) and
   `parentId`, which holds the parent's **`uniqueId`**. Parent resolution scans
-  backwards for the nearest strictly smaller depth. Both consumers index this via
+  backwards for the nearest strictly smaller depth, **in a second pass after the
+  document-order sort** — the match loop runs one comment pattern at a time, so
+  resolving inline reads a pattern-ordered array and files a section under a parent
+  that starts below it (#54). Both consumers index this via
   `buildChildrenMap()` in `src/utils/sectionTree.ts` rather than re-scanning.
   Note that roots are `depth === 1`, **not** "no parent" — a file opening with
   `### Foo ----` yields a parentless depth-3 section that is not a root.
