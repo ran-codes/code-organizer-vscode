@@ -108,30 +108,41 @@ value = 3
         assert.strictEqual(childThree.parentId, rootThree.uniqueId);
     });
 
-    test('A deeper child skips past an intermediate sibling to the right parent', () => {
-        // Two children at the same depth under different parents, where the
-        // shallower candidates come from a pattern that ran first. Also pins
-        // that resolution takes the *nearest* smaller depth, not the first root.
-        const text = `// Section One ----
-{/* //// Sub One ---- */}
-{/* colon//////// Ignored ---- */}
+    test('Resolution takes the nearest smaller depth, skipping a same-depth sibling', () => {
+        // `Child B` sits directly after `Grandchild` (depth 3) and after
+        // `Child A` (its own depth). It must bind to `Root`, two matches back
+        // and from the *other* pattern — so this fails both for an inline scan
+        // and for any "nearest preceding match regardless of depth" shortcut.
+        const text = `// Root One ----
+{/* //// Child A ---- */}
+{/* express////// Grandchild ---- */}
+{/* //// Child B ---- */}
 
-// Section Two ----
-{/* //// Sub Two ---- */}
-{/* semi////// Also Ignored ---- */}
+// Root Two ----
 `;
         const sections = findSections(text, 'jsx');
 
-        const byName = (name: string) => sections.find(section => section.name === name);
+        // The `express//////` line has no `//` immediately after `{/*`, so the
+        // JSX pattern cannot claim it. Asserted, not assumed — the depth-3 slot
+        // below depends on it being absent.
+        assert.strictEqual(sections.length, 4);
+        assert.strictEqual(sections.some(section => section.name === 'Grandchild'), false);
 
-        const subOne = byName('Sub One');
-        const subTwo = byName('Sub Two');
+        const [rootOne, childA, childB, rootTwo] = sections;
 
-        assert.ok(subOne, 'Sub One should be parsed');
-        assert.ok(subTwo, 'Sub Two should be parsed');
+        assert.strictEqual(rootOne.name, 'Root One');
+        assert.strictEqual(childA.name, 'Child A');
+        assert.strictEqual(childB.name, 'Child B');
+        assert.strictEqual(rootTwo.name, 'Root Two');
 
-        assert.strictEqual(subOne.parentId, byName('Section One')?.uniqueId);
-        assert.strictEqual(subTwo.parentId, byName('Section Two')?.uniqueId);
+        assert.strictEqual(childA.depth, 2);
+        assert.strictEqual(childB.depth, 2);
+
+        // Both children bind to Root One — childB skips past childA, its equal.
+        assert.strictEqual(childA.parentId, rootOne.uniqueId);
+        assert.strictEqual(childB.parentId, rootOne.uniqueId);
+        assert.notStrictEqual(childB.parentId, childA.uniqueId);
+        assert.notStrictEqual(childB.parentId, rootTwo.uniqueId);
     });
 
     test('Duplicate names across two styles stay individually addressable', () => {
