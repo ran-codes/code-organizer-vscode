@@ -3,11 +3,23 @@ import { SectionMatch } from './utils/findSections';
 import { childrenOf } from './utils/sectionTree';
 import { SectionIndex } from './sectionIndex';
 
+/**
+ * Whether to draw the depth icon before a section name (#57).
+ *
+ * Read per refresh rather than cached at activation: the tree is rebuilt from
+ * scratch on every refresh, so re-reading here is what lets the setting take
+ * effect without a window reload.
+ */
+export function showIconsEnabled(): boolean {
+  return vscode.workspace.getConfiguration('codeOrganizer').get<boolean>('showIcons', true);
+}
+
 export class SectionTreeItem extends vscode.TreeItem {
   constructor(
     public readonly section: SectionMatch,
     childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]>,
-    public readonly document: vscode.TextDocument
+    public readonly document: vscode.TextDocument,
+    showIcons: boolean = true
   ) {
     const hasChildren = childrenByParentId.has(section.uniqueId);
     super(
@@ -19,12 +31,17 @@ export class SectionTreeItem extends vscode.TreeItem {
 
     this.tooltip = section.name;
 
-    // Set icon based on depth
-    this.iconPath = new vscode.ThemeIcon(
-      section.depth === 1 ? 'symbol-module' :
-      section.depth === 2 ? 'symbol-class' :
-      section.depth === 3 ? 'symbol-method' : 'symbol-property'
-    );
+    // Set icon based on depth. Leaving `iconPath` undefined renders the row with
+    // no icon at all — there is no "blank" ThemeIcon, so the only way to hide it
+    // is to not set it. Only this view is affected; the built-in Outline draws
+    // its own icons from the SymbolKind we report and cannot be opted out of.
+    if (showIcons) {
+      this.iconPath = new vscode.ThemeIcon(
+        section.depth === 1 ? 'symbol-module' :
+        section.depth === 2 ? 'symbol-class' :
+        section.depth === 3 ? 'symbol-method' : 'symbol-property'
+      );
+    }
 
     // Command to jump to section
     this.command = {
@@ -45,6 +62,7 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
   private childrenByParentId: ReadonlyMap<string, readonly SectionMatch[]> = new Map();
   private currentDocument?: vscode.TextDocument;
   private treeItemCache: Map<string, SectionTreeItem> = new Map();
+  private showIcons: boolean = showIconsEnabled();
 
   constructor(private readonly sectionIndex: SectionIndex) { }
 
@@ -52,6 +70,7 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     this.currentDocument = document;
     this.sections = this.sectionIndex.getSections(document);
     this.childrenByParentId = this.sectionIndex.getChildrenMap(document);
+    this.showIcons = showIconsEnabled();
     this.treeItemCache.clear();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -90,7 +109,9 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     if (cached) {
       return cached;
     }
-    const item = new SectionTreeItem(section, this.childrenByParentId, this.currentDocument!);
+    const item = new SectionTreeItem(
+      section, this.childrenByParentId, this.currentDocument!, this.showIcons
+    );
     this.treeItemCache.set(section.uniqueId, item);
     return item;
   }

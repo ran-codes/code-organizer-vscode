@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`codeOrganizer.showIcons` setting**: turn off the depth icon in front of each
+  section name in the Code Organizer view for a text-only outline. Applies as soon
+  as it is toggled — no window reload. It covers the Code Organizer view only; the
+  built-in Outline and breadcrumbs draw their own icons, which VS Code's own
+  `outline.icons` and `breadcrumbs.icons` settings control (#57)
+
 - **Mermaid `%%` comment support**: `%% # Section Name ----` now creates sections,
   with nesting from the hash count (`%% ##`, `%% ###`, `%% ####`) — so `.mmd`
   diagrams get an outline in both the built-in Outline and the Activity Bar view.
