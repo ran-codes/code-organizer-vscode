@@ -7,6 +7,14 @@ import { initializeDecorations, disposeDecorations } from './decorations';
 import { initializeLog, log, disposeLog } from './log';
 import { SectionMatch } from './utils/findSections';
 
+/**
+ * Settings read once at activation — changing one needs a window reload to take
+ * effect. `showIcons` is deliberately not here: it is read per tree refresh, so
+ * rebuilding the tree is enough and a reload prompt for a cosmetic toggle would
+ * be out of proportion.
+ */
+const RELOAD_REQUIRED_SETTINGS = ['enable', 'supportedLanguages', 'minDashes', 'maxNestingLevel'];
+
 export function activate(context: vscode.ExtensionContext) {
 
 	// 1. Configuration ----
@@ -85,7 +93,15 @@ export function activate(context: vscode.ExtensionContext) {
 	// 6. Configuration Changes ----
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration(e => {
-			if (e.affectsConfiguration('codeOrganizer')) {
+			if (e.affectsConfiguration('codeOrganizer.showIcons')) {
+				// Every tree item is rebuilt by refresh(), which re-reads the setting.
+				// Goes through the tree's own document, never `activeTextEditor` — that
+				// is undefined while the Settings editor has focus, which is exactly
+				// where a user toggles this from.
+				treeDataProvider.refreshCurrent();
+			}
+
+			if (RELOAD_REQUIRED_SETTINGS.some(key => e.affectsConfiguration(`codeOrganizer.${key}`))) {
 				vscode.window.showInformationMessage(
 					'Code Organizer configuration changed. Please reload VS Code for changes to take effect.',
 					'Reload'

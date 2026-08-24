@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { CodeOrganizerTreeDataProvider } from '../treeDataProvider';
+import { CodeOrganizerTreeDataProvider, SectionTreeItem } from '../treeDataProvider';
 import { SectionIndex } from '../sectionIndex';
 
 // The invariant this suite exists for: `TreeView.reveal()` matches elements by
@@ -100,6 +100,115 @@ suite('Tree Data Provider Tests (reveal identity)', () => {
 	});
 
 	test('Should return no children before any refresh', async () => {
+		assert.deepStrictEqual(provider.getChildren(), []);
+	});
+});
+
+// `codeOrganizer.showIcons` (#57). Two separate things are asserted here and the
+// split is deliberate: the item-level tests pin *how* an icon is suppressed
+// (`iconPath` left undefined — there is no blank ThemeIcon to assign), while the
+// provider-level test pins that the setting is actually plumbed through. Neither
+// implies the other: the item could honour its flag perfectly while the provider
+// never reads the setting.
+suite('Tree Data Provider Tests (icon visibility)', () => {
+
+	let index: SectionIndex;
+	let provider: CodeOrganizerTreeDataProvider;
+
+	setup(() => {
+		index = new SectionIndex();
+		provider = new CodeOrganizerTreeDataProvider(index);
+	});
+
+	teardown(async () => {
+		index.dispose();
+		// Global config outlives the suite — put it back or every later suite runs
+		// against whatever this one left behind.
+		await vscode.workspace.getConfiguration('codeOrganizer')
+			.update('showIcons', undefined, vscode.ConfigurationTarget.Global);
+	});
+
+	async function sectionFixture() {
+		const document = await vscode.workspace.openTextDocument({
+			content: '# Root ----\n## Child ----\n### Grandchild ----\n#### Leaf ----\n',
+			language: 'python'
+		});
+		return { document, sections: index.getSections(document), children: index.getChildrenMap(document) };
+	}
+
+	test('Should carry the depth icon when icons are on', async () => {
+		const { document, sections, children } = await sectionFixture();
+
+		const expected = ['symbol-module', 'symbol-class', 'symbol-method', 'symbol-property'];
+		sections.forEach((section, i) => {
+			const item = new SectionTreeItem(section, children, document, true);
+			assert.ok(item.iconPath instanceof vscode.ThemeIcon, `depth ${i + 1} lost its icon`);
+			assert.strictEqual((item.iconPath as vscode.ThemeIcon).id, expected[i]);
+		});
+	});
+
+	test('Should leave iconPath undefined at every depth when icons are off', async () => {
+		const { document, sections, children } = await sectionFixture();
+
+		for (const section of sections) {
+			const item = new SectionTreeItem(section, children, document, false);
+			assert.strictEqual(item.iconPath, undefined);
+			// Hiding the icon must not cost anything else on the row.
+			assert.strictEqual(item.label, section.name);
+			assert.ok(item.command, 'go-to-section command dropped');
+		}
+	});
+
+	test('Should default to showing icons when the flag is omitted', async () => {
+		const { document, sections, children } = await sectionFixture();
+
+		const item = new SectionTreeItem(sections[0], children, document);
+		assert.ok(item.iconPath instanceof vscode.ThemeIcon);
+	});
+
+	test('Should honour codeOrganizer.showIcons on refresh', async () => {
+		// The setting is re-read by refresh() rather than cached at construction,
+		// which is what lets it apply without a window reload.
+		const document = await vscode.workspace.openTextDocument({
+			content: '# Root ----\n## Child ----\n', language: 'python'
+		});
+
+		provider.refresh(document);
+		assert.ok(provider.getChildren()[0].iconPath instanceof vscode.ThemeIcon);
+
+		await vscode.workspace.getConfiguration('codeOrganizer')
+			.update('showIcons', false, vscode.ConfigurationTarget.Global);
+		provider.refresh(document);
+
+		const root = provider.getChildren()[0];
+		assert.strictEqual(root.iconPath, undefined);
+		assert.strictEqual(provider.getChildren(root)[0].iconPath, undefined);
+	});
+
+	// The live-toggle path, and the reason `refreshCurrent()` exists. The config
+	// handler has no document to hand in: the Settings editor is not a TextEditor,
+	// so `vscode.window.activeTextEditor` is undefined while it has focus — which
+	// is exactly where a user toggles a setting from. Rebuilding has to go through
+	// the document the tree already holds.
+	test('Should apply a showIcons change through refreshCurrent, with no document passed', async () => {
+		const document = await vscode.workspace.openTextDocument({
+			content: '# Root ----\n## Child ----\n', language: 'python'
+		});
+
+		provider.refresh(document);
+		assert.ok(provider.getChildren()[0].iconPath instanceof vscode.ThemeIcon);
+
+		await vscode.workspace.getConfiguration('codeOrganizer')
+			.update('showIcons', false, vscode.ConfigurationTarget.Global);
+		provider.refreshCurrent();
+
+		const root = provider.getChildren()[0];
+		assert.strictEqual(root.iconPath, undefined);
+		assert.strictEqual(provider.getChildren(root)[0].iconPath, undefined);
+	});
+
+	test('Should no-op refreshCurrent before the first refresh', () => {
+		provider.refreshCurrent();
 		assert.deepStrictEqual(provider.getChildren(), []);
 	});
 });

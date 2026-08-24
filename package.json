@@ -114,6 +114,11 @@
           "minimum": 1,
           "maximum": 6,
           "description": "Maximum nesting level for sections (1-6)"
+        },
+        "codeOrganizer.showIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the depth icon before each section name in the Code Organizer view. Turn off for a text-only outline. This does not affect the built-in Outline view or breadcrumbs, whose icons VS Code draws itself — use the built-in 'outline.icons' and 'breadcrumbs.icons' settings for those."
         }
       }
     },
