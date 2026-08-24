@@ -95,10 +95,10 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration('codeOrganizer.showIcons')) {
 				// Every tree item is rebuilt by refresh(), which re-reads the setting.
-				const editor = vscode.window.activeTextEditor;
-				if (editor) {
-					treeDataProvider.refresh(editor.document);
-				}
+				// Goes through the tree's own document, never `activeTextEditor` — that
+				// is undefined while the Settings editor has focus, which is exactly
+				// where a user toggles this from.
+				treeDataProvider.refreshCurrent();
 			}
 
 			if (RELOAD_REQUIRED_SETTINGS.some(key => e.affectsConfiguration(`codeOrganizer.${key}`))) {

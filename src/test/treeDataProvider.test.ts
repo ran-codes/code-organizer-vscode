@@ -184,4 +184,31 @@ suite('Tree Data Provider Tests (icon visibility)', () => {
 		assert.strictEqual(root.iconPath, undefined);
 		assert.strictEqual(provider.getChildren(root)[0].iconPath, undefined);
 	});
+
+	// The live-toggle path, and the reason `refreshCurrent()` exists. The config
+	// handler has no document to hand in: the Settings editor is not a TextEditor,
+	// so `vscode.window.activeTextEditor` is undefined while it has focus — which
+	// is exactly where a user toggles a setting from. Rebuilding has to go through
+	// the document the tree already holds.
+	test('Should apply a showIcons change through refreshCurrent, with no document passed', async () => {
+		const document = await vscode.workspace.openTextDocument({
+			content: '# Root ----\n## Child ----\n', language: 'python'
+		});
+
+		provider.refresh(document);
+		assert.ok(provider.getChildren()[0].iconPath instanceof vscode.ThemeIcon);
+
+		await vscode.workspace.getConfiguration('codeOrganizer')
+			.update('showIcons', false, vscode.ConfigurationTarget.Global);
+		provider.refreshCurrent();
+
+		const root = provider.getChildren()[0];
+		assert.strictEqual(root.iconPath, undefined);
+		assert.strictEqual(provider.getChildren(root)[0].iconPath, undefined);
+	});
+
+	test('Should no-op refreshCurrent before the first refresh', () => {
+		provider.refreshCurrent();
+		assert.deepStrictEqual(provider.getChildren(), []);
+	});
 });

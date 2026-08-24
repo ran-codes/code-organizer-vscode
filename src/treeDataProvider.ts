@@ -75,6 +75,23 @@ export class CodeOrganizerTreeDataProvider implements vscode.TreeDataProvider<Se
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  /**
+   * Rebuild the visible tree without changing which document it shows.
+   *
+   * For settings that apply live. Deliberately not `refresh(activeTextEditor
+   * .document)`: the Settings editor is not a `TextEditor`, so `activeTextEditor`
+   * is undefined while it has focus — the state a user is in whenever they toggle
+   * a setting from the UI — and the refresh would never fire. Nothing recovers
+   * later either, since `cursorSync` only refreshes when the document *changes*.
+   * Going through the document the tree was already built from is correct whether
+   * or not a text editor is active, and can never rebuild against a different one.
+   */
+  refreshCurrent(): void {
+    if (this.currentDocument) {
+      this.refresh(this.currentDocument);
+    }
+  }
+
   getTreeItem(element: SectionTreeItem): vscode.TreeItem {
     return element;
   }
