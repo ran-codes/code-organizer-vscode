@@ -1,0 +1,118 @@
+---
+name: release
+version: 0.1.0
+description: Cut and publish a release of the code-organizer VS Code extension. Use when the user says "release", "cut a release", "do a release", "publish", "ship a new version", or invokes /release. Walks the canonical checklist in .context/workflow.md — the agent does the mechanical steps (version bump, changelog, tests, package, GitHub release, tracking issue), asks the user every decision (which version) via AskUserQuestion, and hands the publish commands to the human to run in their own terminal with yes/no "do you see it?" verification checkpoints.
+---
+
+# Release protocol — code-organizer
+
+`.context/workflow.md` is **canonical**. Read it first, every run. If it disagrees
+with this skill, workflow.md wins — follow it and tell the user about the drift so
+this skill can be updated.
+
+Division of labor, non-negotiable:
+
+- **AGENT** steps: you do them. Report the result plainly.
+- **ASK** steps: decisions are the user's — use AskUserQuestion. Never pick a
+  version, push, or close an issue on your own initiative.
+- **HUMAN** steps: authentication and publishing happen in the *user's* terminal,
+  never yours. Give them the exact command and suggest they type it with the `!`
+  prefix (e.g. `! vsce publish`) so its output lands in the conversation. Then
+  verify with a yes/no "Do you see …?" question before moving on. **Never run
+  `vsce login` or `vsce publish` yourself.**
+
+Work the stages in order. Don't skip a verification checkpoint because the
+previous command "looked fine".
+
+## Stage 0 — Preflight (AGENT)
+
+1. Read `.context/workflow.md`.
+2. Gather state:
+   - `git status` — must be clean, on `master`. If not, stop and tell the user.
+   - Current `version` in `package.json`; latest tag (`git tag --sort=-v:refname`).
+   - Commits since the last tag; the `[Unreleased]` section of `CHANGELOG.md`.
+   - Whether an open `[Release] v…` tracking issue already exists
+     (`gh issue list --search "[Release] in:title" --state open`) — if one does,
+     resume it instead of opening a duplicate.
+3. Summarize for the user: what's shipping (Added/Fixed items with issue numbers),
+   current version, last tag.
+
+## Stage 1 — Version (ASK)
+
+AskUserQuestion: bump to what? Offer the computed patch / minor / major values
+(e.g. from `0.1.1`: `0.1.2` / `0.2.0` / `1.0.0`). Recommend minor if the
+changelog has an `Added` section, patch if fixes only. Full semver always —
+`0.2.0`, never `0.2`.
+
+## Stage 2 — Metadata (AGENT)
+
+1. Set `version` in `package.json` to the chosen value.
+2. In `CHANGELOG.md`, retitle `## [Unreleased]` → `## [x.y.z] - YYYY-MM-DD`
+   (today's date).
+3. Ask the user whether `README.md` needs updates (features/screenshots changed?).
+   If yes, make them or wait while they do.
+4. Commit on `master` (e.g. `Bump version to x.y.z for release`) and push —
+   **confirm with the user before pushing**.
+
+## Stage 3 — Tracking issue (AGENT)
+
+Create the issue from `.github/ISSUE_TEMPLATE/release.md` via `gh issue create`:
+
+- Title `[Release] vx.y.z`; assignee `ran-codes`.
+- Body = the template body with every `0.0.0` placeholder replaced by the real
+  version, and the Context section filled with the feature/fix issues from the
+  changelog (link them as `#NN`).
+- Tick the boxes that are already true (features developed, PRs merged, metadata).
+
+Keep this issue current: as each later stage completes, edit the body to tick its
+boxes (`gh issue edit --body`). Give the user the issue URL.
+
+## Stage 4 — Local testing (AGENT, then HUMAN check)
+
+1. AGENT: `npm run test`. If it fails, stop — fix or report; do not proceed.
+2. AGENT: paste the test log as a comment on the release issue
+   (`gh issue comment`).
+3. AGENT: `vsce package` → produces `code-organizer-x.y.z.vsix`.
+4. AGENT: `code --install-extension ./code-organizer-x.y.z.vsix`.
+5. HUMAN checkpoint — AskUserQuestion (yes/no):
+   "Reload VS Code and open a test file (e.g. `assets/test-files/test.py`).
+   Do you see the sections in the Outline and the Code Organizer view?"
+   On **no**: stop, debug together. On **yes**: tick the Local tests boxes.
+
+## Stage 5 — GitHub release (AGENT)
+
+1. `gh release create vx.y.z --title "vx.y.z" --notes <changelog section>` —
+   tag with all three semver parts, notes taken from this version's CHANGELOG
+   entry.
+2. Comment the release URL on the tracking issue and tick the GitHub
+   housekeeping boxes.
+
+## Stage 6 — Publish (HUMAN)
+
+This whole stage runs in the user's terminal — feed commands, verify, repeat:
+
+1. Tell the user to run `! vsce ls-publishers`.
+   - If `ran-codes` is listed → continue.
+   - If not → tell them to run `! vsce login ran-codes` (needs their PAT — you
+     cannot do this).
+2. Tell the user to run `! vsce publish`.
+   - Note for them: this triggers `vscode:prepublish` → `npm run package`
+     (check-types + lint + production esbuild) — the only automated gate. A type
+     or lint error here aborts the publish; if that happens, stop and fix.
+3. AskUserQuestion (yes/no): "Open the
+   [Marketplace hub](https://marketplace.visualstudio.com/manage/publishers/ran-codes/extensions/code-organizer/hub?_a=acquisition)
+   — do you see vx.y.z verified?" (Verification can take a few minutes — offer
+   to wait.)
+4. AskUserQuestion (yes/no): "Check
+   [Open VSX](https://open-vsx.org/extension/ran-codes/code-organizer) — do you
+   see vx.y.z there?" (Open VSX may lag behind the Marketplace.)
+5. Tick both Publish boxes on the tracking issue as each is confirmed.
+
+## Stage 7 — Wrap up (ASK, then AGENT)
+
+1. AskUserQuestion: announce this release (r/vscode post with demo GIF)? If yes,
+   the post is theirs to write — link it on the issue when they share it;
+   optional, skippable.
+2. Confirm every box on the tracking issue is ticked, then ask the user:
+   close the issue? On yes, `gh issue close`.
+3. Final summary: version, tag, release URL, issue URL, both registry links.
