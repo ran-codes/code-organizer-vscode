@@ -1,5 +1,6 @@
 ---
 name: release
+version: 0.1.0
 description: Cut and publish a release of the code-organizer VS Code extension. Use when the user says "release", "cut a release", "do a release", "publish", "ship a new version", or invokes /release. Walks the canonical checklist in .context/workflow.md — the agent does the mechanical steps (version bump, changelog, tests, package, GitHub release, tracking issue), asks the user every decision (which version) via AskUserQuestion, and hands the publish commands to the human to run in their own terminal with yes/no "do you see it?" verification checkpoints.
 ---
 
