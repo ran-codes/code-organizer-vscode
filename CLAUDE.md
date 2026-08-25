@@ -87,7 +87,7 @@ isn't reachable from `src/extension.ts` won't exist at runtime.
 | Type-check only | `npm run check-types` |
 | Lint | `npm run lint` |
 | Full test run | `npm run test` |
-| Package a `.vsix` | `vsce package` |
+| Package a `.vsix` | `npx vsce package` |
 
 Interactive testing: press `F5` to launch the Extension Development Host.
 
@@ -191,17 +191,24 @@ The loop, in short:
    `npm run compile`, `F5` to verify, add tests, `npm run test`.
 2. **Metadata** — bump `version` in `package.json` (full semver — `0.1.1`, never `0.1`),
    update `CHANGELOG.md`, update `README.md` if features or screenshots changed.
-3. **Local test** — `vsce package`, install the `.vsix` locally, check it by hand.
+3. **Local test** — `npx vsce package`, secret-scan the `.vsix`, install it locally,
+   check it by hand.
 4. **GitHub** — merge the feature PRs, cut a release tagged `v[version]`.
-5. **Publish** — `vsce publish` to the VS Marketplace, then confirm on Open VSX.
+5. **Publish** — `npx vsce publish` to the VS Marketplace, then
+   `npx ovsx publish code-organizer-[version].vsix` to Open VSX. **Open VSX does not
+   auto-sync** — skipping it strands VSCodium/Cursor/Gitpod users on the old version.
+   The two registries take two *different* credentials.
 
 Each release gets a tracking issue opened from `.github/ISSUE_TEMPLATE/release.md`,
 titled `[Release] v[version]`, with the checklist ticked off and the test log pasted
 in as a comment. Past examples: #19, #21, #33.
 
-Note that `vsce publish` triggers `vscode:prepublish` → `npm run package`
+Note that `npx vsce publish` triggers `vscode:prepublish` → `npm run package`
 (`check-types` + `lint` + production esbuild). That is the **only** automated gate
-in the project — a type error or lint failure blocks a publish.
+in the project — a type error or lint failure blocks a publish. `@vscode/vsce` and
+`ovsx` are `devDependencies`, so always invoke them through `npx` — a bare `vsce`
+takes whatever is on `PATH`, and `npx vsce` without the local dep resolves to the
+**deprecated** `vsce` package.
 
 **`.context/workflow.md` is the source of truth for the full checklist.** Read it
 before cutting a release; the summary above is deliberately abbreviated.
