@@ -199,6 +199,20 @@ flowchart TD
     schema -->|yes| warehouse[(Warehouse)]
 ```
 
+## Settings
+
+The extension works with zero configuration. These settings are there when you want to change something — set them in Settings (Ctrl+,) under "Code Organizer", or in `settings.json`.
+
+| Setting | Default | What it does |
+|---------|---------|--------------|
+| `codeOrganizer.enable` | `true` | Turn the extension on or off. |
+| `codeOrganizer.supportedLanguages` | `["*"]` | Languages to parse. `*` means every language; otherwise list them individually, e.g. `["python", "javascript"]`. |
+| `codeOrganizer.minDashes` | `4` | How many trailing dashes a comment needs before it counts as a section. Minimum `2`. |
+| `codeOrganizer.maxNestingLevel` | `4` | Deepest nesting level to show, `1`–`6`. |
+| `codeOrganizer.showIcons` | `true` | Show the depth icon before each section name in the Code Organizer view. Turn it off for a text-only outline. |
+
+`showIcons` covers the Code Organizer view only. The built-in Outline and breadcrumbs draw their own icons — use VS Code's `outline.icons` and `breadcrumbs.icons` for those.
+
 ## Why Use This Extension?
 
 ### The Problem
@@ -238,7 +252,16 @@ code --install-extension ran-codes.code-organizer-vscode
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
-### 0.1.0 - Latest
+### 0.2.0 - Latest
+- **🆕 `showIcons` Setting**: Turn off the depth icons for a text-only Code Organizer view
+- **🆕 Mermaid Support**: `%% # Section ----` comments create sections in `.mmd` diagrams
+- Text selection is visible again on section comment lines
+- Correct nesting in files that mix two comment styles
+- Section highlight holds when the cursor sits at the end of a file
+- Sections sharing a name with their parent no longer disappear from the Outline
+- YAML front matter and unclosed code fences no longer break Markdown/Quarto parsing
+
+### 0.1.0
 - **🆕 Custom Activity Bar View**: Dedicated Code Organizer tab with custom icon
 - **🆕 Editor-Outline Sync**: Auto-scroll outline view as you navigate through code
 - **🆕 "Show Code Organizer" Command**: Quick access via Command Palette
