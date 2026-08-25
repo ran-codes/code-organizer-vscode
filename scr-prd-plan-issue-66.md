@@ -51,6 +51,9 @@ Docs-and-manifest change only; no `src/` code. Four files:
   and Positron's `p3m.dev` mirror of Open VSX lags a further few hours).
 - **`.github/ISSUE_TEMPLATE/release.md`** — checklist mirrors the new steps.
 
+No `CHANGELOG.md` entry: this is process docs plus devDependencies, with no change to
+shipped extension behavior. The decision record is the PR and commit messages.
+
 ## Open decisions
 
 None — the owner comment resolved the design forks (explicit Open VSX publish, scan
@@ -97,8 +100,12 @@ before publish, revoke-then-republish on leak).
      verification checkpoint; replace the "may lag" wording with the 404-lag note
      plus the p3m-mirror-lag note (Open VSX is where verification stops).
    - Update the header's `!`-prefix guidance so it excludes login commands.
+   - Bump the frontmatter `version: 0.1.0` → `0.2.0` (the stage structure changes).
 4. `.github/ISSUE_TEMPLATE/release.md`: add Preflight checkboxes, expand the
    Open VSX line into publish + verify sub-boxes, switch to `npx` command forms.
+   Sub-box command text mirrors `workflow.md`, keeping the `0.0.0` placeholder the
+   template already uses (`npx ovsx publish code-organizer-0.0.0.vsix`, then verify
+   at open-vsx.org/user-settings/extensions).
 5. Re-read all three docs side by side for drift — SKILL.md defers to workflow.md,
    so any disagreement introduced here defeats the point.
 
