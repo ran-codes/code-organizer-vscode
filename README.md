@@ -252,7 +252,7 @@ code --install-extension ran-codes.code-organizer-vscode
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release information.
 
-### 0.2.0 - Latest
+### 0.2.1 - Latest
 - **🆕 `showIcons` Setting**: Turn off the depth icons for a text-only Code Organizer view
 - **🆕 Mermaid Support**: `%% # Section ----` comments create sections in `.mmd` diagrams
 - Text selection is visible again on section comment lines
