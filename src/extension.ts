@@ -15,6 +15,15 @@ import { SectionMatch } from './utils/findSections';
  */
 const RELOAD_REQUIRED_SETTINGS = ['enable', 'supportedLanguages', 'minDashes', 'maxNestingLevel'];
 
+/**
+ * Opens our Activity Bar container. Deliberately the **container**, not the
+ * auto-generated `codeOrganizerOutlineActivity.focus` for the view inside it:
+ * focusing a view that VS Code is not currently showing is a silent no-op, so
+ * the command did nothing in exactly the state a user runs it — when the pane
+ * is missing (#42). The container command opens the pane regardless.
+ */
+export const SHOW_CONTAINER_COMMAND = 'workbench.view.extension.codeOrganizer';
+
 export function activate(context: vscode.ExtensionContext) {
 
 	// 1. Configuration ----
@@ -75,12 +84,28 @@ export function activate(context: vscode.ExtensionContext) {
 		),
 
 		vscode.commands.registerCommand('codeOrganizer.showView', async () => {
-			// The auto-generated .focus command for our view.
-			await vscode.commands.executeCommand('codeOrganizerOutlineActivity.focus');
+			await vscode.commands.executeCommand(SHOW_CONTAINER_COMMAND);
 		}),
 
-		vscode.commands.registerCommand('codeOrganizer.activate', () => {
-			vscode.window.showInformationMessage('Code Organizer is already active and working!');
+		// Reveals the pane and reports what we actually see, so a user whose
+		// button is missing gets a way back and a real answer. The old version
+		// said "already active and working!" unconditionally — it checked
+		// nothing, and was the most misleading thing in the #42 transcript.
+		vscode.commands.registerCommand('codeOrganizer.activate', async () => {
+			await vscode.commands.executeCommand(SHOW_CONTAINER_COMMAND);
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) {
+				vscode.window.showInformationMessage(
+					'Code Organizer is active. Open a code file to see its sections.'
+				);
+				return;
+			}
+			const count = sectionIndex.getSections(editor.document).length;
+			vscode.window.showInformationMessage(
+				count === 1
+					? 'Code Organizer is active — 1 section in the current file.'
+					: `Code Organizer is active — ${count} sections in the current file.`
+			);
 		})
 	);
 

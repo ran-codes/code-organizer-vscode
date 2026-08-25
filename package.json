@@ -2,7 +2,7 @@
   "name": "code-organizer",
   "displayName": "🗂️ Code Organizer",
   "description": "Transform your code into organized, navigable sections using simple comment patterns. Create table-of-contents-like structure with # Section Name ---- syntax. Works with Python, JavaScript, TypeScript, React/JSX, C/C++, Java, Go, Rust, PHP, SQL and more. Perfect for large files and data science notebooks.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "ran-codes",
   "author": {
     "name": "ran-codes",
@@ -135,11 +135,16 @@
       "codeOrganizer": [
         {
           "id": "codeOrganizerOutlineActivity",
-          "name": "Code Organizer",
-          "when": "resourceLangId"
+          "name": "Code Organizer"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "codeOrganizerOutlineActivity",
+        "contents": "Open a code file to see its sections.\n\nSection comments like `# Section Name ----` build the outline. Add more `#` for nesting."
+      }
+    ],
     "commands": [
       {
         "command": "codeOrganizer.activate",

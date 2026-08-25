@@ -24,6 +24,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The Code Organizer button no longer disappears from the Activity Bar when no
+  file is open. The view carried a `"when": "resourceLangId"` clause, and VS Code
+  removes a container from the rail entirely when the only view inside it is
+  hidden — so a fresh window, a window with all editors closed, or the Settings
+  screen showed no button at all, which is indistinguishable from a broken
+  install. The clause never filtered by language either: any open editor
+  satisfied it, including plain text. The button is now unconditional, and the
+  pane shows a short welcome message instead of sitting blank when there is no
+  file to outline. Found while investigating #42, which reports a missing button
+  in a state this does not explain — the report is still open
+- `Code Organizer: Show Code Organizer` now opens the pane in every state. It
+  targeted the view rather than its container, and focusing a view VS Code is not
+  currently showing is a silent no-op — so the command did nothing in exactly the
+  situation a user reaches for it (#42)
+- `Code Organizer: Activate` now reveals the pane and reports the section count
+  for the current file. It used to answer "already active and working!"
+  unconditionally, without checking anything (#42)
 - Text selection is visible again on section comment lines. The current-section
   highlight painted a solid band over the line, and VS Code draws extension
   decorations on top of the selection — so on any theme with an opaque

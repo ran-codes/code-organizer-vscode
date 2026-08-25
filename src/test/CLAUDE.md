@@ -20,6 +20,8 @@ those modules never import `vscode`. The provider suite is the exception: it imp
 | `sectionIndex.test.ts` | The shared parse cache: one parse per document version *and* language |
 | `documentSymbolProvider.test.ts` | Symbol-tree construction — nesting, roots, and the duplicate-name fixture from #47 |
 | `treeDataProvider.test.ts` | TreeItem **instance identity** — the `reveal()` invariant |
+| `decorations.test.ts` | Manifest guard: `contributes.colors` declares the id `decorations.ts` asks for, and every default is translucent (#40) |
+| `activityBarView.test.ts` | Manifest guard: the Activity Bar view stays ungated, `viewsWelcome` covers it, and `SHOW_CONTAINER_COMMAND` addresses the declared container (#42) |
 
 Each syntax suite covers the same axes: basic detection, nesting/depth, `uniqueId`
 generation, invalid patterns that must be ignored, and indentation (spaces, tabs,
@@ -54,6 +56,23 @@ the oracle then disagrees with the implementation at EOF and the test fails loud
 Narrowing the loop bound back to `offset < text.length` is **silent** — the EOF
 assertion stops running and the oracle still passes, having quietly dropped the one
 case it was widened for. The dedicated test is the backstop for that one.
+
+## Manifest guards
+
+`decorations.test.ts` and `activityBarView.test.ts` are a third category: neither
+tests a module's logic, because in both cases the bug **was a `package.json`
+line**. Both read the manifest through
+`vscode.extensions.getExtension('ran-codes.code-organizer').packageJSON` rather
+than `require`-ing the file, so they assert against the manifest the host actually
+loaded. Both pin a coupling the compiler cannot see — a color id shared between
+`decorations.ts` and `contributes.colors` (#40), and a container id that
+`extension.ts` rebuilds by hand into `workbench.view.extension.<id>` (#42). Rename
+one side of either pair and the failure is silent at runtime: a color that resolves
+to nothing, a command that opens nothing.
+
+Neither can cover the rendering itself — that is workbench chrome, and the manual
+protocols in `.context/scratch/` are what check it by eye. Their job is narrower:
+make sure a future edit cannot quietly restore the shipped bug.
 
 ## Identity assertions — use `strictEqual`, never `deepStrictEqual`
 

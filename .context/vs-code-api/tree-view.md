@@ -41,6 +41,14 @@ Add to your `contributes` section:
 }
 ```
 
+> ⚠️ **Do not copy the `when` clause.** We shipped it and it caused #42: VS Code
+> removes a view *container* from the Activity Bar entirely when the only view
+> inside it is hidden, so with no editor open the button vanished rather than
+> showing an empty pane. `resourceLangId` does not filter by language either —
+> any open editor satisfies it, plain text included. Ship the view ungated with a
+> `viewsWelcome` entry for the empty state; `src/test/activityBarView.test.ts`
+> pins this.
+
 ---
 
 ### 2. Create TreeView in `extension.ts`
