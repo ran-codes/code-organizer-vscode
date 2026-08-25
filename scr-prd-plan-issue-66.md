@@ -47,7 +47,8 @@ Docs-and-manifest change only; no `src/` code. Four files:
   `! vsce login` instruction is rewritten (login in the user's own terminal, never
   `!`-prefixed; `! vsce publish` / `! npx ovsx publish` remain fine since they don't
   echo credentials); the "Open VSX may lag behind the Marketplace" wording is replaced
-  with the real behavior (explicit publish, then the API 404s for a few minutes).
+  with the real behavior (explicit publish, then the API 404s for a few minutes,
+  and Positron's `p3m.dev` mirror of Open VSX lags a further few hours).
 - **`.github/ISSUE_TEMPLATE/release.md`** — checklist mirrors the new steps.
 
 ## Open decisions
@@ -74,6 +75,9 @@ before publish, revoke-then-republish on leak).
      `npx ovsx publish code-organizer-<version>.vsix`, then check
      https://open-vsx.org/user-settings/extensions for review status, expecting the
      version API to 404 for a few minutes before going 200.
+   - Note that Open VSX is the **terminal** verification step: Positron installs from
+     the `p3m.dev` mirror of Open VSX, which syncs hours later — do not block the
+     release on p3m, and do not read "not in Positron yet" as a failed publish.
    - Add the `.vscodeignore` ≠ `.gitignore` rule (vsce falls back to `.gitignore`
      only when `.vscodeignore` is absent), cross-referencing the comment already in
      `.vscodeignore`.
@@ -90,7 +94,8 @@ before publish, revoke-then-republish on leak).
    - Stage 6: prepend both auth preflights; rewrite step 1 so `vsce login` is
      directed to the user's own terminal (no `!`); add HUMAN steps
      `! npx ovsx publish code-organizer-x.y.z.vsix` and the user-settings
-     verification checkpoint; replace the "may lag" wording with the 404-lag note.
+     verification checkpoint; replace the "may lag" wording with the 404-lag note
+     plus the p3m-mirror-lag note (Open VSX is where verification stops).
    - Update the header's `!`-prefix guidance so it excludes login commands.
 4. `.github/ISSUE_TEMPLATE/release.md`: add Preflight checkboxes, expand the
    Open VSX line into publish + verify sub-boxes, switch to `npx` command forms.
