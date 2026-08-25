@@ -15,3 +15,9 @@ vsc-extension-quickstart.md
 test-files/**
 .claude/**
 .context/**
+
+# Secrets. This file does NOT inherit from .gitignore — vsce only falls back to
+# .gitignore when .vscodeignore is absent, so anything gitignored must be
+# repeated here or it ships inside the .vsix. A PAT in .env reached the
+# Marketplace this way once; keep these patterns.
+**/.env*
