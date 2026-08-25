@@ -137,3 +137,65 @@ changes, so no new tests). Then F5, against the pass criteria in
    - 0.1.2 note: fixed a way the button could vanish (no editor open) — may
      not be their case; please update and report back.
 4. Reporter's confirmation closes #42; the code fix alone does not.
+
+---
+
+# Human framing
+
+Plain-language version of the whole situation — the reporter's problem, the bug
+we found, and why they are probably not the same thing.
+
+## The reporter's problem (unexplained)
+
+Their Code Organizer button shows up in exactly one workspace and no others,
+even though the extension is clearly running (the built-in Outline works
+everywhere). We could not reproduce this and cannot explain the one-workspace
+asymmetry from our code. Best guess: VS Code remembers panel placement
+per-workspace on their machine, and the button got hidden in that remembered
+state. If so, only they can fix it — right-click the Activity Bar → check
+**Code Organizer**, or run `View: Reset View Locations`.
+
+## The bug we found while looking (real, but probably not theirs)
+
+Our panel button had a visibility rule attached: *"only show this panel when a
+file is open in the editor."* VS Code handles that rule aggressively — when the
+panel has nothing to show, it doesn't display an empty panel, it **removes the
+entire button from the sidebar**. Gone, as if the extension were never
+installed.
+
+So a window with no file open (fresh window, all tabs closed, Settings screen)
+has no button at all, which looks exactly like a broken install. And both
+rescue hatches are broken in that state: `Show Code Organizer` targets the
+hidden panel and silently does nothing; `Activate` prints "already active and
+working!" unconditionally without checking anything.
+
+The kicker: the rule never did anything useful. It triggered on *any* open
+file — even a `.txt` — so it never filtered "code files only." Its entire
+real-world effect was creating this trap.
+
+Why it's probably not the reporter's bug: their failing workspaces had a file
+open (the built-in Outline was showing sections), and with a file open this
+rule is satisfied and the button shows. Their button was missing in exactly the
+state where our bug cannot fire.
+
+## The fix: completely decouple button visibility from editor state
+
+The entire coupling is **one line in `package.json`** — `"when":
+"resourceLangId"`. Delete it and the button is always on the rail, in every
+window, from activation onward. Removing a visibility gate can only ever show
+the button more, never hide it, so there are no side effects beyond the button
+now appearing in file-less windows.
+
+Two small companions make it clean rather than just correct: a welcome message
+("Open a code file to see its sections") so the now-always-present panel isn't
+blank in an empty window, and repointing `Show Code Organizer` at the container
+so the command works in every state. Anyone who preferred the button hidden can
+right-click the rail and uncheck it — the standard VS Code way.
+
+## How to talk about it on #42
+
+"We couldn't reproduce your issue and can't yet explain the one-workspace
+behavior. While investigating we found and fixed a real bug that makes the
+button vanish in a related situation — it may not be yours. Please try the two
+recovery steps and tell us your exact version." Fixing something ≠ fixing
+their thing; the reporter's confirmation is what closes the issue.
